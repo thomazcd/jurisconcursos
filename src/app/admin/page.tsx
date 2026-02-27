@@ -11,7 +11,7 @@ export default async function AdminDashboard() {
     const role = (session.user as any).role;
     if (role === 'USER') redirect('/user/dashboard');
 
-    const [subjectCount, precedentCount, userCount] = await prisma.$transaction([
+    const [subjectCount, precedentCount, userCount] = await Promise.all([
         prisma.subject.count(),
         prisma.precedent.count(),
         prisma.user.count({ where: { role: 'USER' } }),
