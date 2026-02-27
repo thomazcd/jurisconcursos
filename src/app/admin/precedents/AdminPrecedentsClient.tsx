@@ -9,17 +9,21 @@ type Precedent = {
     summary: string;
     fullTextOrLink?: string | null;
     subjectId: string;
-    applicability: string;
+    forAll: boolean;
+    forProcurador: boolean;
+    forJuizFederal: boolean;
+    forJuizEstadual: boolean;
+    judgmentDate?: string | null;
+    isRG: boolean;
+    rgTheme?: number | null;
+    informatoryNumber?: string | null;
+    processClass?: string | null;
+    processNumber?: string | null;
+    organ?: string | null;
+    rapporteur?: string | null;
     tags: string[];
     createdAt: string;
     subject: { name: string };
-};
-
-const APPL_LABEL: Record<string, string> = {
-    GERAL: 'Geral',
-    JUIZ: 'Juiz',
-    PROCURADOR: 'Procurador',
-    AMBOS: 'Ambos',
 };
 
 const emptyForm = {
@@ -28,8 +32,26 @@ const emptyForm = {
     summary: '',
     fullTextOrLink: '',
     subjectId: '',
-    applicability: 'GERAL',
+    forAll: true,
+    forProcurador: false,
+    forJuizFederal: false,
+    forJuizEstadual: false,
+    judgmentDate: '',
+    isRG: false,
+    rgTheme: '',
+    informatoryNumber: '',
+    processClass: '',
+    processNumber: '',
+    organ: '',
+    rapporteur: '',
     tagsStr: '',
+};
+
+const SCOPE_LABEL: Record<string, string> = {
+    COMMON: '🌐 Comum',
+    PROCURADOR: '📋 Procurador',
+    JUIZ_FEDERAL: '⚖️ Juiz Federal',
+    JUIZ_ESTADUAL: '⚖️ Juiz Estadual',
 };
 
 export default function AdminPrecedentsClient() {
@@ -80,7 +102,18 @@ export default function AdminPrecedentsClient() {
             summary: p.summary,
             fullTextOrLink: p.fullTextOrLink ?? '',
             subjectId: p.subjectId,
-            applicability: p.applicability,
+            forAll: p.forAll,
+            forProcurador: p.forProcurador,
+            forJuizFederal: p.forJuizFederal,
+            forJuizEstadual: p.forJuizEstadual,
+            judgmentDate: p.judgmentDate ? p.judgmentDate.substring(0, 10) : '',
+            isRG: p.isRG,
+            rgTheme: p.rgTheme != null ? String(p.rgTheme) : '',
+            informatoryNumber: p.informatoryNumber ?? '',
+            processClass: p.processClass ?? '',
+            processNumber: p.processNumber ?? '',
+            organ: p.organ ?? '',
+            rapporteur: p.rapporteur ?? '',
             tagsStr: p.tags.join(', '),
         });
         setError('');
@@ -91,7 +124,26 @@ export default function AdminPrecedentsClient() {
         setSaving(true);
         setError('');
         const tags = form.tagsStr.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
-        const payload = { ...form, tags, tagsStr: undefined };
+        const payload = {
+            court: form.court,
+            title: form.title,
+            summary: form.summary,
+            fullTextOrLink: form.fullTextOrLink || null,
+            subjectId: form.subjectId,
+            forAll: form.forAll,
+            forProcurador: form.forProcurador,
+            forJuizFederal: form.forJuizFederal,
+            forJuizEstadual: form.forJuizEstadual,
+            judgmentDate: form.judgmentDate || null,
+            isRG: form.isRG,
+            rgTheme: form.rgTheme ? parseInt(String(form.rgTheme)) : null,
+            informatoryNumber: form.informatoryNumber || null,
+            processClass: form.processClass || null,
+            processNumber: form.processNumber || null,
+            organ: form.organ || null,
+            rapporteur: form.rapporteur || null,
+            tags,
+        };
         const url = editing ? `/api/admin/precedents/${editing.id}` : '/api/admin/precedents';
         const method = editing ? 'PUT' : 'POST';
         const res = await fetch(url, {
@@ -107,19 +159,36 @@ export default function AdminPrecedentsClient() {
     }
 
     async function handleDelete(id: string, title: string) {
-        if (!confirm(`Excluir precedente "${title.substring(0, 60)}…"?`)) return;
+        if (!confirm(`Excluir "${title.substring(0, 60)}"?`)) return;
         await fetch(`/api/admin/precedents/${id}`, { method: 'DELETE' });
         fetchPrecedents(page, courtFilter, subjectFilter);
     }
 
     const totalPages = Math.ceil(total / limit);
 
+    function applicabilityLabel(p: Precedent) {
+        if (p.forAll) return <span className="badge badge-geral">Geral</span>;
+        const parts = [];
+        if (p.forProcurador) parts.push('PGE');
+        if (p.forJuizFederal) parts.push('J.Fed');
+        if (p.forJuizEstadual) parts.push('J.Est');
+        return <span className="badge badge-juiz">{parts.join(' + ')}</span>;
+    }
+
+    // Group subjects by scope for the select
+    const subjectsByScope = subjects.reduce((acc, s) => {
+        const key = s.trackScope;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(s);
+        return acc;
+    }, {} as Record<string, Subject[]>);
+
     return (
         <div>
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Precedentes</h1>
-                    <p className="page-subtitle">Gerencie os precedentes do STF e STJ ({total} no total)</p>
+                    <p className="page-subtitle">Gerencie os precedentes do STF, STJ, TRF e TJ ({total} no total)</p>
                 </div>
                 <button className="btn btn-primary" onClick={openCreate}>+ Novo precedente</button>
             </div>
@@ -129,6 +198,8 @@ export default function AdminPrecedentsClient() {
                     <option value="">Tribunal: Todos</option>
                     <option value="STF">STF</option>
                     <option value="STJ">STJ</option>
+                    <option value="TRF">TRF</option>
+                    <option value="TJ">TJ</option>
                 </select>
                 <select value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setPage(1); }}>
                     <option value="">Matéria: Todas</option>
@@ -141,33 +212,28 @@ export default function AdminPrecedentsClient() {
                     <table>
                         <thead>
                             <tr>
+                                <th>Data</th>
                                 <th>Título</th>
                                 <th>Tribunal</th>
                                 <th>Matéria</th>
                                 <th>Aplicabilidade</th>
-                                <th>Tags</th>
-                                <th>Data</th>
                                 <th style={{ textAlign: 'right' }}>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {loading && (
-                                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando…</td></tr>
-                            )}
+                            {loading && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando…</td></tr>}
                             {!loading && precedents.map((p) => (
                                 <tr key={p.id}>
-                                    <td style={{ maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem', color: 'var(--text-3)' }}>
+                                        {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '—'}
+                                    </td>
+                                    <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {p.isRG && <span style={{ fontSize: '0.7rem', background: 'var(--gold)', color: '#fff', borderRadius: '3px', padding: '1px 5px', marginRight: '5px' }}>RG {p.rgTheme}</span>}
                                         {p.title}
                                     </td>
                                     <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
                                     <td style={{ fontSize: '0.8rem' }}>{p.subject?.name}</td>
-                                    <td>
-                                        <span className={`badge badge-${p.applicability === 'GERAL' ? 'geral' : p.applicability === 'JUIZ' ? 'juiz' : p.applicability === 'PROCURADOR' ? 'proc' : 'ambos'}`}>
-                                            {APPL_LABEL[p.applicability]}
-                                        </span>
-                                    </td>
-                                    <td style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>{p.tags.slice(0, 2).join(', ')}{p.tags.length > 2 ? '…' : ''}</td>
-                                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
+                                    <td>{applicabilityLabel(p)}</td>
                                     <td style={{ textAlign: 'right' }}>
                                         <div className="flex gap-2" style={{ justifyContent: 'flex-end' }}>
                                             <button className="btn btn-secondary btn-sm" onClick={() => openEdit(p)}>Editar</button>
@@ -177,7 +243,7 @@ export default function AdminPrecedentsClient() {
                                 </tr>
                             ))}
                             {!loading && precedents.length === 0 && (
-                                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum precedente encontrado.</td></tr>
+                                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum precedente encontrado.</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -198,7 +264,7 @@ export default function AdminPrecedentsClient() {
             {/* Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+                    <div className="modal" style={{ maxWidth: '720px', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2 className="modal-title">{editing ? 'Editar precedente' : 'Novo precedente'}</h2>
                             <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
@@ -206,35 +272,64 @@ export default function AdminPrecedentsClient() {
 
                         {error && <div className="alert alert-error">{error}</div>}
 
+                        {/* Linha 1: Tribunal + Data */}
                         <div className="form-row">
                             <div className="form-group mb-0">
-                                <label>Tribunal</label>
+                                <label>Tribunal *</label>
                                 <select value={form.court} onChange={(e) => setForm({ ...form, court: e.target.value })}>
                                     <option value="STF">STF – Supremo Tribunal Federal</option>
                                     <option value="STJ">STJ – Superior Tribunal de Justiça</option>
+                                    <option value="TRF">TRF – Tribunal Regional Federal</option>
+                                    <option value="TJ">TJ – Tribunal de Justiça</option>
                                 </select>
                             </div>
                             <div className="form-group mb-0">
-                                <label>Aplicabilidade</label>
-                                <select value={form.applicability} onChange={(e) => setForm({ ...form, applicability: e.target.value })}>
-                                    <option value="GERAL">Geral – todos os perfis</option>
-                                    <option value="JUIZ">Somente Juiz</option>
-                                    <option value="PROCURADOR">Somente Procurador</option>
-                                    <option value="AMBOS">Ambos (Juiz + Procurador)</option>
-                                </select>
+                                <label>Data do julgamento</label>
+                                <input type="date" value={form.judgmentDate} onChange={(e) => setForm({ ...form, judgmentDate: e.target.value })} />
                             </div>
                         </div>
 
+                        {/* Matéria */}
                         <div className="form-group mt-2">
-                            <label>Matéria</label>
+                            <label>Matéria *</label>
                             <select value={form.subjectId} onChange={(e) => setForm({ ...form, subjectId: e.target.value })}>
                                 <option value="">Selecione uma matéria…</option>
-                                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.trackScope})</option>)}
+                                {Object.entries(subjectsByScope).map(([scope, subs]) => (
+                                    <optgroup key={scope} label={SCOPE_LABEL[scope] ?? scope}>
+                                        {subs.map((s) => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
                             </select>
                         </div>
 
+                        {/* Aplicabilidade (multi-trilha) */}
                         <div className="form-group">
-                            <label>Título / Identificador</label>
+                            <label>Aplicabilidade (quem deve ver este precedente)</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.4rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontWeight: 500 }}>
+                                    <input type="checkbox" checked={form.forAll} onChange={(e) => setForm({ ...form, forAll: e.target.checked })} />
+                                    🌐 Geral (todos)
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={form.forProcurador} onChange={(e) => setForm({ ...form, forProcurador: e.target.checked })} />
+                                    📋 Procurador do Estado
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={form.forJuizFederal} onChange={(e) => setForm({ ...form, forJuizFederal: e.target.checked })} />
+                                    ⚖️ Juiz Federal
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={form.forJuizEstadual} onChange={(e) => setForm({ ...form, forJuizEstadual: e.target.checked })} />
+                                    ⚖️ Juiz Estadual
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Título */}
+                        <div className="form-group">
+                            <label>Título / Identificador *</label>
                             <input
                                 type="text"
                                 placeholder="Ex: RE 593.068 – Proibição do retrocesso social"
@@ -243,8 +338,9 @@ export default function AdminPrecedentsClient() {
                             />
                         </div>
 
+                        {/* Resumo */}
                         <div className="form-group">
-                            <label>Resumo / Ementa</label>
+                            <label>Resumo / Tese fixada *</label>
                             <textarea
                                 rows={4}
                                 placeholder="Descreva a tese fixada pelo tribunal…"
@@ -254,24 +350,54 @@ export default function AdminPrecedentsClient() {
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label>Link / Texto integral <span style={{ color: 'var(--text-3)' }}>(opcional)</span></label>
-                            <input
-                                type="text"
-                                placeholder="https://jurisprudencia.stf.jus.br/…"
-                                value={form.fullTextOrLink}
-                                onChange={(e) => setForm({ ...form, fullTextOrLink: e.target.value })}
-                            />
+                        {/* Dados processuais */}
+                        <div className="form-row">
+                            <div className="form-group mb-0">
+                                <label>Classe processual</label>
+                                <input type="text" placeholder="Ex: RE, ADI, REsp, ADPF" value={form.processClass} onChange={(e) => setForm({ ...form, processClass: e.target.value })} />
+                            </div>
+                            <div className="form-group mb-0">
+                                <label>Número do processo</label>
+                                <input type="text" placeholder="Ex: 593.068/SP" value={form.processNumber} onChange={(e) => setForm({ ...form, processNumber: e.target.value })} />
+                            </div>
                         </div>
 
+                        <div className="form-row mt-2">
+                            <div className="form-group mb-0">
+                                <label>Órgão julgador</label>
+                                <input type="text" placeholder="Ex: Plenário, 1ª Turma" value={form.organ} onChange={(e) => setForm({ ...form, organ: e.target.value })} />
+                            </div>
+                            <div className="form-group mb-0">
+                                <label>Relator</label>
+                                <input type="text" placeholder="Ex: Min. Alexandre de Moraes" value={form.rapporteur} onChange={(e) => setForm({ ...form, rapporteur: e.target.value })} />
+                            </div>
+                        </div>
+
+                        {/* RG + Informativo */}
+                        <div className="form-row mt-2">
+                            <div className="form-group mb-0">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input type="checkbox" checked={form.isRG} onChange={(e) => setForm({ ...form, isRG: e.target.checked })} />
+                                    Repercussão Geral (STF)
+                                </label>
+                                {form.isRG && (
+                                    <input type="number" placeholder="Nº do Tema" style={{ marginTop: '0.4rem' }} value={String(form.rgTheme)} onChange={(e) => setForm({ ...form, rgTheme: e.target.value })} />
+                                )}
+                            </div>
+                            <div className="form-group mb-0">
+                                <label>Nº do Informativo</label>
+                                <input type="text" placeholder="Ex: 1123" value={form.informatoryNumber} onChange={(e) => setForm({ ...form, informatoryNumber: e.target.value })} />
+                            </div>
+                        </div>
+
+                        {/* Link + Tags */}
+                        <div className="form-group mt-2">
+                            <label>Link / Texto integral <span style={{ color: 'var(--text-3)' }}>(opcional)</span></label>
+                            <input type="text" placeholder="https://jurisprudencia.stf.jus.br/…" value={form.fullTextOrLink} onChange={(e) => setForm({ ...form, fullTextOrLink: e.target.value })} />
+                        </div>
                         <div className="form-group">
                             <label>Tags <span style={{ color: 'var(--text-3)' }}>(separadas por vírgula)</span></label>
-                            <input
-                                type="text"
-                                placeholder="ex: retrocesso social, direitos fundamentais, STF"
-                                value={form.tagsStr}
-                                onChange={(e) => setForm({ ...form, tagsStr: e.target.value })}
-                            />
+                            <input type="text" placeholder="ex: bem de família, fiador, locação" value={form.tagsStr} onChange={(e) => setForm({ ...form, tagsStr: e.target.value })} />
                         </div>
 
                         <div className="modal-actions">

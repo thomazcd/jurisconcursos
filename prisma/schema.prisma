@@ -1,8 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma Schema – Juris Concursos (v2: 3 trilhas, dados ricos no precedente)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -18,27 +17,27 @@ enum Role {
 }
 
 enum Track {
-  JUIZ
   PROCURADOR
+  JUIZ_FEDERAL
+  JUIZ_ESTADUAL
 }
 
 enum TrackScope {
   COMMON
-  JUIZ
   PROCURADOR
+  JUIZ_FEDERAL
+  JUIZ_ESTADUAL
 }
 
 enum Court {
   STF
   STJ
+  TRF
+  TJ
 }
 
-enum Applicability {
-  GERAL
-  JUIZ
-  PROCURADOR
-  AMBOS
-}
+// Applicability agora é multi-trilha: campos booleanos no Precedent
+// Mantemos um campo GERAL + 3 booleanos de trilha
 
 model User {
   id           String   @id @default(cuid())
@@ -58,7 +57,7 @@ model User {
 model UserProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
-  activeTrack Track    @default(JUIZ)
+  activeTrack Track    @default(JUIZ_ESTADUAL)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -81,24 +80,41 @@ model Subject {
 }
 
 model Precedent {
-  id            String        @id @default(cuid())
+  id            String   @id @default(cuid())
   court         Court
   title         String
-  summary       String        @db.Text
-  fullTextOrLink String?       @db.Text
+  summary       String   @db.Text
+  fullTextOrLink String?  @db.Text
+
+  // Aplicabilidade multi-trilha
+  forAll        Boolean  @default(true)   // GERAL – aparece para todos
+  forProcurador Boolean  @default(false)
+  forJuizFederal Boolean @default(false)
+  forJuizEstadual Boolean @default(false)
+
   subjectId     String
-  applicability Applicability @default(GERAL)
-  tags          String[]      @default([])
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+
+  // Dados ricos para o admin / estudo avançado
+  judgmentDate  DateTime? // data do julgamento
+  isRG          Boolean   @default(false) // Repercussão Geral
+  rgTheme       Int?      // número do tema de RG
+  informatoryNumber String? // número do informativo (ex: "1123")
+  processClass  String?   // ex: RE, ADI, REsp
+  processNumber String?   // ex: "593.068/SP"
+  organ         String?   // ex: "Plenário", "2ª Turma"
+  rapporteur    String?   // nome do relator
+  tags          String[]  @default([])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   subject Subject         @relation(fields: [subjectId], references: [id], onDelete: Restrict)
   reads   PrecedentRead[]
 
   @@index([subjectId])
   @@index([court])
-  @@index([createdAt])
-  @@index([applicability])
+  @@index([judgmentDate])
+  @@index([forAll])
   @@map("precedents")
 }
 
