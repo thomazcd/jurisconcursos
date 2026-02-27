@@ -86,7 +86,7 @@ export default function LoginPage() {
                 </div>
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v1.00002
+                v1.00003
             </div>
         </div>
     );
