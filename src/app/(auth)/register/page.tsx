@@ -21,11 +21,10 @@ export default function RegisterPage() {
         });
         const data = await res.json();
         setLoading(false);
-        if (!res.ok) {
-            setError(data.error ?? 'Erro ao cadastrar.');
+        if (res.ok) {
+            window.location.href = '/login?registered=true';
         } else {
-            setSuccess('Conta criada! Redirecionando…');
-            setTimeout(() => router.push('/login'), 1500);
+            setError(data.details || data.error || 'Erro ao criar conta');
         }
     }
 
