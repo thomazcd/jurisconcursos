@@ -18,10 +18,19 @@ export default async function AdminDashboard() {
     ]);
 
     const recentPrecedents = await prisma.precedent.findMany({
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
         take: 5,
         include: { subject: { select: { name: true } } },
     });
+
+    function applicabilityLabel(p: { forAll: boolean; forProcurador: boolean; forJuizFederal: boolean; forJuizEstadual: boolean }) {
+        if (p.forAll) return 'Geral';
+        const parts = [];
+        if (p.forProcurador) parts.push('PGE');
+        if (p.forJuizFederal) parts.push('J.Fed');
+        if (p.forJuizEstadual) parts.push('J.Est');
+        return parts.join(' + ') || '—';
+    }
 
     return (
         <div className="layout">
@@ -57,23 +66,28 @@ export default async function AdminDashboard() {
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Data</th>
                                     <th>Título</th>
                                     <th>Tribunal</th>
                                     <th>Matéria</th>
-                                    <th>Aplicabilidade</th>
-                                    <th>Data</th>
+                                    <th>Visível para</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {recentPrecedents.length === 0 && (
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum precedente cadastrado ainda.</td></tr>
+                                )}
                                 {recentPrecedents.map((p) => (
                                     <tr key={p.id}>
-                                        <td style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem', color: 'var(--text-3)' }}>
+                                            {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '—'}
+                                        </td>
+                                        <td style={{ maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {p.title}
                                         </td>
                                         <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
-                                        <td>{p.subject.name}</td>
-                                        <td><span className={`badge badge-${p.applicability.toLowerCase() === 'geral' ? 'geral' : p.applicability.toLowerCase() === 'juiz' ? 'juiz' : p.applicability.toLowerCase() === 'procurador' ? 'proc' : 'ambos'}`}>{p.applicability}</span></td>
-                                        <td style={{ whiteSpace: 'nowrap' }}>{new Date(p.createdAt).toLocaleDateString('pt-BR')}</td>
+                                        <td style={{ fontSize: '0.82rem' }}>{p.subject.name}</td>
+                                        <td><span className="badge badge-geral">{applicabilityLabel(p)}</span></td>
                                     </tr>
                                 ))}
                             </tbody>
