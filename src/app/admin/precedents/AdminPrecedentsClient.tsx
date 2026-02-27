@@ -271,7 +271,7 @@ export default function AdminPrecedentsClient() {
                                             {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '—'}
                                         </td>
                                         <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
-                                        <td style={{ fontSize: '0.78rem', color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{p.theme ?? '—'}</td>
+                                        <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>📌 {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
                                         <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
                                         <td style={{ fontSize: '0.78rem' }}>{p.subject?.name ?? '—'}</td>
                                         <td style={{ fontSize: '0.78rem' }}>{visibilityLabel(p)}</td>
