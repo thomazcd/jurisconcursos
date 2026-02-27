@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
-import { getApplicabilityFilter, getEligibleTrackScopes } from '@/lib/eligibility';
+import { getApplicabilityFilter } from '@/lib/eligibility';
 import { Track } from '@prisma/client';
+
+function getSubjectFilter(track: Track) {
+    if (track === 'PROCURADOR') return { forProcurador: true };
+    if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
+    return { forJuizEstadual: true };
+}
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
 export async function GET(req: NextRequest) {
@@ -12,12 +18,12 @@ export async function GET(req: NextRequest) {
     const userId = (session!.user as any).id as string;
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
     const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
-    const scopes = getEligibleTrackScopes(track);
+    const subjectFilter = getSubjectFilter(track);
     const appFilter = getApplicabilityFilter(track);
 
     const subjects = await prisma.subject.findMany({
-        where: { trackScope: { in: scopes as any[] } },
-        orderBy: { trackScope: 'asc' },
+        where: subjectFilter,
+        orderBy: { name: 'asc' },
         include: {
             precedents: {
                 where: appFilter,
@@ -29,7 +35,7 @@ export async function GET(req: NextRequest) {
         },
     });
 
-    const result = subjects.map((s) => {
+    const result = subjects.map((s: any) => {
         const total = s.precedents.length;
         const readCount = s.precedents.filter((p: any) => p.reads.length > 0).length;
         const unreadCount = total - readCount;

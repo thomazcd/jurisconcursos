@@ -67,15 +67,17 @@ model UserProfile {
 }
 
 model Subject {
-  id         String     @id @default(cuid())
-  name       String
-  trackScope TrackScope @default(COMMON)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  name            String
+  trackScope      TrackScope @default(COMMON) // mantido para compatibilidade
+  forProcurador   Boolean    @default(false)
+  forJuizFederal  Boolean    @default(false)
+  forJuizEstadual Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   precedents Precedent[]
 
-  @@index([trackScope])
   @@map("subjects")
 }
 
