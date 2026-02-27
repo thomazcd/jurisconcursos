@@ -1,20 +1,46 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-type Subject = { id: string; name: string; trackScope: string; createdAt: string };
-
-const SCOPE_LABELS: Record<string, string> = {
-    COMMON: 'Comum',
-    JUIZ: 'Só Juiz',
-    PROCURADOR: 'Só Procurador',
+type Subject = {
+    id: string;
+    name: string;
+    trackScope: string;
+    forProcurador: boolean;
+    forJuizFederal: boolean;
+    forJuizEstadual: boolean;
+    createdAt: string;
 };
+
+function scopeLabel(s: Subject): string {
+    const tracks: string[] = [];
+    if (s.forJuizEstadual) tracks.push('J.Est');
+    if (s.forJuizFederal) tracks.push('J.Fed');
+    if (s.forProcurador) tracks.push('PGE');
+    if (tracks.length === 3) return 'Comum (todos)';
+    return tracks.join(' + ') || s.trackScope;
+}
+
+function scopeBadgeClass(s: Subject): string {
+    const all3 = s.forJuizEstadual && s.forJuizFederal && s.forProcurador;
+    if (all3) return 'badge-geral';
+    if (s.forProcurador && !s.forJuizFederal && !s.forJuizEstadual) return 'badge-proc';
+    if (s.forJuizFederal && !s.forJuizEstadual && !s.forProcurador) return 'badge-stf';
+    if (s.forJuizEstadual && !s.forJuizFederal && !s.forProcurador) return 'badge-stj';
+    return 'badge-geral';
+}
 
 export default function AdminSubjectsClient() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState<Subject | null>(null);
-    const [form, setForm] = useState({ name: '', trackScope: 'COMMON' });
+    const [form, setForm] = useState({
+        name: '',
+        trackScope: 'COMMON',
+        forProcurador: false,
+        forJuizFederal: false,
+        forJuizEstadual: false,
+    });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -30,14 +56,14 @@ export default function AdminSubjectsClient() {
 
     function openCreate() {
         setEditing(null);
-        setForm({ name: '', trackScope: 'COMMON' });
+        setForm({ name: '', trackScope: 'COMMON', forProcurador: false, forJuizFederal: false, forJuizEstadual: false });
         setError('');
         setShowModal(true);
     }
 
     function openEdit(s: Subject) {
         setEditing(s);
-        setForm({ name: s.name, trackScope: s.trackScope });
+        setForm({ name: s.name, trackScope: s.trackScope, forProcurador: s.forProcurador, forJuizFederal: s.forJuizFederal, forJuizEstadual: s.forJuizEstadual });
         setError('');
         setShowModal(true);
     }
@@ -65,6 +91,10 @@ export default function AdminSubjectsClient() {
         fetchSubjects();
     }
 
+    function toggleTrack(field: 'forProcurador' | 'forJuizFederal' | 'forJuizEstadual') {
+        setForm(f => ({ ...f, [field]: !f[field] }));
+    }
+
     return (
         <div>
             <div className="page-header">
@@ -81,7 +111,7 @@ export default function AdminSubjectsClient() {
                         <thead>
                             <tr>
                                 <th>Nome</th>
-                                <th>Escopo</th>
+                                <th>Visível para</th>
                                 <th>Cadastro</th>
                                 <th style={{ textAlign: 'right' }}>Ações</th>
                             </tr>
@@ -94,8 +124,8 @@ export default function AdminSubjectsClient() {
                                 <tr key={s.id}>
                                     <td>{s.name}</td>
                                     <td>
-                                        <span className={`badge ${s.trackScope === 'COMMON' ? 'badge-geral' : s.trackScope === 'PROCURADOR' ? 'badge-proc' : s.trackScope === 'JUIZ_FEDERAL' ? 'badge-stf' : 'badge-stj'}`}>
-                                            {SCOPE_LABELS[s.trackScope]}
+                                        <span className={`badge ${scopeBadgeClass(s)}`}>
+                                            {scopeLabel(s)}
                                         </span>
                                     </td>
                                     <td>{new Date(s.createdAt).toLocaleDateString('pt-BR')}</td>
@@ -127,16 +157,25 @@ export default function AdminSubjectsClient() {
 
                         <div className="form-group">
                             <label>Nome da matéria</label>
-                            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Direito Constitucional" />
+                            <input type="text" value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Direito Constitucional" />
                         </div>
+
                         <div className="form-group">
-                            <label>Escopo (trackScope)</label>
-                            <select value={form.trackScope} onChange={(e) => setForm({ ...form, trackScope: e.target.value })}>
-                                <option value="COMMON">Comum – aparece para Juiz e Procurador</option>
-                                <option value="JUIZ">Só Juiz</option>
-                                <option value="PROCURADOR">Só Procurador</option>
-                            </select>
+                            <label>Visível para quais trilhas</label>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.25rem' }}>
+                                {([
+                                    { field: 'forJuizEstadual', label: '⚖️ Juiz Estadual' },
+                                    { field: 'forJuizFederal', label: '🏛️ Juiz Federal' },
+                                    { field: 'forProcurador', label: '📋 Procurador do Estado' },
+                                ] as const).map(({ field, label }) => (
+                                    <label key={field} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                        <input type="checkbox" checked={form[field]} onChange={() => toggleTrack(field)} />
+                                        {label}
+                                    </label>
+                                ))}
+                            </div>
                         </div>
+
                         <div className="modal-actions">
                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
                             <button className="btn btn-primary" onClick={handleSave} disabled={saving || !form.name.trim()}>
