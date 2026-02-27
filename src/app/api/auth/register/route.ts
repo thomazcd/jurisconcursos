@@ -11,33 +11,43 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
-        const parsed = schema.safeParse(body);
-        if (!parsed.success) {
-            return NextResponse.json({ error: 'Dados inválidos', issues: parsed.error.issues }, { status: 400 });
+        const { name, email, password } = await req.json();
+
+        if (!name || !email || !password) {
+            return NextResponse.json({ error: 'Campos obrigatórios faltando' }, { status: 400 });
         }
-        const { name, email, password } = parsed.data;
 
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) {
-            return NextResponse.json({ error: 'E-mail já cadastrado' }, { status: 400 });
+            return NextResponse.json({ error: 'Este e-mail já está cadastrado' }, { status: 400 });
         }
 
-        const passwordHash = await bcrypt.hash(password, 12);
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // Criando usuário e perfil separadamente para evitar travamentos de transação em poolers
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 passwordHash,
                 role: 'USER',
-                profile: { create: { activeTrack: 'JUIZ' } },
             },
-            select: { id: true, name: true, email: true, role: true },
         });
 
-        return NextResponse.json({ user }, { status: 201 });
-    } catch (e) {
-        console.error(e);
-        return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+        await prisma.userProfile.create({
+            data: {
+                userId: user.id,
+                activeTrack: 'JUIZ',
+            },
+        });
+
+        return NextResponse.json({ success: true, user: { id: user.id, name: user.name, email: user.email } });
+    } catch (error: any) {
+        console.error('Registration error:', error);
+        return NextResponse.json({
+            error: 'Erro ao criar conta',
+            details: error.message,
+            code: error.code
+        }, { status: 500 });
     }
 }
