@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    activeTrack: user.profile?.activeTrack ?? 'JUIZ',
+                    activeTrack: user.profile?.activeTrack ?? 'JUIZ_ESTADUAL',
                 };
             },
         }),

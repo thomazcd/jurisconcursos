@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         await prisma.userProfile.create({
             data: {
                 userId: user.id,
-                activeTrack: 'JUIZ',
+                activeTrack: 'JUIZ_ESTADUAL',
             },
         });
 
