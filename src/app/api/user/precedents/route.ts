@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     const where: any = {
-        applicability: { in: apps },
+        applicability: { in: apps as unknown as any[] },
     };
     if (subjectId) where.subjectId = subjectId;
     if (court) where.court = court;

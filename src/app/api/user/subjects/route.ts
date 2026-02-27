@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const apps = getEligibleApplicabilities(track);
 
     const subjects = await prisma.subject.findMany({
-        where: { trackScope: { in: scopes as any[] } },
+        where: { trackScope: { in: scopes as unknown as any[] } },
         orderBy: { trackScope: 'asc' },
         include: {
             precedents: {

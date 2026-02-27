@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const precedents = await prisma.precedent.findMany({
         where: {
             applicability: { in: apps },
-            subject: { trackScope: { in: scopes as any[] } },
+            subject: { trackScope: { in: scopes as unknown as any[] } },
             reads: { none: { userId } },
         },
         include: {
