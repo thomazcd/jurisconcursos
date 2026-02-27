@@ -20,14 +20,6 @@ export default async function UserDashboardPage() {
         <div className="layout">
             <Sidebar role={role} name={session.user.name ?? ''} track={track} />
             <main className="main-content">
-                <div className="page-header">
-                    <div>
-                        <h1 className="page-title">Dashboard de Estudos</h1>
-                        <p className="page-subtitle">
-                            Acompanhe seu progresso e estude os precedentes do STF e STJ
-                        </p>
-                    </div>
-                </div>
                 <DashboardClient userName={session.user.name ?? ''} track={track} />
             </main>
         </div>
