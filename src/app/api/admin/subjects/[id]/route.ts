@@ -3,9 +3,14 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { z } from 'zod';
 
+const TRACK_SCOPE = ['COMMON', 'PROCURADOR', 'JUIZ_FEDERAL', 'JUIZ_ESTADUAL'] as const;
+
 const schema = z.object({
     name: z.string().min(2).max(120).optional(),
-    trackScope: z.enum(['COMMON', 'JUIZ', 'PROCURADOR']).optional(),
+    trackScope: z.enum(TRACK_SCOPE).optional(),
+    forProcurador: z.boolean().optional(),
+    forJuizFederal: z.boolean().optional(),
+    forJuizEstadual: z.boolean().optional(),
 });
 
 // PUT /api/admin/subjects/[id]

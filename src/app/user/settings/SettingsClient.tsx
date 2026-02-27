@@ -2,9 +2,15 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
+const TRACKS = [
+    { value: 'JUIZ_ESTADUAL', icon: '⚖️', label: 'Juiz Estadual', desc: 'Magistratura Estadual' },
+    { value: 'JUIZ_FEDERAL', icon: '🏛️', label: 'Juiz Federal', desc: 'Magistratura Federal' },
+    { value: 'PROCURADOR', icon: '📋', label: 'Procurador do Estado', desc: 'Procuradoria do Estado' },
+];
+
 export default function UserSettingsPage() {
     const { data: session } = useSession();
-    const [track, setTrack] = useState('JUIZ');
+    const [track, setTrack] = useState('JUIZ_ESTADUAL');
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
 
@@ -25,8 +31,11 @@ export default function UserSettingsPage() {
         });
         setTrack(newTrack);
         setSaving(false);
-        setSuccess(`Perfil alterado para ${newTrack === 'JUIZ' ? 'Magistrado (Juiz)' : 'Procurador do Estado'} com sucesso!`);
+        const label = TRACKS.find((t) => t.value === newTrack)?.label ?? newTrack;
+        setSuccess(`Perfil alterado para ${label} com sucesso!`);
     }
+
+    const activeTrack = TRACKS.find((t) => t.value === track);
 
     return (
         <div>
@@ -39,7 +48,7 @@ export default function UserSettingsPage() {
 
             {success && <div className="alert alert-success">{success}</div>}
 
-            <div className="card" style={{ maxWidth: '480px' }}>
+            <div className="card" style={{ maxWidth: '520px' }}>
                 <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem' }}>Conta</h2>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', marginBottom: '1.25rem' }}>
                     {session?.user?.name} &mdash; {session?.user?.email}
@@ -47,37 +56,42 @@ export default function UserSettingsPage() {
 
                 <div className="divider" />
 
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '1.25rem 0 0.35rem' }}>Perfil de concurso ativo</h2>
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '1.25rem 0 0.35rem' }}>Trilha de concurso ativa</h2>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1rem' }}>
-                    O perfil determina quais matérias e precedentes você verá no dashboard.
+                    A trilha determina quais matérias e precedentes você verá no dashboard.
                 </p>
 
-                <div className="profile-selector" style={{ margin: 0 }}>
-                    <button
-                        className={`profile-option ${track === 'JUIZ' ? 'active-juiz' : ''}`}
-                        onClick={() => handleSwitch('JUIZ')}
-                        disabled={saving}
-                    >
-                        <div className="icon">⚖️</div>
-                        <strong>Magistrado (Juiz)</strong>
-                        <span>Carreira da Magistratura</span>
-                    </button>
-                    <button
-                        className={`profile-option ${track === 'PROCURADOR' ? 'active-procurador' : ''}`}
-                        onClick={() => handleSwitch('PROCURADOR')}
-                        disabled={saving}
-                    >
-                        <div className="icon">📋</div>
-                        <strong>Procurador do Estado</strong>
-                        <span>Carreira da Procuradoria</span>
-                    </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0 }}>
+                    {TRACKS.map((t) => (
+                        <button
+                            key={t.value}
+                            onClick={() => handleSwitch(t.value)}
+                            disabled={saving}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer',
+                                border: '2px solid', textAlign: 'left',
+                                borderColor: track === t.value ? 'var(--accent)' : 'var(--border)',
+                                background: track === t.value ? 'var(--accent)' : 'var(--surface2)',
+                                color: track === t.value ? '#fff' : 'var(--text)',
+                                transition: 'all 0.15s',
+                            }}
+                        >
+                            <span style={{ fontSize: '1.3rem' }}>{t.icon}</span>
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.label}</div>
+                                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{t.desc}</div>
+                            </div>
+                            {track === t.value && <span style={{ marginLeft: 'auto', fontSize: '0.8rem' }}>✓ Ativo</span>}
+                        </button>
+                    ))}
                 </div>
 
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.75rem' }}>
-                    {track === 'JUIZ'
-                        ? '⚖️ Você verá matérias comuns + específicas de Magistratura, e precedentes GERAL / JUIZ / AMBOS.'
-                        : '📋 Você verá matérias comuns + específicas de Procuradoria, e precedentes GERAL / PROCURADOR / AMBOS.'}
-                </p>
+                {activeTrack && (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.75rem' }}>
+                        {activeTrack.icon} Trilha <strong>{activeTrack.label}</strong> ativa. Você verá matérias e precedentes específicos desta carreira.
+                    </p>
+                )}
             </div>
         </div>
     );

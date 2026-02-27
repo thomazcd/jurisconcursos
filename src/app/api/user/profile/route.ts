@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { z } from 'zod';
 
-const schema = z.object({ activeTrack: z.enum(['JUIZ', 'PROCURADOR']) });
+const schema = z.object({ activeTrack: z.enum(['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR']) });
 
 // GET current profile
 export async function GET(req: NextRequest) {

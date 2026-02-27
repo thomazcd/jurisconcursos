@@ -94,7 +94,7 @@ export default function AdminSubjectsClient() {
                                 <tr key={s.id}>
                                     <td>{s.name}</td>
                                     <td>
-                                        <span className={`badge ${s.trackScope === 'COMMON' ? 'badge-common' : s.trackScope === 'JUIZ' ? 'badge-juiz' : 'badge-proc'}`}>
+                                        <span className={`badge ${s.trackScope === 'COMMON' ? 'badge-geral' : s.trackScope === 'PROCURADOR' ? 'badge-proc' : s.trackScope === 'JUIZ_FEDERAL' ? 'badge-stf' : 'badge-stj'}`}>
                                             {SCOPE_LABELS[s.trackScope]}
                                         </span>
                                     </td>

@@ -14,7 +14,7 @@ export default async function UserDashboardPage() {
     if (role === 'ADMIN' || role === 'GESTOR') redirect('/admin');
 
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
-    const track = profile?.activeTrack ?? 'JUIZ';
+    const track = profile?.activeTrack ?? 'JUIZ_ESTADUAL';
 
     return (
         <div className="layout">
