@@ -105,6 +105,7 @@ model Precedent {
   processNumber String?   // ex: "593.068/SP"
   organ         String?   // ex: "Plenário", "2ª Turma"
   rapporteur    String?   // nome do relator
+  theme         String?   // tema (ex: "Tema 1081")
   tags          String[]  @default([])
 
   createdAt     DateTime @default(now())
@@ -123,7 +124,9 @@ model Precedent {
 model PrecedentRead {
   userId      String
   precedentId String
-  readAt      DateTime @default(now())
+  readCount   Int      @default(0)
+  readEvents  DateTime[] @default([])
+  updatedAt   DateTime @updatedAt
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   precedent Precedent @relation(fields: [precedentId], references: [id], onDelete: Cascade)

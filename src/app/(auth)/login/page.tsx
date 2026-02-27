@@ -85,6 +85,9 @@ export default function LoginPage() {
                     procurador@juris.com / user123 (Procurador)
                 </div>
             </div>
+            <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
+                v1.00002
+            </div>
         </div>
     );
 }

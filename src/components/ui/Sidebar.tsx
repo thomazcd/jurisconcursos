@@ -65,6 +65,9 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                         {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : `Trilha: ${track === 'JUIZ_FEDERAL' ? '🏛️ Juiz Federal' : track === 'JUIZ_ESTADUAL' ? '⚖️ Juiz Estadual' : '📋 Procurador'}`}
                     </div>
                 </div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textAlign: 'center', marginBottom: '0.5rem', opacity: 0.6 }}>
+                    v1.00002
+                </div>
                 <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={handleSignOut}>
                     Sair
                 </button>
@@ -72,3 +75,4 @@ export function Sidebar({ role, name, track }: SidebarProps) {
         </aside>
     );
 }
+
