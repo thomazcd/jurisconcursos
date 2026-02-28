@@ -42,6 +42,20 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ readCount: newCount, readEvents: newEvents });
     }
 
+    if (action === 'toggle_favorite') {
+        const existing = await prisma.precedentRead.findUnique({
+            where: { userId_precedentId: { userId, precedentId } },
+        });
+
+        const result = await prisma.precedentRead.upsert({
+            where: { userId_precedentId: { userId, precedentId } },
+            create: { userId, precedentId, isFavorite: true },
+            update: { isFavorite: !(existing?.isFavorite ?? false) },
+        });
+
+        return NextResponse.json({ isFavorite: result.isFavorite });
+    }
+
     if (action === 'flashcard') {
         const existing = await prisma.precedentRead.findUnique({
             where: { userId_precedentId: { userId, precedentId } },

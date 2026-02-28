@@ -15,22 +15,32 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
+        const q = searchParams.get('q'); // Search query
 
         const appFilter = getApplicabilityFilter(track);
-        const where: any = {
-            ...appFilter,
-            ...(subjectId ? { subjectId } : {}),
-        };
+        let where: any = { ...appFilter };
+
+        // If searching and no specific subject selected -> Global Search
+        if (q && (!subjectId || subjectId === 'ALL')) {
+            where.OR = [
+                { title: { contains: q, mode: 'insensitive' } },
+                { summary: { contains: q, mode: 'insensitive' } },
+                { theme: { contains: q, mode: 'insensitive' } },
+                { processNumber: { contains: q, mode: 'insensitive' } }
+            ];
+        } else if (subjectId && subjectId !== 'ALL') {
+            where.subjectId = subjectId;
+        }
 
         const precedents = await prisma.precedent.findMany({
             where,
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             include: {
                 subject: { select: { name: true } },
-                reads: { where: { userId }, select: { readCount: true, readEvents: true } },
+                reads: { where: { userId } },
             },
             distinct: ['processNumber', 'processClass', 'title'],
-            take: 500,
+            take: 500, // Limit for performance
         });
 
         const result = precedents.map((p: any) => ({
@@ -38,6 +48,10 @@ export async function GET(req: NextRequest) {
             readCount: p.reads[0]?.readCount ?? 0,
             isRead: (p.reads[0]?.readCount ?? 0) > 0,
             readEvents: p.reads[0]?.readEvents ?? [],
+            correctCount: p.reads[0]?.correctCount ?? 0,
+            wrongCount: p.reads[0]?.wrongCount ?? 0,
+            lastResult: p.reads[0]?.lastResult ?? null,
+            isFavorite: p.reads[0]?.isFavorite ?? false,
             reads: undefined,
         }));
 
