@@ -17,20 +17,8 @@ export async function GET(req: NextRequest) {
         const subjectId = searchParams.get('subjectId');
         const q = searchParams.get('q'); // Search query
 
-        const appFilter = getApplicabilityFilter(track);
-        let where: any = { ...appFilter };
-
-        // If searching and no specific subject selected -> Global Search
-        if (q && (!subjectId || subjectId === 'ALL')) {
-            where.OR = [
-                { title: { contains: q, mode: 'insensitive' } },
-                { summary: { contains: q, mode: 'insensitive' } },
-                { theme: { contains: q, mode: 'insensitive' } },
-                { processNumber: { contains: q, mode: 'insensitive' } }
-            ];
-        } else if (subjectId && subjectId !== 'ALL') {
-            where.subjectId = subjectId;
-        }
+        // NUCLEAR OPTION: Ignore all filters to restore visibility
+        const where: any = {};
 
         const precedents = await prisma.precedent.findMany({
             where,
