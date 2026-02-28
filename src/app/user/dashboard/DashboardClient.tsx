@@ -275,7 +275,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 )}
 
-                <div className="prec-title" style={{ fontSize: compactMode ? '0.9rem' : '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: compactMode ? '0.25rem' : '0.6rem', lineHeight: '1.4' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: compactMode ? '0.9em' : '1.05em', fontWeight: 800, color: 'var(--text)', marginBottom: compactMode ? '0.25em' : '0.6em', lineHeight: '1.4' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
@@ -288,7 +288,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 ) : (
                     <div style={{ marginBottom: compactMode ? '0' : '0.75rem' }}>
                         {flashResult && <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8rem', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
-                        <div style={{ fontSize: compactMode ? '0.83rem' : '0.92rem', color: 'var(--text-2)', lineHeight: compactMode ? '1.4' : '1.6', opacity: 0.9 }}>{p.summary}</div>
+                        <div style={{ fontSize: compactMode ? '0.83em' : '0.92em', color: 'var(--text-2)', lineHeight: compactMode ? '1.4' : '1.6', opacity: 0.9 }}>{p.summary}</div>
                     </div>
                 )}
 
