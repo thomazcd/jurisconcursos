@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getApplicabilityFilter } from '@/lib/eligibility';
+import { TrackScope } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
     try {
@@ -45,10 +46,10 @@ export async function GET(req: NextRequest) {
         // 3. POR MATÉRIA (Subject)
         const subjects = await prisma.subject.findMany({
             where: (track === 'PROCURADOR'
-                ? { OR: [{ forProcurador: true }, { trackScope: 'COMMON' }, { trackScope: 'PROCURADOR' }] }
+                ? { OR: [{ forProcurador: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'PROCURADOR' as TrackScope }] }
                 : track === 'JUIZ_FEDERAL'
-                    ? { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_FEDERAL' }] }
-                    : { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_ESTADUAL' }] }
+                    ? { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_FEDERAL' as TrackScope }] }
+                    : { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_ESTADUAL' as TrackScope }] }
             ),
             include: {
                 precedents: {

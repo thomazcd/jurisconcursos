@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { getApplicabilityFilter } from '@/lib/eligibility';
-import { Track } from '@prisma/client';
+import { Track, TrackScope } from '@prisma/client';
 
 function getSubjectFilter(track: Track) {
-    if (track === 'PROCURADOR') return { OR: [{ forProcurador: true }, { trackScope: 'COMMON' }, { trackScope: 'PROCURADOR' }] };
-    if (track === 'JUIZ_FEDERAL') return { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_FEDERAL' }] };
-    return { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_ESTADUAL' }] };
+    if (track === 'PROCURADOR') return { OR: [{ forProcurador: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'PROCURADOR' as TrackScope }] };
+    if (track === 'JUIZ_FEDERAL') return { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_FEDERAL' as TrackScope }] };
+    return { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_ESTADUAL' as TrackScope }] };
 }
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
