@@ -160,6 +160,48 @@ export default function DashboardClient({ userName, track }: Props) {
         loadSubjects();
     }
 
+    async function resetAllReads() {
+        if (!confirm('Deseja marcar TODOS os julgados como não lidos? Isso zerará o contador de leituras de todo o sistema.')) return;
+        setLoading(true);
+        try {
+            await fetch('/api/user/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk_reset_reads', precedentId: 'ALL' }),
+            });
+            await loadPrecedents(selectedSubject, search);
+            loadSubjects();
+            setShowHelp(false);
+            setHelpStep(0);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao resetar leituras');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function resetAllStats() {
+        if (!confirm('Deseja zerar TODAS as estatísticas de desempenho (V/F)?')) return;
+        setLoading(true);
+        try {
+            await fetch('/api/user/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk_reset_stats', precedentId: 'ALL' }),
+            });
+            await loadPrecedents(selectedSubject, search);
+            loadSubjects();
+            setShowHelp(false);
+            setHelpStep(0);
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao resetar estatísticas');
+        } finally {
+            setLoading(false);
+        }
+    }
+
     async function resetRead(id: string, e: React.MouseEvent) {
         e.stopPropagation();
         if (!confirm('Deseja zerar o progresso deste precedente?')) return;
@@ -279,7 +321,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: 600, marginBottom: '1rem', lineHeight: '1.5' }}>{p.flashcardQuestion || p.summary}</div>
+                        <div style={{ fontSize: '1.05em', color: 'var(--text)', fontWeight: 600, marginBottom: '1rem', lineHeight: '1.5' }}>{p.flashcardQuestion || p.summary}</div>
                         <div style={{ display: 'flex', gap: '0.6rem' }}>
                             <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, true); }} className="btn btn-sm" style={{ flex: 1, background: '#10b981', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>VERDADEIRO</button>
                             <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, false); }} className="btn btn-sm" style={{ flex: 1, background: '#ef4444', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>FALSO</button>
@@ -287,7 +329,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 ) : (
                     <div style={{ marginBottom: compactMode ? '0' : '0.75rem' }}>
-                        {flashResult && <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8rem', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
+                        {flashResult && <div style={{ padding: '0.5em 0.75em', marginBottom: '0.5em', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8em', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
                         <div style={{ fontSize: compactMode ? '0.83em' : '0.92em', color: 'var(--text-2)', lineHeight: compactMode ? '1.4' : '1.6', opacity: 0.9 }}>{p.summary}</div>
                     </div>
                 )}
@@ -453,7 +495,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 border: '1px solid var(--border)',
                 borderRadius: 20,
                 boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                display: 'flex',
+                display: isFocusMode ? 'none' : 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 gap: '2rem'
@@ -519,21 +561,24 @@ export default function DashboardClient({ userName, track }: Props) {
                     <button
                         onClick={() => setIsFocusMode(!isFocusMode)}
                         style={{
-                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            border: '1px solid var(--border)',
                             cursor: 'pointer',
-                            padding: '0 20px',
-                            borderRadius: 12,
-                            fontSize: '0.8rem',
+                            padding: '0 16px',
+                            borderRadius: 10,
+                            fontSize: '0.75rem',
                             fontWeight: 900,
                             transition: 'all 0.2s',
-                            background: isFocusMode ? '#f59e0b' : 'linear-gradient(135deg, var(--accent), #0ea5e9)',
-                            color: '#fff',
-                            height: '38px',
-                            boxShadow: isFocusMode ? '0 4px 12px rgba(245,158,11,0.3)' : '0 4px 12px rgba(20,184,166,0.25)',
+                            background: isFocusMode ? 'rgba(245, 158, 11, 0.12)' : 'rgba(20, 184, 166, 0.12)',
+                            color: isFocusMode ? '#f59e0b' : 'var(--accent)',
+                            height: '34px',
                             letterSpacing: '0.05em'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.opacity = '1'; }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.12)' : 'rgba(20, 184, 166, 0.12)'; }}
                     >{isFocusMode ? '🔓 SAIR FOCO' : '🎯 MODO FOCO'}</button>
                 </div>
             </div>
@@ -675,9 +720,29 @@ export default function DashboardClient({ userName, track }: Props) {
                                 'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema.',
                                 'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
                                 'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
-                                'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.'
+                                'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
+                                'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
                             ][helpStep]}
                         </p>
+
+                        {helpStep === 4 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
+                                <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
+                                    <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
+                                </div>
+                                <button
+                                    onClick={resetAllReads}
+                                    className="btn btn-secondary"
+                                    style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
+                                >♻️ Marcar TUDO como Não Lido</button>
+                                <button
+                                    onClick={resetAllStats}
+                                    className="btn btn-secondary"
+                                    style={{ fontSize: '0.75rem', fontWeight: 800 }}
+                                >📊 Zerar Estatísticas de V/F</button>
+                            </div>
+                        )}
 
                         {/* Pontos de progresso */}
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
@@ -697,16 +762,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             )}
 
-            {isFocusMode && (
-                <div className="focus-exit no-print">
-                    <button onClick={() => setIsFocusMode(false)} className="btn btn-primary btn-sm">🎯 Sair do Modo Foco</button>
-                    <div style={{ color: 'var(--text-3)', fontSize: '0.8rem', fontWeight: 600 }}>Ambiente de Leitura Ativo</div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.max(10, f - 1))}>A-</button>
-                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.min(24, f + 1))}>A+</button>
-                    </div>
-                </div>
-            )}
+
 
             <style jsx>{`
                 .hidden-focus { display: none !important; }

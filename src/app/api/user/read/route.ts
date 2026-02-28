@@ -14,6 +14,22 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
 
+    if (action === 'bulk_reset_reads') {
+        await prisma.precedentRead.updateMany({
+            where: { userId },
+            data: { readCount: 0, readEvents: [] },
+        });
+        return NextResponse.json({ success: true });
+    }
+
+    if (action === 'bulk_reset_stats') {
+        await prisma.precedentRead.updateMany({
+            where: { userId },
+            data: { correctCount: 0, wrongCount: 0, lastResult: null },
+        });
+        return NextResponse.json({ success: true });
+    }
+
     if (action === 'reset') {
         const result = await prisma.precedentRead.upsert({
             where: { userId_precedentId: { userId, precedentId } },
