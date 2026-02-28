@@ -226,7 +226,7 @@ export default function DashboardClient({ userName, track }: Props) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ precedentId: id, action: 'reset' }),
         });
-        setReadMap(m => ({ ...m, [id]: { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false } }));
+        setReadMap(m => ({ ...m, [id]: { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null } }));
         loadSubjects();
     }
 
