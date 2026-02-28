@@ -329,8 +329,15 @@ export default function DashboardClient({ userName, track }: Props) {
                                     <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
                                         {isRead ? `✓ ${readData.count}×` : 'Não lido'}
                                     </span>
-                                    <button className="btn-read" style={{ padding: '2px 8px' }} onClick={() => markRead(p.id)} title="Marcar leitura (+1)">+1</button>
-                                    {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }}>✕</button>}
+                                    <button
+                                        className="btn-read"
+                                        style={{ padding: '2px 10px', fontWeight: 600, fontSize: '0.65rem' }}
+                                        onClick={() => markRead(p.id)}
+                                        title={isRead ? "Marcar mais uma leitura (+1)" : "Marcar como lido"}
+                                    >
+                                        {isRead ? '+1' : 'Ler'}
+                                    </button>
+                                    {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar leituras">✕</button>}
                                 </div>
                             </div>
                         </div>
@@ -351,10 +358,12 @@ export default function DashboardClient({ userName, track }: Props) {
                 .btn-tag { transition: all 0.2s ease; cursor: pointer; }
                 .btn-tag:hover { border-color: var(--accent); }
                 .btn-xs { height: 24px; padding: 0 4px; font-size: 0.7rem; }
+                .btn-read { transition: transform 0.1s; }
+                .btn-read:active { transform: scale(0.95); }
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00024
+                v1.00025
             </div>
         </div>
     );
