@@ -349,7 +349,12 @@ export default function DashboardClient({ userName, track }: Props) {
                 {!compactMode && (
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                         {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme}</span>}
-                        {p.subjects?.filter(s => s.name !== currentSubjectContext).map(s => (
+                        {p.subjects?.filter(s => {
+                            if (!currentSubjectContext) return true;
+                            const s1 = s.name.trim().toLowerCase();
+                            const s2 = currentSubjectContext.trim().toLowerCase();
+                            return s1 !== s2;
+                        }).map(s => (
                             <span key={s.id} style={{ fontSize: '0.65em', background: 'rgba(20, 184, 166, 0.1)', color: 'var(--accent)', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <SvgIcons.BookOpen size={10} /> + {s.name}
                             </span>
