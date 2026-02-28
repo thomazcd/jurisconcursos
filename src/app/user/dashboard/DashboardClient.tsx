@@ -516,7 +516,7 @@ export default function DashboardClient({ userName, track }: Props) {
             {/* MODAL DE ANOTAÇÕES */}
             {notesModal && (
                 <div className="modal-overlay" onClick={() => setNotesModal(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', padding: '1.5rem', borderRadius: '20px' }}>
+                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', padding: '2rem', borderRadius: '24px', background: 'var(--surface)', border: '1px solid var(--border-strong)', boxShadow: '0 30px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><SvgIcons.MessageSquare size={24} /> Minhas Anotações</h3>
                             <button onClick={() => setNotesModal(null)} style={{ border: 'none', background: 'var(--surface2)', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontWeight: 900, display: 'flex', alignItems: 'center', justifySelf: 'center', padding: 8 }}><SvgIcons.X size={16} /></button>
@@ -854,7 +854,7 @@ export default function DashboardClient({ userName, track }: Props) {
                             style={{ fontSize: '0.75rem', padding: '4px 10px' }}
                             onClick={() => setCompactMode(c => !c)}
                             title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
-                        >{compactMode ? '🗂️ Completo' : '⬛ Compacto'}</button>
+                        >{compactMode ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Layout size={14} /> Completo</span> : <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Minimize2 size={14} /> Compacto</span>}</button>
 
                         <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
 
@@ -914,50 +914,64 @@ export default function DashboardClient({ userName, track }: Props) {
                             {/* Close button */}
                             <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
 
-                            {/* Emoji ícone com fundo colorido */}
-                            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
-                                {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
+                            {/* Ícone com fundo colorido */}
+                            <div style={{ width: 72, height: 72, borderRadius: '22px', background: 'linear-gradient(135deg, var(--accent), #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', margin: '0 auto 1.25rem', boxShadow: '0 10px 25px rgba(20,184,166,0.3)', transform: 'rotate(-5deg)' }}>
+                                {[
+                                    <SvgIcons.Sparkles size={36} key="s0" />,
+                                    <SvgIcons.BookOpen size={36} key="s1" />,
+                                    <SvgIcons.Search size={36} key="s2" />,
+                                    <SvgIcons.Brain size={36} key="s3" />,
+                                    <SvgIcons.Target size={36} key="s4" />,
+                                    <SvgIcons.RotateCw size={36} key="s5" />
+                                ][helpStep]}
                             </div>
 
                             {/* Título */}
                             <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
-                                {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
+                                {[
+                                    'Bem-vindo ao Novo Juris!',
+                                    'Controle de Leitura',
+                                    'Detalhes e Favoritos',
+                                    'Flashcards (V/F)',
+                                    'Foco e Visualização',
+                                    'Busca e Ações Globais'
+                                ][helpStep]}
                             </h2>
 
                             {/* Descrição */}
-                            <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
+                            <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                                 {[
-                                    'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
-                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
-                                    'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
-                                    'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
-                                    'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
-                                    'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
+                                    'Sua plataforma de jurisprudência evoluiu. Preparamos uma interface premium, ultra-rápida e focada no que importa: seu desempenho. Vamos conhecer os novos comandos?',
+                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar revisões. Clique no número de leituras para ver seu histórico detalhado com data e hora.',
+                                    'Clique na lupa ou no número do processo (ex: RE 1.234) para abrir os detalhes completos: relator, órgão e link do inteiro teor. Use a estrela para salvar teses em sua lista de favoritos.',
+                                    'Pronto para um estudo ativo? Mude para o modo Flashcard no topo. Escondemos a tese e você deve julgar se a afirmação é verdadeira ou falsa. O sistema gera estatísticas automáticas do seu acerto.',
+                                    'Ative o MODO FOCO (ícone de alvo) para remover todas as distrações. Você também pode ativar o "Modo Compacto" para listas densas e ajustar o tamanho da fonte (A+/A-) na barra de ferramentas.',
+                                    'Use a barra de busca para encontrar qualquer termo nas teses. Na barra superior, você também alterna entre Modo Escuro/Claro. Abaixo, você encontra ferramentas para gerenciar seu histórico.'
                                 ][helpStep]}
-                            </p>
+                            </div>
 
-                            {helpStep === 4 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
+                            {helpStep === 5 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: 16, border: '1px solid var(--border)' }}>
                                     <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
-                                        <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
-                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
+                                        <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Zona de Gerenciamento</h4>
+                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações limpam seu progresso local.</p>
                                     </div>
                                     <button
                                         onClick={resetAllReads}
                                         className="btn btn-secondary"
-                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
-                                    >♻️ Marcar TUDO como Não Lido</button>
+                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    ><SvgIcons.RotateCcw size={14} /> Marcar TUDO como Não Lido</button>
                                     <button
                                         onClick={resetAllStats}
                                         className="btn btn-secondary"
-                                        style={{ fontSize: '0.75rem', fontWeight: 800 }}
-                                    >📊 Zerar Estatísticas de V/F</button>
+                                        style={{ fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    ><SvgIcons.RotateCw size={14} /> Zerar Estatísticas de V/F</button>
                                 </div>
                             )}
 
                             {/* Pontos de progresso */}
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
-                                {[0, 1, 2, 3, 4].map(i => (
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                                {[0, 1, 2, 3, 4, 5].map(i => (
                                     <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
                                 ))}
                             </div>
@@ -965,8 +979,8 @@ export default function DashboardClient({ userName, track }: Props) {
                             {/* Botões */}
                             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                                 {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                                <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
-                                    {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
+                                <button className="btn btn-primary" onClick={() => helpStep < 5 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {helpStep < 5 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Entendi!</>}
                                 </button>
                             </div>
                         </div>

@@ -6,6 +6,7 @@ interface IconProps {
     fill?: string;
     style?: React.CSSProperties;
     className?: string;
+    key?: React.Key;
 }
 
 const IconWrapper = ({ children, props, defaultSize = 18 }: { children: React.ReactNode, props: IconProps, defaultSize?: number }) => (
