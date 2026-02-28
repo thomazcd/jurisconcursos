@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { APP_VERSION } from '@/lib/version';
+import { Logo } from '@/components/ui/Logo';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -29,8 +30,7 @@ export default function LoginPage() {
         <div className="auth-page">
             <div className="auth-card">
                 <div className="auth-logo">
-                    <h1>⚖️ Juris Concursos</h1>
-                    <p>Estudo de jurisprudência para magistratura e procuradoria</p>
+                    <Logo size="large" vertical={true} />
                 </div>
 
                 {error && <div className="alert alert-error">{error}</div>}

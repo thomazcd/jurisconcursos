@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { APP_VERSION } from '@/lib/version';
+import { Logo } from '@/components/ui/Logo';
 
 interface SidebarProps {
     role: string;
@@ -139,19 +140,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
 
                 {/* Logo */}
                 <div style={{ padding: '1.5rem 1.25rem 1.75rem', borderBottom: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{
-                            width: 38, height: 38, borderRadius: 11,
-                            background: 'linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '1.1rem', flexShrink: 0,
-                            boxShadow: '0 4px 12px rgba(20,184,166,0.25)'
-                        }}>⚖️</div>
-                        <div>
-                            <div style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--text)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Juris</div>
-                            <div style={{ fontWeight: 700, fontSize: '0.6rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.13em' }}>Concursos</div>
-                        </div>
-                    </div>
+                    <Logo size="medium" />
                 </div>
 
                 {/* Nav */}
