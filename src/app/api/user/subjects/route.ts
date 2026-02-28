@@ -5,9 +5,9 @@ import { getApplicabilityFilter } from '@/lib/eligibility';
 import { Track } from '@prisma/client';
 
 function getSubjectFilter(track: Track) {
-    if (track === 'PROCURADOR') return { forProcurador: true };
-    if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
-    return { forJuizEstadual: true };
+    if (track === 'PROCURADOR') return { OR: [{ forProcurador: true }, { trackScope: 'COMMON' }, { trackScope: 'PROCURADOR' }] };
+    if (track === 'JUIZ_FEDERAL') return { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_FEDERAL' }] };
+    return { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' }, { trackScope: 'JUIZ_ESTADUAL' }] };
 }
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
