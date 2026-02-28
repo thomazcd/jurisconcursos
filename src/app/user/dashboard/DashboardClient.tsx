@@ -234,18 +234,18 @@ export default function DashboardClient({ userName, track }: Props) {
         return (
             <div
                 key={p.id}
-                className={`prec-item ${isRead ? 'is-read-card' : ''}`}
+                className={`prec-item ${isRead ? 'is-read-card' : 'is-unread-card'}`}
                 style={{
-                    borderLeft: `5px solid ${isRead ? '#22c55e' : '#e2e8f0'}`,
+                    borderLeft: `5px solid ${isRead ? '#22c55e' : '#fecaca'}`,
                     padding: '1rem 1.25rem',
                     borderRadius: '0 16px 16px 0',
-                    background: isRead ? 'rgba(34, 197, 94, 0.04)' : 'var(--surface)',
+                    background: isRead ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.03)',
                     boxShadow: isRead ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
                     cursor: 'pointer',
                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     marginBottom: '0.75rem',
                     position: 'relative',
-                    border: isRead ? '1px solid rgba(34, 197, 94, 0.1)' : '1px solid var(--border)',
+                    border: isRead ? '1px solid rgba(34, 197, 94, 0.1)' : '1px solid rgba(239, 68, 68, 0.1)',
                     borderLeftWidth: '5px'
                 }}
                 onClick={() => {
@@ -325,15 +325,22 @@ export default function DashboardClient({ userName, track }: Props) {
                                     onClick={(e) => markRead(p.id, e)}
                                     className="btn-action-hit"
                                     style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
-                                    title="Marcar como lido (+1)"
+                                    title="Lido mais uma vez"
                                 >+1</button>
                                 <button
                                     onClick={(e) => decrementRead(p.id, e)}
                                     className="btn-action-miss"
                                     style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
-                                    title="Remover uma leitura (-1)"
+                                    title="Diminuir uma leitura"
                                 >-1</button>
-                                <div style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)' }}>{readData.count}×</div>
+                                <div
+                                    style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'help' }}
+                                    title={readData.events && readData.events.length > 0
+                                        ? "Histórico de Leituras:\n" + readData.events.map((e: string) => `• ${new Date(e).toLocaleString('pt-BR')}`).join('\n')
+                                        : "Nenhum evento registrado"}
+                                >
+                                    {readData.count}×
+                                </div>
                                 <button onClick={(e) => resetRead(p.id, e)} style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
                             </div>
                         )}
