@@ -280,12 +280,13 @@ export default function DashboardClient({ userName, track }: Props) {
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
                     <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '700px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)' }}>🔍 Detalhes do Julgado</h2>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => setIsFocusMode(!isFocusMode)} className="btn btn-ghost" title="Modo Foco">{isFocusMode ? '🔲' : '🔳'}</button>
-                                <button onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }} className="btn-close">✕</button>
-                            </div>
+                        <div className="modal-header" style={{ position: 'relative', justifyContent: 'center' }}>
+                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)', textAlign: 'center' }}>🔍 Detalhes do Julgado</h2>
+                            <button
+                                onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}
+                                className="btn-close"
+                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)' }}
+                            >✕</button>
                         </div>
 
                         <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 3}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
@@ -460,7 +461,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00039</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00040</div>
         </div>
     );
 }
