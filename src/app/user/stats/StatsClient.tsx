@@ -150,7 +150,7 @@ export default function StatsClient() {
             </div>
 
             <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00018 — Juris Stats Engine
+                v1.00019 — Juris Stats Engine
             </div>
         </div>
     );
