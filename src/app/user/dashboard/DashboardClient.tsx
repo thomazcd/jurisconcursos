@@ -883,7 +883,7 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                     </div>
                 ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-                    <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
+                    <div key={subName} style={{ marginBottom: isFocusMode ? '1rem' : '0.5rem' }}>
                         <div className="subject-header">
                             <div className="subject-icon">
                                 <SvgIcons.BookOpen size={20} />
@@ -1007,7 +1007,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
                     border: 1px solid var(--border);
                 }
-                .subject-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.25rem; margin-top: 2rem; }
+                .subject-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; margin-top: 0.5rem; }
                 .subject-icon { 
                     display: flex; 
                     align-items: center; 
