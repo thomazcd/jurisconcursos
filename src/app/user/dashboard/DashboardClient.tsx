@@ -34,7 +34,6 @@ export default function DashboardClient({ userName, track }: Props) {
     const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
-    // Detailed View State
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
 
     const loadSubjects = useCallback(() => {
@@ -133,7 +132,6 @@ export default function DashboardClient({ userName, track }: Props) {
 
     return (
         <div className="dashboard-container">
-            {/* Detailed View Modal */}
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => setSelectedPrecedent(null)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -143,7 +141,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                         <div className="modal-body">
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text)' }}>{selectedPrecedent.title}</h3>
-
                             {selectedPrecedent.theme && (
                                 <div style={{ marginBottom: '1rem' }}>
                                     <span style={{ fontSize: '0.75rem', background: 'rgba(201,138,0,0.1)', color: '#b47b00', padding: '4px 12px', borderRadius: 20, fontWeight: 700 }}>
@@ -151,11 +148,9 @@ export default function DashboardClient({ userName, track }: Props) {
                                     </span>
                                 </div>
                             )}
-
                             <div className="summary-scrollable" style={{ padding: '1rem', background: 'var(--surface2)', borderRadius: 12, marginBottom: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
                                 <div style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-1)' }}>{selectedPrecedent.summary}</div>
                             </div>
-
                             <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.85rem' }}>
                                 <div className="detail-item">
                                     <span style={{ color: 'var(--text-3)', display: 'block' }}>Tribunal</span>
@@ -206,7 +201,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            {/* Selectors & Filters Row */}
+            {/* Selectors & Filters */}
             <div className="no-print" style={{ background: 'var(--surface2)', padding: '0.75rem', borderRadius: 12, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <select
@@ -220,7 +215,6 @@ export default function DashboardClient({ userName, track }: Props) {
                             </option>
                         ))}
                     </select>
-
                     <select
                         value={yearFilter}
                         onChange={e => setYearFilter(e.target.value)}
@@ -229,7 +223,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         <option value="ALL">Ano</option>
                         {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
-
                     <select
                         value={infFilter}
                         onChange={e => setInfFilter(e.target.value)}
@@ -238,7 +231,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         <option value="ALL">Informativo</option>
                         {availableInfs.map(inf => <option key={inf} value={inf}>Inf {inf}</option>)}
                     </select>
-
                     <input
                         type="search" placeholder="Filtrar nesta matéria…"
                         value={search}
@@ -246,7 +238,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         style={{ flex: 1, padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
                     />
                 </div>
-
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', background: 'var(--surface)', padding: '2px', borderRadius: 8, border: '1px solid var(--border)' }}>
@@ -276,15 +267,12 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            {loading && <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando precedentes…</p>}
-
             <div className="prec-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {filtered.map((p) => {
                     const readData = readMap[p.id] || { count: 0, events: [] };
                     const isRead = readData.count > 0;
                     const isRevealed = studyMode === 'READ' || revealed[p.id];
                     const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
-
                     return (
                         <div
                             key={p.id}
@@ -304,7 +292,6 @@ export default function DashboardClient({ userName, track }: Props) {
                             <div className="prec-title" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
                                 {p.title}
                             </div>
-
                             {!isRevealed ? (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
@@ -317,11 +304,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                     {p.summary}
                                 </div>
                             )}
-
-                            <div
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}
-                                onClick={e => e.stopPropagation()} // Prevent modal when clicking controls
-                            >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }} onClick={e => e.stopPropagation()}>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
                                     <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
                                         📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
@@ -330,12 +313,10 @@ export default function DashboardClient({ userName, track }: Props) {
                                         ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                                     </span>
                                     {proc && <span>📄 {proc}</span>}
-
                                     <span style={{ color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                                         📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                                     </span>
                                 </div>
-
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                     <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
                                         {isRead ? `✓ ${readData.count}×` : 'Não lido'}
@@ -352,19 +333,8 @@ export default function DashboardClient({ userName, track }: Props) {
             <style jsx>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-                
-                .modal-overlay {
-                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
-                    display: flex; align-items: center; justify-content: center;
-                    z-index: 1000; padding: 2rem;
-                }
-                .modal-content {
-                    background: var(--surface); width: 100%; max-width: 800px;
-                    border-radius: 24px; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25);
-                    animation: scaleIn 0.2s ease-out; display: flex; flex-direction: column;
-                    border: 1px solid var(--border); overflow: hidden;
-                }
+                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 2rem; }
+                .modal-content { background: var(--surface); width: 100%; max-width: 800px; border-radius: 24px; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25); animation: scaleIn 0.2s ease-out; display: flex; flex-direction: column; border: 1px solid var(--border); overflow: hidden; }
                 .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface2); }
                 .modal-body { padding: 2rem; overflow-y: auto; }
                 .modal-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 1rem; }
@@ -375,7 +345,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00021 — Detalhes Ricos do Julgado ⚖️
+                Juris Concursos v1.00022
             </div>
         </div>
     );

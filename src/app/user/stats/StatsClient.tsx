@@ -20,7 +20,6 @@ export default function StatsClient() {
             .then(d => { setData(d); setLoading(false); });
     }, []);
 
-    // Time-based calculations
     const timeStats = useMemo(() => {
         if (!data) return null;
         const now = new Date();
@@ -28,20 +27,16 @@ export default function StatsClient() {
         const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfYear = new Date(now.getFullYear(), 0, 1);
-
         const counts = { day: 0, week: 0, month: 0, year: 0, heatmap: {} as Record<string, number> };
-
         data.events.forEach(e => {
             const d = new Date(e);
             const dateStr = d.toISOString().split('T')[0];
             counts.heatmap[dateStr] = (counts.heatmap[dateStr] || 0) + 1;
-
             if (d >= startOfDay) counts.day++;
             if (d >= startOfWeek) counts.week++;
             if (d >= startOfMonth) counts.month++;
             if (d >= startOfYear) counts.year++;
         });
-
         return counts;
     }, [data]);
 
@@ -51,8 +46,6 @@ export default function StatsClient() {
     return (
         <div className="stats-container" style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)' }}>📊 Desempenho de Estudo</h1>
-
-            {/* Top Cards: Temporal Stats */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                 {[
                     { label: 'Hoje', val: timeStats.day, color: '#3b82f6' },
@@ -66,13 +59,9 @@ export default function StatsClient() {
                     </div>
                 ))}
             </div>
-
-            {/* Middle Section: Progress Charts */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                {/* General Progress */}
                 <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 20, border: '1px solid var(--border)' }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem' }}>Progresso nos Informativos</h2>
-
                     {[
                         { label: 'Geral (Informativos)', ...data.summary, color: 'var(--accent)' },
                         { label: 'STF', ...data.byCourt.STF, color: '#2563eb' },
@@ -89,8 +78,6 @@ export default function StatsClient() {
                         </div>
                     ))}
                 </div>
-
-                {/* Heatmap Placeholder/Basic implementation */}
                 <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 20, border: '1px solid var(--border)' }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>Frequência de Estudo (Últimos 30 dias)</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginTop: '1rem' }}>
@@ -99,18 +86,8 @@ export default function StatsClient() {
                             const str = d.toISOString().split('T')[0];
                             const count = timeStats.heatmap[str] || 0;
                             let color = 'var(--surface2)';
-                            if (count > 0) color = '#dcfce7';
-                            if (count > 2) color = '#86efac';
-                            if (count > 5) color = '#22c55e';
-                            if (count > 10) color = '#166534';
-
-                            return (
-                                <div
-                                    key={i}
-                                    title={`${str}: ${count} leituras`}
-                                    style={{ aspectRatio: '1', background: color, borderRadius: 3, border: '1px solid rgba(0,0,0,0.05)' }}
-                                />
-                            );
+                            if (count > 0) color = '#dcfce7'; if (count > 2) color = '#86efac'; if (count > 5) color = '#22c55e'; if (count > 10) color = '#166534';
+                            return <div key={i} title={`${str}: ${count} leituras`} style={{ aspectRatio: '1', background: color, borderRadius: 3, border: '1px solid rgba(0,0,0,0.05)' }} />;
                         })}
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.65rem', color: 'var(--text-3)' }}>
@@ -126,31 +103,19 @@ export default function StatsClient() {
                     </div>
                 </div>
             </div>
-
-            {/* Section: Teses Placeholder */}
             <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)', padding: '2rem', borderRadius: 24, color: '#fff', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(30,58,138,0.3)' }}>
                 <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>📜 Teses do STF e STJ</h2>
                 <p style={{ opacity: 0.8, fontSize: '0.9rem', marginBottom: '1.5rem' }}>Em breve: Estatísticas detalhadas de Repetitivos, IACs e Repercussão Geral.</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                    <div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (Geral)</div>
-                    </div>
+                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (Geral)</div></div>
                     <div style={{ width: 1, background: 'rgba(255,255,255,0.2)' }} />
-                    <div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STF)</div>
-                    </div>
+                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STF)</div></div>
                     <div style={{ width: 1, background: 'rgba(255,255,255,0.2)' }} />
-                    <div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STJ)</div>
-                    </div>
+                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STJ)</div></div>
                 </div>
             </div>
-
             <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00021 — Juris Stats Engine
+                v1.00022
             </div>
         </div>
     );

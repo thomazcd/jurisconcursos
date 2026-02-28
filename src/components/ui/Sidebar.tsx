@@ -61,17 +61,17 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                 )}
             </nav>
 
-            <div className="sidebar-footer">
+            <div className="sidebar-footer" style={{ textAlign: 'center' }}>
                 <div style={{ marginBottom: '0.75rem' }}>
                     <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text)' }}>{name}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
-                        {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : `Trilha: ${track === 'JUIZ_FEDERAL' ? '🏛️ Juiz Federal' : track === 'JUIZ_ESTADUAL' ? '⚖️ Juiz Estadual' : '📋 Procurador'}`}
+                        {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : `${track === 'JUIZ_FEDERAL' ? '🏛️ Juiz Federal' : track === 'JUIZ_ESTADUAL' ? '⚖️ Juiz Estadual' : '📋 Procurador'}`}
                     </div>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textAlign: 'center', marginBottom: '0.5rem', opacity: 0.6 }}>
-                    v1.00021
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginBottom: '0.5rem', opacity: 0.6 }}>
+                    v1.00022
                 </div>
-                <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={handleSignOut}>
+                <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSignOut}>
                     Sair
                 </button>
             </div>
