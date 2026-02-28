@@ -258,7 +258,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
     const filtered = useMemo(() => {
         return precedents.filter(p => {
-            const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false };
+            const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
             if (filterHideRead && readData.count > 0) return false;
             if (filterOnlyErrors && readData.last !== 'MISS') return false;
             if (filterOnlyFavorites && !readData.isFavorite) return false;
@@ -284,7 +284,7 @@ export default function DashboardClient({ userName, track }: Props) {
     }, [selectedSubject, filtered, search, yearFilter, infFilter, courtFilter]);
 
     const renderPrecedent = (p: Precedent) => {
-        const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false };
+        const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
         const isRead = readData.count > 0;
         const isRevealed = studyMode === 'READ' || revealed[p.id];
         const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');

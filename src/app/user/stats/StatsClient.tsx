@@ -22,7 +22,19 @@ export default function StatsClient() {
         setLoading(true);
         fetch('/api/user/stats')
             .then(r => r.json())
-            .then(d => { setData(d); setLoading(false); });
+            .then(d => {
+                if (d.error) {
+                    console.error('Stats API Error:', d.error);
+                    setLoading(false);
+                    return;
+                }
+                setData(d);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Stats Fetch Error:', err);
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -67,7 +79,7 @@ export default function StatsClient() {
             counts.last7Days.push({ date: d.toISOString().split('T')[0], count: 0 });
         }
 
-        data.events.forEach(e => {
+        (data.events || []).forEach(e => {
             const d = new Date(e);
             const dateStr = d.toISOString().split('T')[0];
             counts.heatmap[dateStr] = (counts.heatmap[dateStr] || 0) + 1;
@@ -84,7 +96,7 @@ export default function StatsClient() {
     }, [data]);
 
     const streakInfo = useMemo(() => {
-        if (!data || data.events.length === 0) return { current: 0, max: 0 };
+        if (!data || !data.events || data.events.length === 0) return { current: 0, max: 0 };
         const uniqueDates = [...new Set(data.events.map(e => e.split('T')[0]))].sort();
 
         let max = 0;
@@ -126,8 +138,19 @@ export default function StatsClient() {
         return { current, max };
     }, [data]);
 
-    if (loading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-3)' }}>Analisando seu desempenho... 📊</div>;
-    if (!data || !timeStats) return null;
+    if (loading) return (
+        <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)' }}>
+            <div className="skeleton-box" style={{ width: '60px', height: '60px', borderRadius: '50%', margin: '0 auto 1.5rem' }} />
+            <div style={{ color: 'var(--text-3)', fontStyle: 'italic', fontSize: '0.9rem', fontWeight: 600 }}>Analisando seu desempenho e gerando estatísticas avançadas... 📊</div>
+        </div>
+    );
+
+    if (!data || !timeStats || !data.summary) return (
+        <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)', color: 'var(--text-3)' }}>
+            <p>Nenhum dado de desempenho encontrado para exibir no momento. 📈</p>
+            <p style={{ fontSize: '0.8rem', marginTop: '1rem' }}>Comece a ler os informativos para ver sua evolução aqui!</p>
+        </div>
+    );
 
     const hitRateTotal = (data.summary.hits + data.summary.misses) > 0
         ? Math.round((data.summary.hits / (data.summary.hits + data.summary.misses)) * 100)
