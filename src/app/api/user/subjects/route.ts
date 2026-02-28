@@ -20,6 +20,13 @@ export async function GET(req: NextRequest) {
     const subjectFilter = getSubjectFilter(track);
     const appFilter = getApplicabilityFilter(track);
 
+    console.log(`[Subjects API] User ID: ${userId}, Active Track: ${track}`);
+    console.log(`[Subjects API] Subject Filter: ${JSON.stringify(subjectFilter)}`);
+    console.log(`[Subjects API] Applicability Filter: ${JSON.stringify(appFilter)}`);
+
+    const totalSubjectsRaw = await prisma.subject.count();
+    console.log(`DEBUG: Total subjects in DB: ${totalSubjectsRaw}`);
+
     const subjects = await prisma.subject.findMany({
         where: subjectFilter,
         orderBy: { name: 'asc' },
