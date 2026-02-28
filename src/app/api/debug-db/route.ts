@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET() {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'GESTOR') {
+        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     try {
-        // Tenta uma consulta simples
         const subjectCount = await prisma.subject.count();
         return NextResponse.json({
             status: 'Conectado!',

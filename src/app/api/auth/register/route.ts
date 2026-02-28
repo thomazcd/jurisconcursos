@@ -10,6 +10,7 @@ const schema = z.object({
     email: z.string().email(),
     password: z.string().min(6),
     track: z.enum(VALID_TRACKS).optional().default('JUIZ_ESTADUAL'),
+    phone: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -21,7 +22,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Dados inválidos', details: parsed.error.message }, { status: 400 });
         }
 
-        const { name, email, password, track } = parsed.data;
+        const { name, email, password, track, phone } = parsed.data;
+
+        // Anti-bot honeypot check
+        if (phone) {
+            console.warn(`Bot signup attempt blocked: ${email}`);
+            return NextResponse.json({ error: 'Bot detected' }, { status: 400 });
+        }
 
         const existing = await prisma.user.findUnique({ where: { email } });
         if (existing) {

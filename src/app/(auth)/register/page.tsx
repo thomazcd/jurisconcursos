@@ -12,7 +12,7 @@ const TRACKS = [
 export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [form, setForm] = useState({ name: '', email: '', password: '', track: 'JUIZ_ESTADUAL' });
+    const [form, setForm] = useState({ name: '', email: '', password: '', track: 'JUIZ_ESTADUAL', phone: '' });
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -43,6 +43,15 @@ export default function RegisterPage() {
                 {error && <div className="alert alert-error">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
+                    <div className="form-group" style={{ display: 'none' }}>
+                        <input
+                            type="text"
+                            value={form.phone}
+                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                            tabIndex={-1}
+                            autoComplete="off"
+                        />
+                    </div>
                     <div className="form-group">
                         <label htmlFor="name">Nome completo</label>
                         <input
