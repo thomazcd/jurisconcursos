@@ -117,7 +117,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            {/* Selectors & Filters */}
+            {/* Selectors & Filters Row */}
             <div className="no-print" style={{ background: 'var(--surface2)', padding: '0.75rem', borderRadius: 12, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <select
@@ -152,6 +152,7 @@ export default function DashboardClient({ userName, track }: Props) {
                             🚫 Ocultar Lidos
                         </button>
                     </div>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)' }}>
                             {filtered.length} julgados
@@ -200,16 +201,18 @@ export default function DashboardClient({ userName, track }: Props) {
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}>
                                 <div style={{ display: 'flex', gap: '0.8rem', color: 'var(--text-3)' }}>
-                                    {p.publicationDate && (
-                                        <span title="Data de Publicação (DJEN/DJe)" style={{ cursor: 'help' }}>
-                                            📢 {new Date(p.publicationDate).toLocaleDateString('pt-BR')}
-                                        </span>
-                                    )}
-                                    {p.judgmentDate && (
-                                        <span title="Data do Julgamento" style={{ cursor: 'help' }}>
-                                            ⚖️ {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}
-                                        </span>
-                                    )}
+                                    <span
+                                        title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'}
+                                        style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}
+                                    >
+                                        📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
+                                    </span>
+                                    <span
+                                        title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'}
+                                        style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}
+                                    >
+                                        ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                                    </span>
                                     {proc && <span>📄 {proc}</span>}
                                     {p.informatoryNumber && <span>📰 {p.court} {p.informatoryNumber}</span>}
                                 </div>
@@ -234,7 +237,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00013 — Datas DJEN/Julgado Integradas 📅
+                Juris Concursos v1.00014
             </div>
         </div>
     );
