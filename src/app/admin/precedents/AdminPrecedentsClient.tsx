@@ -251,9 +251,9 @@ export default function AdminPrecedentsClient() {
     }
 
     return (
-        <div style={{ display: 'flex', gap: '1rem', height: '100%', minHeight: 0 }}>
-            {/* LEFT: List */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ height: '100%', minHeight: 0 }}>
+            {/* List Container */}
+            <div style={{ width: '100%' }}>
                 <div className="page-header">
                     <div>
                         <h1 className="page-title">Precedentes</h1>
@@ -318,47 +318,62 @@ export default function AdminPrecedentsClient() {
                 </div>
             </div>
 
-            {/* RIGHT: Detail panel */}
+            {/* Detail / Edit Modal */}
             {panel && (
-                <div style={{ width: 400, flexShrink: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '1rem', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <span className={`badge badge-${panel.court.toLowerCase()}`}>{panel.court}</span>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            {!editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Editar</button>}
-                            {editing && <button className="btn btn-primary btn-sm" onClick={handleUpdate} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>}
-                            {editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancelar</button>}
-                            <button className="btn btn-secondary btn-sm" onClick={() => setPanel(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <SvgIcons.X size={14} />
-                            </button>
-                        </div>
-                    </div>
-
-                    {formError && <div className="alert alert-error" style={{ marginBottom: '0.5rem', fontSize: '0.8rem' }}>{formError}</div>}
-
-                    {editing ? (
-                        <PrecedentForm f={form} setF={setForm} />
-                    ) : (
-                        <div>
-                            <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>{panel.title}</p>
-                            <p style={{ fontSize: '0.83rem', color: 'var(--text-2)', marginBottom: '0.75rem', lineHeight: 1.5 }}>{panel.summary}</p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                                <DetailRow label="Matérias" value={panel.subjects?.map(s => s.name).join(', ')} />
-                                <DetailRow label="Tema" value={panel.theme} />
-                                <DetailRow label="Data de julgamento" value={panel.judgmentDate ? new Date(panel.judgmentDate).toLocaleDateString('pt-BR') : null} />
-                                <DetailRow label="Informativo" value={panel.informatoryNumber} />
-                                <DetailRow label="Processo" value={panel.processClass && panel.processNumber ? `${panel.processClass} ${panel.processNumber}` : (panel.processNumber ?? null)} />
-                                <DetailRow label="Órgão" value={panel.organ} />
-                                <DetailRow label="Relator" value={panel.rapporteur} />
-                                <DetailRow label="RG" value={panel.isRG ? `Sim${panel.rgTheme ? ` (Tema ${panel.rgTheme})` : ''}` : null} />
-                                <DetailRow label="Visível para" value={visibilityLabel(panel)} />
+                <div className="modal-overlay" onClick={() => setPanel(null)}>
+                    <div className="modal" style={{ maxWidth: 800, width: '95vw', background: 'var(--surface)', padding: '1.5rem' }} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span className={`badge badge-${panel.court.toLowerCase()}`}>{panel.court}</span>
+                                <h2 className="modal-title" style={{ margin: 0, fontSize: '1.1rem' }}>
+                                    {editing ? 'Editando precedente' : 'Detalhes do precedente'}
+                                </h2>
                             </div>
-                            {panel.fullTextOrLink && (
-                                <a href={panel.fullTextOrLink} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '0.75rem', fontSize: '0.82rem', color: 'var(--accent)', textDecoration: 'none' }}>
-                                    <SvgIcons.Link size={14} /> Ver inteiro teor
-                                </a>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                {!editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Editar</button>}
+                                {editing && <button className="btn btn-primary btn-sm" onClick={handleUpdate} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>}
+                                {editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancelar</button>}
+                                <button className="modal-close" onClick={() => setPanel(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <SvgIcons.X size={18} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {formError && <div className="alert alert-error" style={{ marginBottom: '1rem' }}>{formError}</div>}
+
+                        <div style={{ maxHeight: '75vh', overflowY: 'auto', padding: '0.5rem 0' }}>
+                            {editing ? (
+                                <PrecedentForm f={form} setF={setForm} />
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    <div>
+                                        <h3 style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '0.5rem', color: 'var(--text-1)' }}>{panel.title}</h3>
+                                        <div style={{ background: 'var(--surface2)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)', fontSize: '0.9rem', color: 'var(--text-1)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                            {panel.summary}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.75rem', background: 'var(--surface2)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)' }}>
+                                        <DetailRow label="Matérias" value={panel.subjects?.map(s => s.name).join(', ')} />
+                                        <DetailRow label="Tema" value={panel.theme} />
+                                        <DetailRow label="Data de julgamento" value={panel.judgmentDate ? new Date(panel.judgmentDate).toLocaleDateString('pt-BR') : null} />
+                                        <DetailRow label="Informativo" value={panel.informatoryNumber} />
+                                        <DetailRow label="Processo" value={panel.processClass && panel.processNumber ? `${panel.processClass} ${panel.processNumber}` : (panel.processNumber ?? null)} />
+                                        <DetailRow label="Órgão" value={panel.organ} />
+                                        <DetailRow label="Relator" value={panel.rapporteur} />
+                                        <DetailRow label="RG" value={panel.isRG ? `Sim${panel.rgTheme ? ` (Tema ${panel.rgTheme})` : ''}` : null} />
+                                        <DetailRow label="Visível para" value={visibilityLabel(panel)} />
+                                    </div>
+
+                                    {panel.fullTextOrLink && (
+                                        <a href={panel.fullTextOrLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                                            <SvgIcons.Link size={14} /> Ver inteiro teor no site do tribunal
+                                        </a>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
+                    </div>
                 </div>
             )}
 
