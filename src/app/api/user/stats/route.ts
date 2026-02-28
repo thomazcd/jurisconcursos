@@ -45,12 +45,7 @@ export async function GET(req: NextRequest) {
 
         // 3. POR MATÉRIA (Subject)
         const subjects = await prisma.subject.findMany({
-            where: (track === 'PROCURADOR'
-                ? { OR: [{ forProcurador: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'PROCURADOR' as TrackScope }] }
-                : track === 'JUIZ_FEDERAL'
-                    ? { OR: [{ forJuizFederal: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_FEDERAL' as TrackScope }] }
-                    : { OR: [{ forJuizEstadual: true }, { trackScope: 'COMMON' as TrackScope }, { trackScope: 'JUIZ_ESTADUAL' as TrackScope }] }
-            ),
+            where: {}, // TEMPORARILY DISABLED: Show all
             include: {
                 precedents: {
                     where: eligibility,
