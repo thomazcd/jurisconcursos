@@ -219,7 +219,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     >
                         {subjects.map(s => (
                             <option key={s.id} value={s.id}>
-                                {s.name} ({Math.round((s.readCount / s.total) * 100 || 0)}%)
+                                {s.name}
                             </option>
                         ))}
                     </select>
@@ -321,7 +321,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                         ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                                     </span>
                                     {proc && <span>📄 {proc}</span>}
-                                    <span style={{ color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                                         📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                                     </span>
                                 </div>
@@ -354,7 +354,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00023
+                v1.00024
             </div>
         </div>
     );
