@@ -10,46 +10,56 @@ export async function GET(req: NextRequest) {
         if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const userId = (session.user as any).id;
-        const profile = await prisma.userProfile.findUnique({ where: { userId } });
-        const track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as any;
+        console.log(`[Precedents API] User ID: ${userId}`);
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
-        const q = searchParams.get('q'); // Search query
 
-        // NUCLEAR OPTION: Ignore all filters to restore visibility
+        // Step 1: Count total to verify DB access
+        const total = await prisma.precedent.count();
+        console.log(`[Precedents API] Total Precedents in DB: ${total}`);
+
+        // Step 2: Fetch minimal data
         const where: any = {};
+        if (subjectId && subjectId !== 'ALL') {
+            where.subjectId = subjectId;
+        }
 
         const precedents = await prisma.precedent.findMany({
             where,
-            orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
-            include: {
-                subject: { select: { name: true } },
-                reads: { where: { userId } },
-            },
-            take: 500, // Limit for performance
+            orderBy: { createdAt: 'desc' },
+            take: 200,
         });
+        console.log(`[Precedents API] Fetched ${precedents.length} precedents`);
 
-        const result = precedents.map((p: any) => ({
-            ...p,
-            readCount: p.reads[0]?.readCount ?? 0,
-            isRead: (p.reads[0]?.readCount ?? 0) > 0,
-            readEvents: p.reads[0]?.readEvents ?? [],
-            correctCount: p.reads[0]?.correctCount ?? 0,
-            wrongCount: p.reads[0]?.wrongCount ?? 0,
-            lastResult: p.reads[0]?.lastResult ?? null,
-            isFavorite: p.reads[0]?.isFavorite ?? false,
-            notes: p.reads[0]?.notes ?? null,
-            reads: undefined,
-        }));
+        // Step 3: Fetch reads separately to avoid complex includes if they are breaking
+        const reads = await prisma.precedentRead.findMany({
+            where: { userId }
+        });
+        const readMap = new Map<string, any>(reads.map((r: any) => [r.precedentId, r]));
+
+        const result = precedents.map((p: any) => {
+            const r = readMap.get(p.id);
+            return {
+                ...p,
+                readCount: r?.readCount ?? 0,
+                isRead: (r?.readCount ?? 0) > 0,
+                readEvents: r?.readEvents ?? [],
+                correctCount: r?.correctCount ?? 0,
+                wrongCount: r?.wrongCount ?? 0,
+                lastResult: r?.lastResult ?? null,
+                isFavorite: r?.isFavorite ?? false,
+                notes: r?.notes ?? null,
+            };
+        });
 
         return NextResponse.json({ precedents: result });
     } catch (err: any) {
-        console.error('GET /api/user/precedents:', err);
+        console.error('FATAL ERROR in GET /api/user/precedents:', err);
         return NextResponse.json({
             error: err.message,
             stack: err.stack,
-            precedents: []
+            phase: 'execution'
         }, { status: 500 });
     }
 }
