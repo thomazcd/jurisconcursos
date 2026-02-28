@@ -500,19 +500,21 @@ export default function DashboardClient({ userName, track }: Props) {
                     <button
                         onClick={() => window.print()}
                         title="Gerar PDF completo da lista filtrada"
-                        style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 10px', borderRadius: 10, fontSize: '1rem', lineHeight: 1, transition: 'all 0.15s', color: 'var(--text-2)' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 10px', borderRadius: 10, transition: 'all 0.15s', color: 'var(--text-2)', height: '32px' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                    >🖨️</button>
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    </button>
 
                     {/* Ajuda */}
                     <button
                         onClick={() => setShowHelp(true)}
                         title="Tutorial do sistema"
-                        style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 10px', borderRadius: 10, fontSize: '1rem', lineHeight: 1, transition: 'all 0.15s', color: 'var(--text-2)' }}
+                        style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 14px', borderRadius: 10, fontSize: '0.75rem', fontWeight: 800, transition: 'all 0.15s', color: 'var(--text-2)', height: '32px', whiteSpace: 'nowrap' }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                    >❓</button>
+                    >Tutorial</button>
 
                     {/* Separador */}
                     <div style={{ width: 1, height: 28, background: 'var(--border)', margin: '0 4px' }} />
