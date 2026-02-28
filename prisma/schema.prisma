@@ -98,6 +98,8 @@ model Precedent {
 
   // Dados ricos para o admin / estudo avançado
   judgmentDate  DateTime? // data do julgamento
+  publicationDate DateTime? // data de publicação (DJEN/DJe)
+
   isRG          Boolean   @default(false) // Repercussão Geral
   rgTheme       Int?      // número do tema de RG
   informatoryNumber String? // número do informativo (ex: "1123")

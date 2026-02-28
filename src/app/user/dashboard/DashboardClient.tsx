@@ -4,12 +4,11 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 type Subject = { id: string; name: string; total: number; readCount: number; unreadCount: number };
 type Precedent = {
     id: string; title: string; summary: string; court: string;
-    judgmentDate?: string | null; processClass?: string | null;
-    processNumber?: string | null; informatoryNumber?: string | null;
-    organ?: string | null; rapporteur?: string | null;
+    judgmentDate?: string | null; publicationDate?: string | null;
+    processClass?: string | null; processNumber?: string | null;
+    informatoryNumber?: string | null; organ?: string | null;
     theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
-    readCount: number; isRead: boolean;
-    readEvents: string[];
+    readCount: number; isRead: boolean; readEvents: string[];
 };
 
 interface Props { userName: string; track: string; }
@@ -27,8 +26,6 @@ export default function DashboardClient({ userName, track }: Props) {
     const [loading, setLoading] = useState(false);
     const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[] }>>({});
     const [search, setSearch] = useState('');
-
-    // Study Mode & Filters
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
     const [courtFilter, setCourtFilter] = useState<'ALL' | 'STF' | 'STJ'>('ALL');
@@ -120,7 +117,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            {/* Selectors & Filters Row */}
+            {/* Selectors & Filters */}
             <div className="no-print" style={{ background: 'var(--surface2)', padding: '0.75rem', borderRadius: 12, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <select
@@ -146,30 +143,15 @@ export default function DashboardClient({ userName, track }: Props) {
                     <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', background: 'var(--surface)', padding: '2px', borderRadius: 8, border: '1px solid var(--border)' }}>
                             {(['ALL', 'STF', 'STJ'] as const).map(c => (
-                                <button
-                                    key={c}
-                                    onClick={() => setCourtFilter(c)}
-                                    style={{
-                                        padding: '4px 12px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 600, border: 'none',
-                                        background: courtFilter === c ? 'var(--accent)' : 'transparent',
-                                        color: courtFilter === c ? '#fff' : 'var(--text-3)',
-                                        cursor: 'pointer'
-                                    }}
-                                >
+                                <button key={c} onClick={() => setCourtFilter(c)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 600, border: 'none', background: courtFilter === c ? 'var(--accent)' : 'transparent', color: courtFilter === c ? '#fff' : 'var(--text-3)', cursor: 'pointer' }}>
                                     {c === 'ALL' ? 'Todos' : c}
                                 </button>
                             ))}
                         </div>
-
-                        <button
-                            className={`btn-tag ${filterHideRead ? 'active' : ''}`}
-                            onClick={() => setFilterHideRead(!filterHideRead)}
-                            style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)' }}
-                        >
+                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => setFilterHideRead(!filterHideRead)} style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)' }}>
                             🚫 Ocultar Lidos
                         </button>
                     </div>
-
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)' }}>
                             {filtered.length} julgados
@@ -185,8 +167,6 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 </div>
             </div>
-
-            {loading && <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando precedentes…</p>}
 
             <div className="prec-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {filtered.map((p) => {
@@ -209,10 +189,7 @@ export default function DashboardClient({ userName, track }: Props) {
                             </div>
 
                             {!isRevealed ? (
-                                <button
-                                    onClick={() => setRevealed(prev => ({ ...prev, [p.id]: true }))}
-                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
-                                >
+                                <button onClick={() => setRevealed(prev => ({ ...prev, [p.id]: true }))} style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}>
                                     👀 Revelar Tese
                                 </button>
                             ) : (
@@ -223,16 +200,22 @@ export default function DashboardClient({ userName, track }: Props) {
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}>
                                 <div style={{ display: 'flex', gap: '0.8rem', color: 'var(--text-3)' }}>
-                                    {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                                    {p.publicationDate && (
+                                        <span title="Data de Publicação (DJEN/DJe)" style={{ cursor: 'help' }}>
+                                            📢 {new Date(p.publicationDate).toLocaleDateString('pt-BR')}
+                                        </span>
+                                    )}
+                                    {p.judgmentDate && (
+                                        <span title="Data do Julgamento" style={{ cursor: 'help' }}>
+                                            ⚖️ {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}
+                                        </span>
+                                    )}
                                     {proc && <span>📄 {proc}</span>}
                                     {p.informatoryNumber && <span>📰 {p.court} {p.informatoryNumber}</span>}
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span
-                                        title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'}
-                                        style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}
-                                    >
+                                    <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
                                         {isRead ? `✓ ${readData.count}×` : 'Não lido'}
                                     </span>
                                     <button className="btn-read" style={{ padding: '2px 8px' }} onClick={() => markRead(p.id)} title="Marcar leitura (+1)">+1</button>
@@ -251,7 +234,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00012 🏢
+                Juris Concursos v1.00013 — Datas DJEN/Julgado Integradas 📅
             </div>
         </div>
     );
