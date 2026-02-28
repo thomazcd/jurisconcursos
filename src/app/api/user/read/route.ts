@@ -23,6 +23,25 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ readCount: 0, readEvents: [], correctCount: 0, wrongCount: 0 });
     }
 
+    if (action === 'decrement') {
+        const existing = await prisma.precedentRead.findUnique({
+            where: { userId_precedentId: { userId, precedentId } },
+        });
+        if (!existing || existing.readCount <= 0) {
+            return NextResponse.json({ readCount: 0, readEvents: [] });
+        }
+
+        const newCount = existing.readCount - 1;
+        const newEvents = existing.readEvents.slice(0, -1); // Remove o último evento
+
+        const result = await prisma.precedentRead.update({
+            where: { userId_precedentId: { userId, precedentId } },
+            data: { readCount: newCount, readEvents: newEvents },
+        });
+
+        return NextResponse.json({ readCount: newCount, readEvents: newEvents });
+    }
+
     if (action === 'flashcard') {
         const existing = await prisma.precedentRead.findUnique({
             where: { userId_precedentId: { userId, precedentId } },

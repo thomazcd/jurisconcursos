@@ -148,6 +148,24 @@ export default function DashboardClient({ userName, track }: Props) {
         loadSubjects();
     }
 
+    async function decrementRead(id: string) {
+        const r = await fetch('/api/user/read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ precedentId: id, action: 'decrement' }),
+        });
+        const d = await r.json();
+        setReadMap(m => ({
+            ...m,
+            [id]: {
+                ...m[id],
+                count: d.readCount,
+                events: d.readEvents || []
+            }
+        }));
+        loadSubjects();
+    }
+
     async function resetRead(id: string) {
         if (!confirm('Deseja zerar o progresso deste precedente?')) return;
         await fetch('/api/user/read', {
@@ -320,9 +338,23 @@ export default function DashboardClient({ userName, track }: Props) {
                         )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
-                            {isRead ? `✓ ${readData.count}×` : 'Não lido'}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', background: isRead ? '#dcfce7' : '#fee2e2', borderRadius: 4, overflow: 'hidden' }}>
+                            <span
+                                title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'}
+                                style={{ padding: '2px 8px', color: isRead ? '#166534' : '#991b1b', fontWeight: 700, cursor: 'help', fontSize: '1em' }}
+                            >
+                                {isRead ? `✓ ${readData.count}×` : 'Não lido'}
+                            </span>
+                            {isRead && (
+                                <button
+                                    onClick={() => decrementRead(p.id)}
+                                    style={{ border: 'none', background: 'rgba(22,101,52,0.1)', color: '#166534', padding: '2px 6px', cursor: 'pointer', fontWeight: 800, fontSize: '0.8em', borderLeft: '1px solid rgba(22,101,52,0.2)' }}
+                                    title="Diminuir leitura (-1)"
+                                >
+                                    -1
+                                </button>
+                            )}
+                        </div>
                         {studyMode === 'READ' && (
                             <button
                                 className="btn-read"
@@ -333,7 +365,15 @@ export default function DashboardClient({ userName, track }: Props) {
                                 {isRead ? '+1' : 'Ler'}
                             </button>
                         )}
-                        {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar progresso">✕</button>}
+                        {isRead && (
+                            <button
+                                onClick={() => resetRead(p.id)}
+                                style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer', opacity: 0.6 }}
+                                title="Zerar progresso"
+                            >
+                                🗑️
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
