@@ -60,6 +60,15 @@ export default function DashboardClient({ userName, track }: Props) {
 
     useEffect(() => { loadSubjects(); }, [loadSubjects]);
 
+    useEffect(() => {
+        if (isFocusMode) {
+            document.body.classList.add('is-focus-mode');
+        } else {
+            document.body.classList.remove('is-focus-mode');
+        }
+        return () => document.body.classList.remove('is-focus-mode');
+    }, [isFocusMode]);
+
     const loadPrecedents = useCallback(async (subjectId: string, query?: string) => {
         setLoading(true);
         setRevealed({});
@@ -461,7 +470,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00040</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00041</div>
         </div>
     );
 }

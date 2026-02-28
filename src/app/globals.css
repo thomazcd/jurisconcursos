@@ -171,6 +171,20 @@ label {
     display: none;
 }
 
+/* ── Focus Mode Support ────────────────────────────────────────── */
+body.is-focus-mode .sidebar,
+body.is-focus-mode .mobile-header,
+body.is-focus-mode .sidebar-toggle {
+    display: none !important;
+}
+
+body.is-focus-mode .main-content {
+    margin-left: 0 !important;
+    padding-top: 2rem !important;
+    width: 100vw !important;
+    max-width: 100% !important;
+}
+
 /* ── Mobile & Responsiveness ────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .sidebar {
