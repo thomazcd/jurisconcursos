@@ -15,6 +15,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const isAdmin = role === 'ADMIN' || role === 'GESTOR';
+    const [showComingSoon, setShowComingSoon] = useState(false);
 
     const active = (href: string) => pathname === href || pathname.startsWith(href + '/') ? 'active' : '';
 
@@ -27,6 +28,12 @@ export function Sidebar({ role, name, track }: SidebarProps) {
         await signOut({ redirect: false });
         router.push('/login');
     }
+
+    const triggerComingSoon = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowComingSoon(true);
+        setTimeout(() => setShowComingSoon(false), 3000);
+    };
 
     return (
         <>
@@ -81,9 +88,23 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                             <Link href="/user/dashboard" className={active('/user/dashboard')}>
                                 📰 Informativos
                             </Link>
-                            <Link href="/user/teses" className={active('/user/teses')}>
+                            <a href="#" onClick={triggerComingSoon} className={showComingSoon ? 'active' : ''} style={{ position: 'relative' }}>
                                 📜 Teses STF/STJ
-                            </Link>
+                                {showComingSoon && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        right: '0.5rem',
+                                        background: 'var(--accent)',
+                                        color: 'white',
+                                        fontSize: '0.6rem',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        animation: 'fadeIn 0.2s'
+                                    }}>
+                                        Em breve
+                                    </span>
+                                )}
+                            </a>
                             <Link href="/user/stats" className={active('/user/stats')}>
                                 📊 Desempenho
                             </Link>
@@ -101,8 +122,22 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                             {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : `${track === 'JUIZ_FEDERAL' ? '🏛️ Juiz Federal' : track === 'JUIZ_ESTADUAL' ? '⚖️ Juiz Estadual' : '📋 Procurador'}`}
                         </div>
                     </div>
+                    {showComingSoon && !isAdmin && (
+                        <div style={{
+                            background: 'rgba(201,138,0,0.1)',
+                            color: '#a06e00',
+                            fontSize: '0.7rem',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            marginBottom: '1rem',
+                            fontWeight: 700,
+                            border: '1px solid #eec05d'
+                        }}>
+                            🚧 Conteúdo em construção e será liberado em breve!
+                        </div>
+                    )}
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginBottom: '0.5rem', opacity: 0.6 }}>
-                        v1.00041
+                        v1.00042
                     </div>
                     <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSignOut}>
                         Sair
