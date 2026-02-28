@@ -167,6 +167,10 @@ label {
     width: 100%;
 }
 
+.mobile-header {
+    display: none;
+}
+
 /* ── Mobile & Responsiveness ────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .sidebar {
@@ -174,12 +178,13 @@ label {
         left: -100%;
         transition: left 0.3s ease;
         height: 100vh;
-        z-index: 1000;
+        z-index: 10000;
+        background: white;
     }
 
     .sidebar.open {
         left: 0;
-        width: 250px;
+        width: 260px !important;
         box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
     }
 
@@ -196,15 +201,12 @@ label {
         height: 4rem;
         background: var(--surface);
         border-bottom: 1px solid var(--border);
-        z-index: 900;
+        z-index: 9999;
         align-items: center;
         padding: 0 1rem;
         justify-content: space-between;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
-}
-
-.mobile-header {
-    display: none;
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────── */

@@ -218,13 +218,25 @@ export default function DashboardClient({ userName, track }: Props) {
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.06)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
             >
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+                {/* Estrela de Favoritos no Canto Direito */}
+                <div style={{ position: 'absolute', right: '10px', top: '10px', zIndex: 10 }}>
+                    <button
+                        onClick={(e) => toggleFavorite(p.id, e)}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem', color: readData.isFavorite ? 'var(--accent)' : 'var(--border)', transition: 'transform 0.1s' }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                    >
+                        {readData.isFavorite ? '★' : '☆'}
+                    </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem', paddingRight: '2rem' }}>
                     {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
                     {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
                     {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
                 </div>
 
-                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem', lineHeight: '1.4' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem', lineHeight: '1.4', paddingRight: '1rem' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)', marginBottom: '0.5rem' }} onClick={e => e.stopPropagation()}>
@@ -241,23 +253,21 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.6rem', fontSize: '0.75em' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
-                        <span onClick={(e) => toggleFavorite(p.id, e)} style={{ cursor: 'pointer', fontSize: '1.1rem', color: readData.isFavorite ? 'var(--accent)' : 'var(--border)', transition: 'transform 0.1s', display: 'flex', alignItems: 'center', gap: '2px' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                            {readData.isFavorite ? '★' : '☆'}
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'inherit' }}>📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                        </span>
-
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.6rem', fontSize: '0.72em' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)' }}>📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                        <span title="Data de Publicação">📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}</span>
+                        <span title="Data de Julgamento">⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
                         {proc && <span onClick={(e) => copyToClipboard(proc, p.id, e)} style={{ cursor: 'copy', padding: '2px 6px', background: copying === p.id ? 'var(--accent)' : 'var(--surface2)', color: copying === p.id ? '#fff' : 'inherit', borderRadius: 4 }} title="Copiar número do processo">{copying === p.id ? 'Copiado!' : proc}</span>}
                         {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.7 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', alignItems: 'center', background: isRead ? '#dcfce7' : '#fee2e2', borderRadius: 6, overflow: 'hidden' }}>
-                            <span style={{ padding: '2px 8px', color: isRead ? '#166534' : '#991b1b', fontWeight: 800 }}>{isRead ? `✓ ${readData.count}×` : 'Não lido'}</span>
+                            <span style={{ padding: '2px 8px', color: isRead ? '#166534' : '#991b1b', fontWeight: 800 }}>{isRead ? `${readData.count}×` : 'Não lido'}</span>
                             {isRead && <button onClick={(e) => decrementRead(p.id, e)} style={{ border: 'none', background: 'rgba(0,0,0,0.03)', color: 'inherit', padding: '2px 8px', cursor: 'pointer', fontWeight: 900, borderLeft: '1px solid rgba(0,0,0,0.1)' }}>-1</button>}
                         </div>
-                        {studyMode === 'READ' && <button className="btn-read" style={{ padding: '4px 10px', fontWeight: 800, borderRadius: 6, fontSize: '0.85em' }} onClick={(e) => markRead(p.id, e)}>{isRead ? '+1' : 'Ver'}</button>}
+                        {studyMode === 'READ' && <button className="btn-read" style={{ padding: '4px 10px', fontWeight: 800, borderRadius: 6, fontSize: '0.88em' }} onClick={(e) => markRead(p.id, e)}>{isRead ? '+1' : 'Ler'}</button>}
                         {isRead && <button onClick={(e) => resetRead(p.id, e)} style={{ border: 'none', background: 'transparent', padding: '0 4px', opacity: 0.3, cursor: 'pointer' }}>🗑️</button>}
                     </div>
                 </div>
@@ -435,7 +445,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00035</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00037</div>
         </div>
     );
 }
