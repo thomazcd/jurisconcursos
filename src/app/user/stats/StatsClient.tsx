@@ -1,12 +1,15 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 
+type SubjectStat = { id: string; name: string; total: number; read: number; hits: number; misses: number; percent: number; hitRate: number };
 type StatsData = {
-    summary: { total: number; read: number; percent: number };
+    summary: { total: number; read: number; hits: number; misses: number; percent: number };
     byCourt: {
-        STF: { total: number; read: number; percent: number };
-        STJ: { total: number; read: number; percent: number };
+        STF: { total: number; read: number; hits: number; misses: number };
+        STJ: { total: number; read: number; hits: number; misses: number };
     };
+    bySubject: SubjectStat[];
+    byYear: { year: string; read: number; hits: number; misses: number }[];
     events: string[];
 };
 
@@ -40,82 +43,139 @@ export default function StatsClient() {
         return counts;
     }, [data]);
 
-    if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando estatísticas…</div>;
+    if (loading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-3)' }}>Analisando seu desempenho... 📊</div>;
     if (!data || !timeStats) return null;
 
+    const hitRateTotal = (data.summary.hits + data.summary.misses) > 0
+        ? Math.round((data.summary.hits / (data.summary.hits + data.summary.misses)) * 100)
+        : 0;
+
     return (
-        <div className="stats-container" style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text)' }}>📊 Desempenho de Estudo</h1>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="stats-container" style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, var(--accent), #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>📊 Seu Painel de Performance</h1>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.9rem' }}>Acompanhe sua evolução e identifique pontos de foco nos informativos.</p>
+            </div>
+
+            {/* Top Summaries */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
                 {[
-                    { label: 'Hoje', val: timeStats.day, color: '#3b82f6' },
-                    { label: 'Esta Semana', val: timeStats.week, color: '#8b5cf6' },
-                    { label: 'Este Mês', val: timeStats.month, color: '#10b981' },
-                    { label: 'Este Ano', val: timeStats.year, color: '#f59e0b' },
+                    { label: 'Precisão nos Simulados', val: `${hitRateTotal}%`, sub: `${data.summary.hits} acertos / ${data.summary.misses} erros`, color: '#10b981' },
+                    { label: 'Informativos Lidos', val: data.summary.read, sub: `de ${data.summary.total} totais (${data.summary.percent}%)`, color: 'var(--accent)' },
+                    { label: 'Ritmo Esta Semana', val: timeStats.week, sub: 'leituras realizadas', color: '#8b5cf6' },
+                    { label: 'Hoje', val: timeStats.day, sub: 'leituras realizadas', color: '#3b82f6' },
                 ].map(c => (
-                    <div key={c.label} style={{ background: 'var(--surface)', padding: '1.25rem', borderRadius: 16, border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c.label}</div>
-                        <div style={{ fontSize: '2rem', fontWeight: 800, color: c.color, marginTop: '0.5rem' }}>{c.val} <span style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>leituras</span></div>
+                    <div key={c.label} style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>{c.label}</div>
+                        <div style={{ fontSize: '2.4rem', fontWeight: 900, color: c.color }}>{c.val}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 500, marginTop: '0.2rem' }}>{c.sub}</div>
+                        <div style={{ position: 'absolute', right: -10, bottom: -10, opacity: 0.05, fontSize: '5rem', fontWeight: 900, color: c.color }}>📊</div>
                     </div>
                 ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 20, border: '1px solid var(--border)' }}>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1.5rem' }}>Progresso nos Informativos</h2>
-                    {[
-                        { label: 'Geral (Informativos)', ...data.summary, color: 'var(--accent)' },
-                        { label: 'STF', ...data.byCourt.STF, color: '#2563eb' },
-                        { label: 'STJ', ...data.byCourt.STJ, color: '#7c3aed' },
-                    ].map(item => (
-                        <div key={item.label} style={{ marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                                <span style={{ fontWeight: 600 }}>{item.label}</span>
-                                <span style={{ color: 'var(--text-3)' }}>{item.read} / {item.total} ({item.percent}%)</span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                {/* Performance by Subject */}
+                <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800 }}>📚 Foco por Matéria</h2>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>ORDENADO POR LEITURAS</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                        {data.bySubject.slice(0, 10).map(s => (
+                            <div key={s.id}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'flex-end' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)' }}>{s.name}</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 500 }}>{s.read} / {s.total} lidos • <span style={{ color: s.hitRate > 70 ? '#10b981' : s.hitRate > 40 ? '#f59e0b' : '#ef4444' }}>{s.hitRate}% acertos</span></div>
+                                    </div>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-2)' }}>{s.percent}%</span>
+                                </div>
+                                <div style={{ height: 8, background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', display: 'flex' }}>
+                                    <div style={{ width: `${s.percent}%`, height: '100%', background: 'var(--accent)', borderRadius: 10 }} />
+                                </div>
                             </div>
-                            <div style={{ height: 10, background: 'var(--surface2)', borderRadius: 20, overflow: 'hidden' }}>
-                                <div style={{ width: `${item.percent}%`, height: '100%', background: item.color, borderRadius: 20, transition: 'width 1s ease-out' }} />
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-                <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 20, border: '1px solid var(--border)' }}>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>Frequência de Estudo (Últimos 30 dias)</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginTop: '1rem' }}>
-                        {Array.from({ length: 35 }).map((_, i) => {
-                            const d = new Date(); d.setDate(d.getDate() - (34 - i));
-                            const str = d.toISOString().split('T')[0];
-                            const count = timeStats.heatmap[str] || 0;
-                            let color = 'var(--surface2)';
-                            if (count > 0) color = '#dcfce7'; if (count > 2) color = '#86efac'; if (count > 5) color = '#22c55e'; if (count > 10) color = '#166534';
-                            return <div key={i} title={`${str}: ${count} leituras`} style={{ aspectRatio: '1', background: color, borderRadius: 3, border: '1px solid rgba(0,0,0,0.05)' }} />;
+
+                {/* Performance by Court & Year */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem' }}>🏛️ Tribunais</h2>
+                        {([
+                            { label: 'STF - Supremo Tribunal Federal', ...data.byCourt.STF, color: '#2563eb' },
+                            { label: 'STJ - Superior Tribunal de Justiça', ...data.byCourt.STJ, color: '#7c3aed' },
+                        ]).map(item => {
+                            const p = item.total > 0 ? Math.round((item.read / item.total) * 100) : 0;
+                            const h = (item.hits + item.misses) > 0 ? Math.round((item.hits / (item.hits + item.misses)) * 100) : 0;
+                            return (
+                                <div key={item.label} style={{ marginBottom: '1.5rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                                        <div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)' }}>{item.label}</div>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{item.read} de {item.total} lidos ({p}%)</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: h > 70 ? '#10b981' : h > 40 ? '#f59e0b' : '#ef4444' }}>{h}%</div>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>Taxa de Acerto</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ height: 8, background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden' }}>
+                                        <div style={{ width: `${p}%`, height: '100%', background: item.color, borderRadius: 10 }} />
+                                    </div>
+                                </div>
+                            );
                         })}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.65rem', color: 'var(--text-3)' }}>
-                        <span>Menos</span>
-                        <div style={{ display: 'flex', gap: '2px' }}>
-                            {[0, 1, 3, 6, 11].map(v => {
-                                let color = 'var(--surface2)';
-                                if (v > 0) color = '#dcfce7'; if (v > 2) color = '#86efac'; if (v > 5) color = '#22c55e'; if (v > 10) color = '#166534';
-                                return <div key={v} style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
-                            })}
+
+                    <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)', flex: 1 }}>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.25rem' }}>📅 Histórico por Ano</h2>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '0.75rem' }}>
+                            {data.byYear.map(y => (
+                                <div key={y.year} style={{ padding: '0.75rem', borderRadius: 16, background: 'var(--surface2)', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 800, marginBottom: '0.25rem' }}>{y.year}</div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)' }}>{y.read}</div>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase' }}>lidos</div>
+                                </div>
+                            ))}
                         </div>
-                        <span>Mais</span>
                     </div>
                 </div>
             </div>
-            <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)', padding: '2rem', borderRadius: 24, color: '#fff', textAlign: 'center', boxShadow: '0 10px 25px -5px rgba(30,58,138,0.3)' }}>
-                <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>📜 Teses do STF e STJ</h2>
-                <p style={{ opacity: 0.8, fontSize: '0.9rem', marginBottom: '1.5rem' }}>Em breve: Estatísticas detalhadas de Repetitivos, IACs e Repercussão Geral.</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (Geral)</div></div>
-                    <div style={{ width: 1, background: 'rgba(255,255,255,0.2)' }} />
-                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STF)</div></div>
-                    <div style={{ width: 1, background: 'rgba(255,255,255,0.2)' }} />
-                    <div><div style={{ fontSize: '1.5rem', fontWeight: 800 }}>0 / 0</div><div style={{ fontSize: '0.7rem', opacity: 0.7, textTransform: 'uppercase' }}>Lidas (STJ)</div></div>
+
+            {/* Heatmap Section */}
+            <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 24, border: '1px solid var(--border)', marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem' }}>🔥 Consistência de Estudo (Últimos 35 dias)</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+                    {Array.from({ length: 35 }).map((_, i) => {
+                        const d = new Date(); d.setDate(d.getDate() - (34 - i));
+                        const str = d.toISOString().split('T')[0];
+                        const count = timeStats.heatmap[str] || 0;
+                        let color = 'var(--surface2)';
+                        if (count > 0) color = '#dcfce7'; if (count > 2) color = '#86efac'; if (count > 5) color = '#22c55e'; if (count > 10) color = '#166534';
+                        return <div key={i} title={`${str}: ${count} leituras`} style={{ aspectRatio: '1', background: color, borderRadius: 6, border: '1px solid rgba(0,0,0,0.05)', transition: 'transform 0.2s', cursor: 'help' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'} />;
+                    })}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>
+                    <span>Pior dia (o melhor é hoje!)</span>
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                        <span>Menos</span>
+                        {[0, 1, 3, 6, 11].map(v => {
+                            let color = 'var(--surface2)';
+                            if (v > 0) color = '#dcfce7'; if (v > 2) color = '#86efac'; if (v > 5) color = '#22c55e'; if (v > 10) color = '#166534';
+                            return <div key={v} style={{ width: 12, height: 12, background: color, borderRadius: 3 }} />
+                        })}
+                        <span>Mais</span>
+                    </div>
+                    <span>Sua consistência é o segredo!</span>
                 </div>
             </div>
-            <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00030
+
+            <style jsx>{` @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } `}</style>
+
+            <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
+                v1.00031
             </div>
         </div>
     );

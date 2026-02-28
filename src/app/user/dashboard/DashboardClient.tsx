@@ -38,6 +38,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [search, setSearch] = useState('');
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
+    const [filterOnlyErrors, setFilterOnlyErrors] = useState(false);
     const [courtFilter, setCourtFilter] = useState<'ALL' | 'STF' | 'STJ'>('ALL');
     const [yearFilter, setYearFilter] = useState<string>('ALL');
     const [infFilter, setInfFilter] = useState<string>('ALL');
@@ -191,8 +192,9 @@ export default function DashboardClient({ userName, track }: Props) {
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
         return precedents.filter(p => {
-            const count = (readMap[p.id]?.count ?? p.readCount);
-            if (filterHideRead && count > 0) return false;
+            const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null };
+            if (filterHideRead && readData.count > 0) return false;
+            if (filterOnlyErrors && readData.last !== 'MISS') return false;
             if (courtFilter !== 'ALL' && p.court !== courtFilter) return false;
 
             if (yearFilter !== 'ALL') {
@@ -513,8 +515,11 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </button>
                             ))}
                         </div>
-                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => setFilterHideRead(!filterHideRead)} style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)' }}>
+                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => { setFilterHideRead(!filterHideRead); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)' }}>
                             🚫 Ocultar Lidos
+                        </button>
+                        <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)' }}>
+                            ❌ Ver Erros
                         </button>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
