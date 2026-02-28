@@ -34,6 +34,9 @@ export default function DashboardClient({ userName, track }: Props) {
     const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
+    // User Preferences
+    const [fontSize, setFontSize] = useState(14); // default base font size in px
+
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
 
     const loadSubjects = useCallback(() => {
@@ -131,27 +134,27 @@ export default function DashboardClient({ userName, track }: Props) {
     }, [precedents, search, filterHideRead, courtFilter, yearFilter, infFilter, readMap]);
 
     return (
-        <div className="dashboard-container">
+        <div className="dashboard-container" style={{ fontSize: `${fontSize}px` }}>
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => setSelectedPrecedent(null)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Detalhes do Julgado</h2>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Detalhes do Julgado</h2>
                             <button onClick={() => setSelectedPrecedent(null)} className="btn-close">✕</button>
                         </div>
-                        <div className="modal-body">
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text)' }}>{selectedPrecedent.title}</h3>
+                        <div className="modal-body" style={{ fontSize: `${fontSize}px` }}>
+                            <h3 style={{ fontSize: '1.2em', fontWeight: 700, marginBottom: '1rem', color: 'var(--text)', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>{selectedPrecedent.title}</h3>
                             {selectedPrecedent.theme && (
                                 <div style={{ marginBottom: '1rem' }}>
-                                    <span style={{ fontSize: '0.75rem', background: 'rgba(201,138,0,0.1)', color: '#b47b00', padding: '4px 12px', borderRadius: 20, fontWeight: 700 }}>
+                                    <span style={{ fontSize: '0.8em', background: 'rgba(201,138,0,0.1)', color: '#b47b00', padding: '4px 12px', borderRadius: 20, fontWeight: 700 }}>
                                         📌 {selectedPrecedent.theme}
                                     </span>
                                 </div>
                             )}
                             <div className="summary-scrollable" style={{ padding: '1rem', background: 'var(--surface2)', borderRadius: 12, marginBottom: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
-                                <div style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-1)' }}>{selectedPrecedent.summary}</div>
+                                <div style={{ fontSize: '1em', lineHeight: '1.6', color: 'var(--text-1)' }}>{selectedPrecedent.summary}</div>
                             </div>
-                            <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.85rem' }}>
+                            <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9em' }}>
                                 <div className="detail-item">
                                     <span style={{ color: 'var(--text-3)', display: 'block' }}>Tribunal</span>
                                     <span style={{ fontWeight: 600 }}>{selectedPrecedent.court}</span>
@@ -180,7 +183,7 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                         <div className="modal-footer">
                             {selectedPrecedent.fullTextOrLink && (
-                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>🔗 Abrir Informativo Completo</a>
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ fontSize: '0.9em' }}>🔗 Abrir Informativo Completo</a>
                             )}
                         </div>
                     </div>
@@ -195,7 +198,12 @@ export default function DashboardClient({ userName, track }: Props) {
                         Bem-vindo de volta, {userName}
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '4px', background: 'var(--surface2)', borderRadius: 8, marginRight: '0.5rem', border: '1px solid var(--border)' }}>
+                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.max(10, f - 2))} title="Diminuir fonte" style={{ minWidth: 24, padding: 0 }}>A-</button>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', minWidth: 20, textAlign: 'center' }}>{fontSize}</span>
+                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.min(24, f + 2))} title="Aumentar fonte" style={{ minWidth: 24, padding: 0 }}>A+</button>
+                    </div>
                     <button className={`btn btn-sm ${studyMode === 'READ' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('READ')}>📖 Leitura</button>
                     <button className={`btn btn-sm ${studyMode === 'FLASHCARD' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('FLASHCARD')}>🧠 Treino</button>
                 </div>
@@ -284,27 +292,27 @@ export default function DashboardClient({ userName, track }: Props) {
                         >
                             {p.theme && (
                                 <div style={{ marginBottom: '0.25rem' }}>
-                                    <span style={{ fontSize: '0.6rem', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
+                                    <span style={{ fontSize: '0.7em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
                                         📌 {p.theme}
                                     </span>
                                 </div>
                             )}
-                            <div className="prec-title" style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem' }}>
+                            <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem', lineHeight: '1.3', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
                                 {p.title}
                             </div>
                             {!isRevealed ? (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
-                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
+                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.9em', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
                                 >
                                     👀 Revelar Tese
                                 </button>
                             ) : (
-                                <div className="prec-summary" style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: '1.45', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
+                                <div className="prec-summary" style={{ fontSize: '0.95em', color: 'var(--text-2)', lineHeight: '1.5', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
                                     {p.summary}
                                 </div>
                             )}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }} onClick={e => e.stopPropagation()}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.75em' }} onClick={e => e.stopPropagation()}>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
                                     <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
                                         📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
@@ -342,10 +350,11 @@ export default function DashboardClient({ userName, track }: Props) {
                 .btn-close:hover { color: var(--rose); }
                 .btn-tag { transition: all 0.2s ease; cursor: pointer; }
                 .btn-tag:hover { border-color: var(--accent); }
+                .btn-xs { height: 24px; padding: 0 4px; font-size: 0.7rem; }
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00022
+                v1.00023
             </div>
         </div>
     );
