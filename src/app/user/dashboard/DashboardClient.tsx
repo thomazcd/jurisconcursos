@@ -793,191 +793,190 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 </div>
             </div>
-        </div>
 
-            {/* Barra flutuante do Modo Foco */ }
-    {
-        isFocusMode && (
-            <div style={{
-                position: 'fixed',
-                top: '0.75rem',
-                right: '1rem',
-                zIndex: 9999,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 12,
-                padding: '6px 10px',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                opacity: 0.6,
-                transition: 'opacity 0.2s',
-            }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
-            >
-                <button
-                    className="btn btn-secondary btn-sm"
-                    style={{ fontSize: '0.75rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                    onClick={() => setIsFocusMode(false)}
-                    title="Sair do Modo Foco"
-                >
-                    <SvgIcons.Minimize2 size={14} /> Sair Foco
-                </button>
-
-                <button
-                    onClick={toggleTheme}
-                    style={{
-                        background: 'var(--surface2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 12,
-                        width: 32,
-                        height: 32,
+            {/* Barra flutuante do Modo Foco */}
+            {
+                isFocusMode && (
+                    <div style={{
+                        position: 'fixed',
+                        top: '0.75rem',
+                        right: '1rem',
+                        zIndex: 9999,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        color: 'var(--text-3)',
-                        transition: 'all 0.2s'
+                        gap: '0.4rem',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        padding: '6px 10px',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                        opacity: 0.6,
+                        transition: 'opacity 0.2s',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                    title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                >
-                    {isDark ? ThemeIcons.sun : ThemeIcons.moon}
-                </button>
-
-                <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
-
-                <button
-                    className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
-                    style={{ fontSize: '0.75rem', padding: '4px 10px' }}
-                    onClick={() => setCompactMode(c => !c)}
-                    title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
-                >{compactMode ? '🗂️ Completo' : '⬛ Compacto'}</button>
-
-                <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
-
-                <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte">A-</button>
-                <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte">A+</button>
-            </div>
-        )
-    }
-
-    <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
-
-        {loading ? (
-            <div className="main-content">
-                <div className="page-header" style={{ marginBottom: '2rem' }}>
-                    <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
-                </div>
-                <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
-                    ))}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
-                    ))}
-                </div>
-            </div>
-        ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-            <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
-                <div className="subject-header">
-                    <div className="subject-icon">
-                        <SvgIcons.BookOpen size={20} />
-                    </div>
-                    <h3>{subName}</h3>
-                    <div className="line" />
-                    <span>{list.length}</span>
-                </div>
-                {list.map(renderPrecedent)}
-            </div>
-        )) : filtered.map(renderPrecedent))}
-    </div>
-
-    {
-        showHelp && (
-            <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
-                <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 30,
-                    padding: '2.5rem',
-                    maxWidth: '550px',
-                    width: 'calc(100% - 2rem)',
-                    boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}>
-                    {/* Close button */}
-                    <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-
-                    {/* Emoji ícone com fundo colorido */}
-                    <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
-                        {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
-                    </div>
-
-                    {/* Título */}
-                    <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
-                        {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
-                    </h2>
-
-                    {/* Descrição */}
-                    <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
-                        {[
-                            'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
-                            'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
-                            'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
-                            'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
-                            'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
-                            'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
-                        ][helpStep]}
-                    </p>
-
-                    {helpStep === 4 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
-                            <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
-                                <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
-                                <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
-                            </div>
-                            <button
-                                onClick={resetAllReads}
-                                className="btn btn-secondary"
-                                style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
-                            >♻️ Marcar TUDO como Não Lido</button>
-                            <button
-                                onClick={resetAllStats}
-                                className="btn btn-secondary"
-                                style={{ fontSize: '0.75rem', fontWeight: 800 }}
-                            >📊 Zerar Estatísticas de V/F</button>
-                        </div>
-                    )}
-
-                    {/* Pontos de progresso */}
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
-                        {[0, 1, 2, 3, 4].map(i => (
-                            <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
-                        ))}
-                    </div>
-
-                    {/* Botões */}
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                        {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                        <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
-                            {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+                    >
+                        <button
+                            className="btn btn-secondary btn-sm"
+                            style={{ fontSize: '0.75rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => setIsFocusMode(false)}
+                            title="Sair do Modo Foco"
+                        >
+                            <SvgIcons.Minimize2 size={14} /> Sair Foco
                         </button>
+
+                        <button
+                            onClick={toggleTheme}
+                            style={{
+                                background: 'var(--surface2)',
+                                border: '1px solid var(--border)',
+                                borderRadius: 12,
+                                width: 32,
+                                height: 32,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                color: 'var(--text-3)',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                            title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                        >
+                            {isDark ? ThemeIcons.sun : ThemeIcons.moon}
+                        </button>
+
+                        <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
+
+                        <button
+                            className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
+                            style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                            onClick={() => setCompactMode(c => !c)}
+                            title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
+                        >{compactMode ? '🗂️ Completo' : '⬛ Compacto'}</button>
+
+                        <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
+
+                        <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte">A-</button>
+                        <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte">A+</button>
                     </div>
-                </div>
+                )
+            }
+
+            <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
+
+                {loading ? (
+                    <div className="main-content">
+                        <div className="page-header" style={{ marginBottom: '2rem' }}>
+                            <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
+                        </div>
+                        <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
+                            ))}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
+                            ))}
+                        </div>
+                    </div>
+                ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
+                    <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
+                        <div className="subject-header">
+                            <div className="subject-icon">
+                                <SvgIcons.BookOpen size={20} />
+                            </div>
+                            <h3>{subName}</h3>
+                            <div className="line" />
+                            <span>{list.length}</span>
+                        </div>
+                        {list.map(renderPrecedent)}
+                    </div>
+                )) : filtered.map(renderPrecedent))}
             </div>
-        )
-    }
+
+            {
+                showHelp && (
+                    <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
+                        <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-strong)',
+                            borderRadius: 30,
+                            padding: '2.5rem',
+                            maxWidth: '550px',
+                            width: 'calc(100% - 2rem)',
+                            boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            {/* Close button */}
+                            <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+
+                            {/* Emoji ícone com fundo colorido */}
+                            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
+                                {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
+                            </div>
+
+                            {/* Título */}
+                            <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
+                                {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
+                            </h2>
+
+                            {/* Descrição */}
+                            <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
+                                {[
+                                    'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
+                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
+                                    'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
+                                    'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
+                                    'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
+                                    'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
+                                ][helpStep]}
+                            </p>
+
+                            {helpStep === 4 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
+                                    <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
+                                        <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
+                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
+                                    </div>
+                                    <button
+                                        onClick={resetAllReads}
+                                        className="btn btn-secondary"
+                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
+                                    >♻️ Marcar TUDO como Não Lido</button>
+                                    <button
+                                        onClick={resetAllStats}
+                                        className="btn btn-secondary"
+                                        style={{ fontSize: '0.75rem', fontWeight: 800 }}
+                                    >📊 Zerar Estatísticas de V/F</button>
+                                </div>
+                            )}
+
+                            {/* Pontos de progresso */}
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
+                                {[0, 1, 2, 3, 4].map(i => (
+                                    <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
+                                ))}
+                            </div>
+
+                            {/* Botões */}
+                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                                {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
+                                <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
+                                    {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
 
 
-    <style jsx>{`
+            <style jsx>{`
                 .hidden-focus { display: none !important; }
                 .focus-exit {
                     position: fixed;
@@ -1111,52 +1110,52 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-    {
-        historyModal && (
-            <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
-                <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border-strong)',
-                    borderRadius: 20,
-                    padding: '1.5rem',
-                    maxWidth: '320px',
-                    width: 'calc(100% - 2rem)',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-                    position: 'relative'
-                }}>
-                    <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <SvgIcons.History size={18} style={{ color: 'var(--accent)' }} /> Histórico de Leitura
-                    </h3>
-                    <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
-                        {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
-                            <div key={idx} style={{
-                                padding: '8px 12px',
-                                background: 'var(--surface2)',
-                                borderRadius: 10,
-                                fontSize: '0.85rem',
-                                border: '1px solid var(--border)',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
-                                <span style={{ color: 'var(--text)' }}>
-                                    {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                </span>
+            {
+                historyModal && (
+                    <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
+                        <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border-strong)',
+                            borderRadius: 20,
+                            padding: '1.5rem',
+                            maxWidth: '320px',
+                            width: 'calc(100% - 2rem)',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+                            position: 'relative'
+                        }}>
+                            <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <SvgIcons.History size={18} style={{ color: 'var(--accent)' }} /> Histórico de Leitura
+                            </h3>
+                            <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
+                                {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
+                                    <div key={idx} style={{
+                                        padding: '8px 12px',
+                                        background: 'var(--surface2)',
+                                        borderRadius: 10,
+                                        fontSize: '0.85rem',
+                                        border: '1px solid var(--border)',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
+                                        <span style={{ color: 'var(--text)' }}>
+                                            {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                )) : (
+                                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
+                                )}
                             </div>
-                        )) : (
-                            <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
-                        )}
+                        </div>
                     </div>
-                </div>
-            </div>
-        )
-    }
+                )
+            }
 
-    <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
-        v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
-    </div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
+                v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
+            </div>
         </div >
     );
 }

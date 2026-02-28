@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useState } from 'react';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
