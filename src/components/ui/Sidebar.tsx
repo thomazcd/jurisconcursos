@@ -24,8 +24,13 @@ export function Sidebar({ role, name, track }: SidebarProps) {
     return (
         <aside className="sidebar">
             <div className="sidebar-logo">
-                <h1>⚖️ Juris Concursos</h1>
-                <span>Jurisprudência para concursos</span>
+                <div className="logo-icon-container">
+                    <span className="logo-icon">⚖️</span>
+                </div>
+                <div className="logo-text">
+                    <h1 className="logo-title">Juris</h1>
+                    <span className="logo-subtitle">Concursos</span>
+                </div>
             </div>
 
             <nav className="sidebar-nav">
@@ -69,7 +74,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                     </div>
                 </div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginBottom: '0.5rem', opacity: 0.6 }}>
-                    v1.00025
+                    v1.00026
                 </div>
                 <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSignOut}>
                     Sair
