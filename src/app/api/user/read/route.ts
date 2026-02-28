@@ -13,12 +13,12 @@ export async function POST(req: NextRequest) {
     if (!precedentId) return NextResponse.json({ error: 'precedentId required' }, { status: 400 });
 
     if (action === 'reset') {
-        await prisma.precedentRead.upsert({
+        const result = await prisma.precedentRead.upsert({
             where: { userId_precedentId: { userId, precedentId } },
             create: { userId, precedentId, readCount: 0, readEvents: [] },
             update: { readCount: 0, readEvents: [] },
         });
-        return NextResponse.json({ readCount: 0 });
+        return NextResponse.json({ readCount: 0, readEvents: [] });
     }
 
     // default: increment
@@ -30,11 +30,11 @@ export async function POST(req: NextRequest) {
     const newCount = (existing?.readCount ?? 0) + 1;
     const newEvents = [...(existing?.readEvents ?? []), now];
 
-    await prisma.precedentRead.upsert({
+    const result = await prisma.precedentRead.upsert({
         where: { userId_precedentId: { userId, precedentId } },
         create: { userId, precedentId, readCount: newCount, readEvents: newEvents },
         update: { readCount: newCount, readEvents: newEvents },
     });
 
-    return NextResponse.json({ readCount: newCount });
+    return NextResponse.json({ readCount: newCount, readEvents: newEvents });
 }

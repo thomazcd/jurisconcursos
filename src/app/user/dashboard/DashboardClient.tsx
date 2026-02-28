@@ -9,6 +9,7 @@ type Precedent = {
     organ?: string | null; rapporteur?: string | null;
     theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
     readCount: number; isRead: boolean;
+    readEvents: string[];
 };
 
 interface Props { userName: string; track: string; }
@@ -24,7 +25,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('');
     const [precedents, setPrecedents] = useState<Precedent[]>([]);
     const [loading, setLoading] = useState(false);
-    const [readMap, setReadMap] = useState<Record<string, number>>({});
+    const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[] }>>({});
     const [search, setSearch] = useState('');
 
     useEffect(() => {
@@ -44,8 +45,8 @@ export default function DashboardClient({ userName, track }: Props) {
         const d = await r.json();
         const precs: Precedent[] = d.precedents ?? [];
         setPrecedents(precs);
-        const map: Record<string, number> = {};
-        precs.forEach(p => { map[p.id] = p.readCount; });
+        const map: Record<string, { count: number, events: string[] }> = {};
+        precs.forEach(p => { map[p.id] = { count: p.readCount, events: p.readEvents }; });
         setReadMap(map);
         setLoading(false);
     }, []);
@@ -61,19 +62,19 @@ export default function DashboardClient({ userName, track }: Props) {
             body: JSON.stringify({ precedentId: id, action: 'increment' }),
         });
         const d = await r.json();
-        setReadMap(m => ({ ...m, [id]: d.readCount }));
+        setReadMap(m => ({ ...m, [id]: { count: d.readCount, events: d.readEvents || [] } }));
     }
 
     async function resetRead(id: string) {
+        if (!confirm('Deseja zerar as leituras deste precedente?')) return;
         await fetch('/api/user/read', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ precedentId: id, action: 'reset' }),
         });
-        setReadMap(m => ({ ...m, [id]: 0 }));
+        setReadMap(m => ({ ...m, [id]: { count: 0, events: [] } }));
     }
 
-    const selectedSubjectName = subjects.find(s => s.id === selectedSubject)?.name ?? '';
     const q = search.trim().toLowerCase();
     const filtered = q
         ? precedents.filter(p =>
@@ -109,60 +110,102 @@ export default function DashboardClient({ userName, track }: Props) {
                 />
             </div>
 
-            {/* States */}
             {loading && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', padding: '1rem 0' }}>Carregando…</p>}
 
-            {/* Precedent list */}
             <div className="prec-list">
                 {filtered.map((p) => {
-                    const count = readMap[p.id] ?? p.readCount;
-                    const isRead = count > 0;
+                    const readData = readMap[p.id] || { count: 0, events: [] };
+                    const isRead = readData.count > 0;
                     const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
+
+                    const hoverText = readData.events.length > 0
+                        ? 'Leituras em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n')
+                        : 'Ainda não lido';
 
                     return (
                         <div
                             key={p.id}
                             className="prec-item"
-                            style={{ borderLeft: `3px solid ${isRead ? '#86efac' : '#fca5a5'}`, paddingBottom: '0.75rem' }}
+                            style={{
+                                borderLeft: `3px solid ${isRead ? '#86efac' : '#fca5a5'}`,
+                                padding: '0.6rem 0.75rem',
+                                marginBottom: '0.5rem'
+                            }}
                         >
                             {p.theme && (
-                                <div style={{ marginBottom: '0.4rem' }}>
-                                    <span style={{ fontSize: '0.65rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>
+                                <div style={{ marginBottom: '0.2rem' }}>
+                                    <span style={{ fontSize: '0.6rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>
                                         📌 {p.theme}
                                     </span>
                                 </div>
                             )}
-                            <div className="prec-title" style={{ marginBottom: '0.4rem', color: 'var(--text)', fontWeight: 700 }}>
+                            <div className="prec-title" style={{ marginBottom: '0.2rem', color: 'var(--text)', fontWeight: 700, fontSize: '0.95rem' }}>
                                 {p.title}
                             </div>
-                            <div className="prec-summary" style={{ marginBottom: '0.6rem', color: 'var(--text-2)', lineHeight: '1.4' }}>
+                            <div className="prec-summary" style={{ marginBottom: '0.5rem', color: 'var(--text-2)', lineHeight: '1.4', fontSize: '0.9rem' }}>
                                 {p.summary}
                             </div>
 
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.7rem', color: 'var(--text-3)', borderTop: '0.5px solid var(--border)', paddingTop: '0.5rem' }}>
-                                {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
-                                {proc && <span>📄 {proc}</span>}
-                                {p.informatoryNumber && <span>📰 Informativo {p.court} {p.informatoryNumber}</span>}
-                            </div>
+                            {/* Info + Action line (Combined) */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', borderTop: '0.5px solid var(--border)', paddingTop: '0.4rem' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', color: 'var(--text-3)' }}>
+                                    {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                                    {proc && <span>📄 {proc}</span>}
+                                    {p.informatoryNumber && <span>📰 Inf {p.court} {p.informatoryNumber}</span>}
+                                </div>
 
-                            {/* Read controls */}
-                            <div className="prec-actions no-print">
-                                {!isRead ? (
-                                    <button className="btn-read" onClick={() => markRead(p.id)}>Marcar lido</button>
-                                ) : (
-                                    <span className="read-badge">
-                                        ✓ Lido {count > 1 ? `(${count}×)` : ''}
-                                        <button className="btn-reset" onClick={() => resetRead(p.id)}>Zerar</button>
-                                    </span>
-                                )}
+                                <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {!isRead ? (
+                                        <button
+                                            className="btn-read"
+                                            style={{ padding: '2px 8px', fontSize: '0.65rem' }}
+                                            onClick={() => markRead(p.id)}
+                                        >
+                                            Marcar lido
+                                        </button>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <span
+                                                title={hoverText}
+                                                style={{
+                                                    background: '#dcfce7',
+                                                    color: '#166534',
+                                                    padding: '2px 8px',
+                                                    borderRadius: 4,
+                                                    cursor: 'help',
+                                                    fontWeight: 600
+                                                }}
+                                            >
+                                                ✓ Lido {readData.count > 1 ? `${readData.count}×` : ''}
+                                            </span>
+
+                                            <button
+                                                className="btn-read"
+                                                title="Marcar leitura adicional"
+                                                style={{ padding: '2px 8px', fontSize: '0.65rem', background: 'var(--surface3)', border: '1px solid var(--border)' }}
+                                                onClick={() => markRead(p.id)}
+                                            >
+                                                +1
+                                            </button>
+
+                                            <button
+                                                onClick={() => resetRead(p.id)}
+                                                style={{ padding: '2px 4px', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.65rem', cursor: 'pointer' }}
+                                                title="Zerar progresso"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '2rem', padding: '1rem', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00009
+            <div style={{ textAlign: 'center', marginTop: '1.5rem', padding: '1rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
+                v1.00010
             </div>
         </div>
     );

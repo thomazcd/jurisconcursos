@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             include: {
                 subject: { select: { name: true } },
-                reads: { where: { userId }, select: { readCount: true } },
+                reads: { where: { userId }, select: { readCount: true, readEvents: true } },
             },
             distinct: ['processNumber', 'processClass', 'title'],
             take: 500,
@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
             ...p,
             readCount: p.reads[0]?.readCount ?? 0,
             isRead: (p.reads[0]?.readCount ?? 0) > 0,
+            readEvents: p.reads[0]?.readEvents ?? [],
             reads: undefined,
         }));
 
