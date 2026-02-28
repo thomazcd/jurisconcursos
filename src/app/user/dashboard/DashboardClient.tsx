@@ -956,16 +956,14 @@ export default function DashboardClient({ userName, track }: Props) {
                                         <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Zona de Gerenciamento</h4>
                                         <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações limpam seu progresso local.</p>
                                     </div>
-                                    <button
-                                        onClick={resetAllReads}
+                                    <div
                                         className="btn btn-secondary"
-                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                                    ><SvgIcons.RotateCcw size={14} /> Marcar TUDO como Não Lido</button>
-                                    <button
-                                        onClick={resetAllStats}
+                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
+                                    ><SvgIcons.RotateCcw size={14} /> Marcar TUDO como Não Lido</div>
+                                    <div
                                         className="btn btn-secondary"
-                                        style={{ fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                                    ><SvgIcons.RotateCw size={14} /> Zerar Estatísticas de V/F</button>
+                                        style={{ fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
+                                    ><SvgIcons.RotateCw size={14} /> Zerar Estatísticas de V/F</div>
                                 </div>
                             )}
 
