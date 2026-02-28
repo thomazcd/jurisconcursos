@@ -53,6 +53,24 @@ export default function UserSettingsPage() {
         }
     }
 
+    async function resetAllStats() {
+        if (!confirm('Deseja zerar TODAS as estatísticas de desempenho (V/F)? Esta ação não pode ser desfeita.')) return;
+        setSaving(true);
+        try {
+            await fetch('/api/user/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk_reset_stats', precedentId: 'ALL' }),
+            });
+            alert('Estatísticas resetadas com sucesso!');
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao resetar estatísticas');
+        } finally {
+            setSaving(false);
+        }
+    }
+
     const activeTrack = TRACKS.find((t) => t.value === track);
 
     return (
@@ -113,30 +131,74 @@ export default function UserSettingsPage() {
 
                 <div className="divider" style={{ margin: '1.5rem 0' }} />
 
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#ef4444', marginBottom: '0.5rem' }}>Zona de Perigo</h2>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1rem' }}>
-                    Ações irreversíveis sobre seus dados de estudo.
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444', marginBottom: '0.5rem' }}>🔥 Zona de Perigo</h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginBottom: '1.5rem' }}>
+                    Ações irreversíveis sobre seus dados de estudo. Tenha cuidado!
                 </p>
 
-                <button
-                    onClick={resetAllReads}
-                    disabled={saving}
-                    style={{
-                        padding: '0.6rem 1rem',
-                        borderRadius: '8px',
-                        border: '1px solid #ef4444',
-                        background: 'transparent',
-                        color: '#ef4444',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                    Marcar todos os informativos como NÃO LIDOS
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button
+                        onClick={resetAllReads}
+                        disabled={saving}
+                        style={{
+                            padding: '0.75rem 1rem',
+                            borderRadius: '12px',
+                            border: '1.5px solid #ef4444',
+                            background: 'transparent',
+                            color: '#ef4444',
+                            fontSize: '0.85rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'center'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none'; }}
+                    >
+                        ♻️ Resetar Marcas de "Lido" (Informativos)
+                    </button>
+
+                    <button
+                        onClick={resetAllStats}
+                        disabled={saving}
+                        style={{
+                            padding: '0.75rem 1rem',
+                            borderRadius: '12px',
+                            border: '1.5px solid #ef4444',
+                            background: 'transparent',
+                            color: '#ef4444',
+                            fontSize: '0.85rem',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'center'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none'; }}
+                    >
+                        📊 Zerar Estatísticas (V/F)
+                    </button>
+
+                    <button
+                        onClick={() => alert('Para excluir sua conta, entre em contato com o suporte.')}
+                        disabled={saving}
+                        style={{
+                            padding: '0.75rem 1rem',
+                            borderRadius: '12px',
+                            border: '1.5px solid var(--border)',
+                            background: 'var(--surface2)',
+                            color: 'var(--text-3)',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            textAlign: 'center',
+                            marginTop: '0.5rem'
+                        }}
+                    >
+                        Excluir Minha Conta
+                    </button>
+                </div>
             </div>
         </div>
     );

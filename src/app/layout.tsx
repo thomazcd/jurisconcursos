@@ -10,6 +10,20 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="pt-BR">
+            <head>
+                <script dangerouslySetInnerHTML={{
+                    __html: `
+                        (function() {
+                            try {
+                                const theme = localStorage.getItem('juris-theme');
+                                if (theme === 'dark') {
+                                    document.documentElement.classList.add('dark-theme');
+                                }
+                            } catch (e) {}
+                        })();
+                    `
+                }} />
+            </head>
             <body>
                 <SessionProvider>{children}</SessionProvider>
             </body>

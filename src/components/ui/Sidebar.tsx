@@ -23,6 +23,8 @@ const Icons = {
     subjects: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>,
     logout: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>,
     soon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+    sun: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>,
+    moon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>,
 };
 
 export function Sidebar({ role, name, track }: SidebarProps) {
@@ -31,6 +33,29 @@ export function Sidebar({ role, name, track }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const isAdmin = role === 'ADMIN' || role === 'GESTOR';
     const [showComingSoon, setShowComingSoon] = useState(false);
+    const [isDark, setIsDark] = useState(false);
+    const [progress, setProgress] = useState<{ total: number, read: number } | null>(null);
+
+    useEffect(() => {
+        setIsDark(document.documentElement.classList.contains('dark-theme'));
+
+        // Fetch progress
+        fetch('/api/user/subjects')
+            .then(r => r.json())
+            .then(d => {
+                const total = d.subjects?.reduce((acc: number, s: any) => acc + (s.total || 0), 0) || 0;
+                const read = d.subjects?.reduce((acc: number, s: any) => acc + (s.readCount || 0), 0) || 0;
+                setProgress({ total, read });
+            })
+            .catch(() => { });
+    }, []);
+
+    const toggleTheme = () => {
+        const next = !isDark;
+        setIsDark(next);
+        document.documentElement.classList.toggle('dark-theme', next);
+        localStorage.setItem('juris-theme', next ? 'dark' : 'light');
+    };
 
     const isActive = (href: string) =>
         pathname === href || pathname.startsWith(href + '/');
@@ -138,9 +163,30 @@ export function Sidebar({ role, name, track }: SidebarProps) {
 
             <aside className={`sidebar ${isOpen ? 'open' : ''}`} style={{ width: 240 }}>
 
-                {/* Logo */}
-                <div style={{ padding: '1.5rem 1.25rem 1.75rem', borderBottom: '1px solid var(--border)' }}>
+                {/* Logo & Theme Toggle */}
+                <div style={{ padding: '1.5rem 1.25rem 1.75rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Logo size="medium" />
+                    <button
+                        onClick={toggleTheme}
+                        style={{
+                            background: 'var(--surface2)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: 'var(--text-2)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                        title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                    >
+                        {isDark ? Icons.sun : Icons.moon}
+                    </button>
                 </div>
 
                 {/* Nav */}
@@ -157,7 +203,19 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                     ) : (
                         <>
                             <p style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-3)', padding: '0 0.5rem 0.6rem', marginBottom: '0.2rem' }}>Estudo</p>
-                            <NavLink href="/user/dashboard" icon={Icons.book} label="Informativos" />
+                            <NavLink
+                                href="/user/dashboard"
+                                icon={Icons.book}
+                                label="Informativos"
+                                badge={progress && (
+                                    <div className="progress-mini-container">
+                                        <div className="progress-mini">
+                                            <div className="progress-mini-bar" style={{ width: `${Math.min(100, (progress.read / progress.total) * 100)}%` }} />
+                                        </div>
+                                        <span className="percentage-badge">{Math.round((progress.read / progress.total) * 100)}%</span>
+                                    </div>
+                                )}
+                            />
                             <NavLink
                                 href="#"
                                 icon={Icons.gavel}

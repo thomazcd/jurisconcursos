@@ -141,6 +141,7 @@ model PrecedentRead {
   lastResult   String?  // 'HIT' ou 'MISS'
 
   isFavorite   Boolean  @default(false)
+  notes        String?  @db.Text
 
   updatedAt   DateTime @updatedAt
 

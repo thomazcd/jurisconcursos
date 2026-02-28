@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
             wrongCount: p.reads[0]?.wrongCount ?? 0,
             lastResult: p.reads[0]?.lastResult ?? null,
             isFavorite: p.reads[0]?.isFavorite ?? false,
+            notes: p.reads[0]?.notes ?? null,
             reads: undefined,
         }));
 

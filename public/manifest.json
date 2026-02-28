@@ -1,0 +1,22 @@
+{
+    "name": "Juris Concursos",
+    "short_name": "Juris",
+    "description": "Plataforma de estudo de jurisprudência do STF e STJ para concursos.",
+    "start_url": "/user/dashboard",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#0d9488",
+    "icons": [
+        {
+            "src": "https://raw.githubusercontent.com/antigravity-ai/assets/main/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://raw.githubusercontent.com/antigravity-ai/assets/main/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "orientation": "portrait"
+}

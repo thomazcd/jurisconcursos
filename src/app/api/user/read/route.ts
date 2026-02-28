@@ -9,10 +9,19 @@ export async function POST(req: NextRequest) {
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     const userId = (session.user as any).id;
 
-    const { precedentId, action, isCorrect } = await req.json();
+    const { precedentId, action, isCorrect, notes } = await req.json();
     if (!precedentId) return NextResponse.json({ error: 'precedentId required' }, { status: 400 });
 
     const now = new Date();
+
+    if (action === 'save_note') {
+        const result = await prisma.precedentRead.upsert({
+            where: { userId_precedentId: { userId, precedentId } },
+            create: { userId, precedentId, notes },
+            update: { notes },
+        });
+        return NextResponse.json({ notes: result.notes });
+    }
 
     if (action === 'bulk_reset_reads') {
         await prisma.precedentRead.updateMany({

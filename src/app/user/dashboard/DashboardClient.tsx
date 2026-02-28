@@ -20,6 +20,7 @@ type Precedent = {
     wrongCount?: number;
     lastResult?: 'HIT' | 'MISS' | null;
     isFavorite: boolean;
+    notes?: string | null;
 };
 
 interface Props { userName: string; track: string; }
@@ -35,7 +36,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('ALL');
     const [precedents, setPrecedents] = useState<Precedent[]>([]);
     const [loading, setLoading] = useState(false);
-    const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean }>>({});
+    const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean, notes: string | null }>>({});
     const [search, setSearch] = useState('');
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
@@ -57,6 +58,8 @@ export default function DashboardClient({ userName, track }: Props) {
 
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
     const [historyModal, setHistoryModal] = useState<{ id: string, events: string[] } | null>(null);
+    const [notesModal, setNotesModal] = useState<{ id: string, notes: string | null } | null>(null);
+    const [showHints, setShowHints] = useState<Record<string, boolean>>({});
 
     const loadSubjects = useCallback(() => {
         fetch('/api/user/subjects')
@@ -79,6 +82,7 @@ export default function DashboardClient({ userName, track }: Props) {
         setLoading(true);
         setRevealed({});
         setFlashcardResults({});
+        setShowHints({}); // Reset hints when loading new precedents
 
         let url = subjectId === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${subjectId}`;
         if (query) {
@@ -97,7 +101,8 @@ export default function DashboardClient({ userName, track }: Props) {
                 correct: p.correctCount ?? 0,
                 wrong: p.wrongCount ?? 0,
                 last: p.lastResult ?? null,
-                isFavorite: p.isFavorite ?? false
+                isFavorite: p.isFavorite ?? false,
+                notes: p.notes ?? null,
             };
         });
         setReadMap(map);
@@ -110,6 +115,15 @@ export default function DashboardClient({ userName, track }: Props) {
         }, search ? 500 : 0);
         return () => clearTimeout(timeoutId);
     }, [selectedSubject, search, loadPrecedents]);
+
+    async function saveNote(id: string, notes: string) {
+        setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));
+        await fetch('/api/user/read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ precedentId: id, action: 'save_note', notes }),
+        });
+    }
 
     async function toggleFavorite(id: string, e: React.MouseEvent) {
         e.stopPropagation();
@@ -138,6 +152,7 @@ export default function DashboardClient({ userName, track }: Props) {
         const isCorrectResult = userChoice === (p.flashcardAnswer ?? true);
         setFlashcardResults(prev => ({ ...prev, [p.id]: isCorrectResult ? 'CORRECT' : 'WRONG' }));
         setRevealed(prev => ({ ...prev, [p.id]: true }));
+        setShowHints(prev => ({ ...prev, [p.id]: false })); // Hide hint after answering
 
         const r = await fetch('/api/user/read', {
             method: 'POST',
@@ -368,6 +383,38 @@ export default function DashboardClient({ userName, track }: Props) {
                             >
                                 {readData.isFavorite ? '★' : '☆'}
                             </button>
+                            {/* 📝 Botão de Anotações */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setNotesModal({ id: p.id, notes: readData.notes }); }}
+                                style={{
+                                    border: 'none',
+                                    background: 'var(--surface2)',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    color: readData.notes ? 'var(--accent)' : 'var(--text-4)',
+                                    transition: 'all 0.2s',
+                                    padding: '4px',
+                                    borderRadius: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '26px',
+                                    height: '26px',
+                                    position: 'relative'
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.transform = 'scale(1.1)';
+                                    e.currentTarget.style.background = 'var(--border)';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.transform = 'none';
+                                    e.currentTarget.style.background = 'var(--surface2)';
+                                }}
+                                title={readData.notes ? 'Ver/Editar Anotação' : 'Adicionar Anotação'}
+                            >
+                                📝
+                                {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
+                            </button>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 8px', borderRadius: '6px' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             {proc && (
                                 <span
@@ -423,6 +470,23 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </button>
                             )}
                         </div>
+                        {studyMode === 'FLASHCARD' && !isRevealed && (
+                            <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 12, border: '1px dashed var(--border-strong)', textAlign: 'center' }}>
+                                {!showHints[p.id] ? (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowHints(prev => ({ ...prev, [p.id]: true })) }}
+                                        style={{ background: 'transparent', border: 'none', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 auto' }}
+                                    >
+                                        💡 Ver Dica (Recuperar Memória)
+                                    </button>
+                                ) : (
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', fontStyle: 'italic', animation: 'fadeIn 0.3s' }}>
+                                        <span style={{ fontWeight: 800, color: 'var(--accent)', marginRight: 8 }}>Dica:</span>
+                                        {p.summary.split('.').slice(0, 1).join('.')}.
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -431,6 +495,64 @@ export default function DashboardClient({ userName, track }: Props) {
 
     return (
         <div className={`dashboard-container ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
+            {/* MODAL DE ANOTAÇÕES */}
+            {notesModal && (
+                <div className="modal-overlay" onClick={() => setNotesModal(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', padding: '1.5rem', borderRadius: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900 }}>📝 Minhas Anotações</h3>
+                            <button onClick={() => setNotesModal(null)} style={{ border: 'none', background: 'var(--surface2)', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontWeight: 900 }}>✕</button>
+                        </div>
+
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginBottom: '1rem', lineHeight: '1.4' }}>
+                            Escreva mnemônicos, observações ou pontos importantes para revisar depois.
+                        </p>
+
+                        <textarea
+                            autoFocus
+                            value={notesModal.notes || ''}
+                            onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value })}
+                            placeholder="Digite sua nota aqui..."
+                            style={{
+                                width: '100%',
+                                height: '200px',
+                                padding: '1rem',
+                                borderRadius: '12px',
+                                border: '2px solid var(--border)',
+                                background: 'var(--surface2)',
+                                color: 'var(--text)',
+                                fontSize: '0.95rem',
+                                lineHeight: '1.6',
+                                resize: 'none',
+                                outline: 'none',
+                                transition: 'border-color 0.2s'
+                            }}
+                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                        />
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                            <button
+                                onClick={() => {
+                                    saveNote(notesModal.id, notesModal.notes || '');
+                                    setNotesModal(null);
+                                }}
+                                className="btn btn-primary"
+                                style={{ flex: 1, height: '45px', borderRadius: '12px', fontWeight: 800 }}
+                            >
+                                Salvar Nota
+                            </button>
+                            <button
+                                onClick={() => setNotesModal(null)}
+                                className="btn btn-ghost"
+                                style={{ flex: 1, height: '45px', borderRadius: '12px', fontWeight: 700 }}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
                     <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '700px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
@@ -622,6 +744,40 @@ export default function DashboardClient({ userName, track }: Props) {
                         <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>❌ Erros</button>
                     </div>
                 </div>
+
+                <div className="filter-chips" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
+                    <button
+                        className={`chip ${filterOnlyFavorites ? 'active' : ''}`}
+                        onClick={() => setFilterOnlyFavorites(!filterOnlyFavorites)}
+                    >
+                        <span>⭐</span> Favoritos
+                    </button>
+                    <button
+                        className={`chip ${filterOnlyErrors ? 'active' : ''}`}
+                        onClick={() => setFilterOnlyErrors(!filterOnlyErrors)}
+                    >
+                        <span>❌</span> Errados
+                    </button>
+                    <button
+                        className={`chip ${filterHideRead ? 'active' : ''}`}
+                        onClick={() => setFilterHideRead(!filterHideRead)}
+                    >
+                        <span>🆕</span> Não Lidos
+                    </button>
+                    {courtFilter !== 'ALL' && (
+                        <select
+                            value={infFilter}
+                            onChange={e => setInfFilter(e.target.value)}
+                            className="chip"
+                            style={{ padding: '4px 12px', height: '32px', appearance: 'none', textAlign: 'center' }}
+                        >
+                            <option value="ALL">📑 Inf. Todos</option>
+                            {availableInformatories.map(inf => (
+                                <option key={inf} value={inf}>📑 Inf. {inf}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
             </div>
 
             {/* Barra flutuante do Modo Foco */}
@@ -670,35 +826,49 @@ export default function DashboardClient({ userName, track }: Props) {
 
             <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
 
-                {loading ? <div style={{ padding: '5rem', textAlign: 'center', opacity: 0.5 }}>Carregando julgados...</div> :
-                    (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-                        <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
-                            <div className="subject-header">
-                                <div className="subject-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                </div>
-                                <h3>{subName}</h3>
-                                <div className="line" />
-                                <span>{list.length}</span>
-                            </div>
-                            {list.map(renderPrecedent)}
+                {loading ? (
+                    <div className="main-content">
+                        <div className="page-header" style={{ marginBottom: '2rem' }}>
+                            <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
                         </div>
-                    )) : filtered.map(renderPrecedent))}
+                        <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
+                            ))}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
+                            ))}
+                        </div>
+                    </div>
+                ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
+                    <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
+                        <div className="subject-header">
+                            <div className="subject-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            </div>
+                            <h3>{subName}</h3>
+                            <div className="line" />
+                            <span>{list.length}</span>
+                        </div>
+                        {list.map(renderPrecedent)}
+                    </div>
+                )) : filtered.map(renderPrecedent))}
             </div>
 
             {showHelp && (
-                <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => setShowHelp(false)}>
-                    <div onClick={e => e.stopPropagation()} style={{
+                <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
+                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
                         background: 'var(--surface)',
                         border: '1px solid var(--border-strong)',
-                        borderRadius: 24,
+                        borderRadius: 30,
                         padding: '2.5rem',
-                        maxWidth: '480px',
-                        width: '100%',
-                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-                        animation: 'modalIn 0.2s ease',
-                        textAlign: 'center',
+                        maxWidth: '550px',
+                        width: 'calc(100% - 2rem)',
+                        boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
                         position: 'relative',
+                        overflow: 'hidden'
                     }}>
                         {/* Close button */}
                         <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -900,7 +1070,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
             {historyModal && (
                 <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
-                    <div onClick={e => e.stopPropagation()} style={{
+                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
                         background: 'var(--surface)',
                         border: '1px solid var(--border-strong)',
                         borderRadius: 20,
@@ -908,7 +1078,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         maxWidth: '320px',
                         width: 'calc(100% - 2rem)',
                         boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-                        animation: 'modalIn 0.2s ease',
                         position: 'relative'
                     }}>
                         <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
