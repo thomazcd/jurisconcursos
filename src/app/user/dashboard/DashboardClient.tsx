@@ -304,7 +304,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             )}
 
-            <div className="page-header no-print">
+            <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button onClick={() => setIsFocusMode(!isFocusMode)} className="btn btn-secondary btn-sm" title="Alternar Modo Foco">
                         {isFocusMode ? '🔓 Sair Modo Foco' : '🎯 Modo Foco'}
@@ -322,7 +322,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            <div className="no-print" style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
+            <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 220px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
                         <option value="ALL">📚 Todas as Matérias</option>
@@ -341,17 +341,44 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             </div>
 
-            <div className="prec-list">
+            <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
                 {loading ? <div style={{ padding: '5rem', textAlign: 'center', opacity: 0.5 }}>Carregando julgados...</div> :
                     (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-                        <div key={subName} style={{ marginBottom: '1.5rem' }}>
+                        <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
                             <div className="subject-header"><h3>📚 {subName}</h3><div className="line" /><span>{list.length}</span></div>
                             {list.map(renderPrecedent)}
                         </div>
                     )) : filtered.map(renderPrecedent))}
             </div>
 
+            {isFocusMode && (
+                <div className="focus-exit no-print">
+                    <button onClick={() => setIsFocusMode(false)} className="btn btn-primary btn-sm">🎯 Sair do Modo Foco</button>
+                    <div style={{ color: 'var(--text-3)', fontSize: '0.8rem', fontWeight: 600 }}>Ambiente de Leitura Ativo</div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.max(10, f - 1))}>A-</button>
+                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.min(24, f + 1))}>A+</button>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
+                .hidden-focus { display: none !important; }
+                .focus-exit {
+                    position: fixed;
+                    top: 1.5rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 10000;
+                    background: var(--surface);
+                    padding: 0.5rem 1.5rem;
+                    border-radius: 50px;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                    border: 1px solid var(--border);
+                }
                 .subject-header { display: flex; alignItems: center; gap: 0.75rem; margin-bottom: 1rem; }
                 .subject-header h3 { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
                 .subject-header .line { flex: 1; height: 1px; background: var(--border); }
@@ -362,11 +389,39 @@ export default function DashboardClient({ userName, track }: Props) {
                     inset: 0; 
                     z-index: 9999; 
                     background: var(--background); 
-                    padding: 2rem; 
+                    padding: 0; 
                     overflow-y: auto; 
+                    animation: fadeIn 0.3s ease-out;
                 }
                 
-                .modal-fullscreen { max-width: 100% !important; height: 100vh !important; border-radius: 0 !important; }
+                .focus-list {
+                    max-width: 850px;
+                    margin: 0 auto;
+                    padding: 4rem 2rem;
+                }
+
+                .modal-fullscreen { 
+                    max-width: 100% !important; 
+                    height: 100vh !important; 
+                    border-radius: 0 !important; 
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .modal-fullscreen .modal-body {
+                    max-width: 900px;
+                    margin: 0 auto;
+                    width: 100%;
+                    padding: 4rem 2rem;
+                    flex: 1;
+                    overflow-y: auto;
+                }
+
+                .modal-fullscreen .modal-header {
+                    padding: 1rem 2rem;
+                    background: var(--surface);
+                    border-bottom: 1px solid var(--border);
+                }
                 .detail-label { display: block; fontSize: 0.7rem; color: var(--text-3); fontWeight: 700; textTransform: uppercase; marginBottom: 0.2rem; }
                 .detail-val { fontWeight: 800; color: var(--text); font-size: 0.95rem; }
                 
@@ -380,7 +435,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00033</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00034</div>
         </div>
     );
 }
