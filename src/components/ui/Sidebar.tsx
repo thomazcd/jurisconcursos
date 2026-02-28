@@ -89,9 +89,6 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                             <Link href="/user/dashboard" className={active('/user/dashboard')}>
                                 📰 Informativos
                             </Link>
-                            <Link href="/user/novidades" className={active('/user/novidades')}>
-                                ✨ Novidades
-                            </Link>
                             <a href="#" onClick={triggerComingSoon} className={showComingSoon ? 'active' : ''} style={{ position: 'relative' }}>
                                 📜 Teses STF/STJ
                                 {showComingSoon && (
@@ -115,6 +112,9 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                             <Link href="/user/settings" className={active('/user/settings')}>
                                 ⚙️ Configurações
                             </Link>
+                            <Link href="/user/novidades" className={active('/user/novidades')}>
+                                ✨ Novidades
+                            </Link>
                         </>
                     )}
                 </nav>
@@ -122,9 +122,25 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                 <div className="sidebar-footer" style={{ textAlign: 'center' }}>
                     <div style={{ marginBottom: '0.75rem' }}>
                         <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text)' }}>{name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                        <Link
+                            href={isAdmin ? "#" : "/user/settings"}
+                            style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--accent)',
+                                fontWeight: 700,
+                                textDecoration: 'none',
+                                background: 'rgba(67, 106, 255, 0.08)',
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                display: 'inline-block',
+                                marginTop: '4px',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(67, 106, 255, 0.15)'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(67, 106, 255, 0.08)'; e.currentTarget.style.transform = 'none'; }}
+                        >
                             {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : `${track === 'JUIZ_FEDERAL' ? '🏛️ Juiz Federal' : track === 'JUIZ_ESTADUAL' ? '⚖️ Juiz Estadual' : '📋 Procurador'}`}
-                        </div>
+                        </Link>
                     </div>
                     {showComingSoon && !isAdmin && (
                         <div style={{
