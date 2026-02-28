@@ -34,6 +34,9 @@ export default function DashboardClient({ userName, track }: Props) {
     const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
+    // Detailed View State
+    const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
+
     const loadSubjects = useCallback(() => {
         fetch('/api/user/subjects')
             .then(r => r.json())
@@ -130,6 +133,65 @@ export default function DashboardClient({ userName, track }: Props) {
 
     return (
         <div className="dashboard-container">
+            {/* Detailed View Modal */}
+            {selectedPrecedent && (
+                <div className="modal-overlay" onClick={() => setSelectedPrecedent(null)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Detalhes do Julgado</h2>
+                            <button onClick={() => setSelectedPrecedent(null)} className="btn-close">✕</button>
+                        </div>
+                        <div className="modal-body">
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text)' }}>{selectedPrecedent.title}</h3>
+
+                            {selectedPrecedent.theme && (
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <span style={{ fontSize: '0.75rem', background: 'rgba(201,138,0,0.1)', color: '#b47b00', padding: '4px 12px', borderRadius: 20, fontWeight: 700 }}>
+                                        📌 {selectedPrecedent.theme}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="summary-scrollable" style={{ padding: '1rem', background: 'var(--surface2)', borderRadius: 12, marginBottom: '1.5rem', maxHeight: '400px', overflowY: 'auto' }}>
+                                <div style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-1)' }}>{selectedPrecedent.summary}</div>
+                            </div>
+
+                            <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.85rem' }}>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Tribunal</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.court}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Órgão Julgador</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.organ || '---'}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Relator</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.rapporteur || '---'}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Identificador</span>
+                                    <span style={{ fontWeight: 600 }}>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Informativo</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? ` / ${selectedPrecedent.informatoryYear}` : ''}</span>
+                                </div>
+                                <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Julgamento</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            {selectedPrecedent.fullTextOrLink && (
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>🔗 Abrir Informativo Completo</a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="page-header no-print" style={{ marginBottom: '1rem' }}>
                 <div>
@@ -224,7 +286,14 @@ export default function DashboardClient({ userName, track }: Props) {
                     const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
 
                     return (
-                        <div key={p.id} className="prec-item" style={{ borderLeft: `4px solid ${isRead ? '#22c55e' : '#ef4444'}`, padding: '0.75rem', borderRadius: '0 8px 8px 0', background: 'var(--surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                        <div
+                            key={p.id}
+                            className="prec-item"
+                            style={{ borderLeft: `4px solid ${isRead ? '#22c55e' : '#ef4444'}`, padding: '0.75rem', borderRadius: '0 8px 8px 0', background: 'var(--surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => setSelectedPrecedent(p)}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'translateX(4px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                        >
                             {p.theme && (
                                 <div style={{ marginBottom: '0.25rem' }}>
                                     <span style={{ fontSize: '0.6rem', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
@@ -237,7 +306,10 @@ export default function DashboardClient({ userName, track }: Props) {
                             </div>
 
                             {!isRevealed ? (
-                                <button onClick={() => setRevealed(prev => ({ ...prev, [p.id]: true }))} style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
+                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
+                                >
                                     👀 Revelar Tese
                                 </button>
                             ) : (
@@ -246,7 +318,10 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}>
+                            <div
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}
+                                onClick={e => e.stopPropagation()} // Prevent modal when clicking controls
+                            >
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
                                     <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
                                         📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
@@ -258,17 +333,6 @@ export default function DashboardClient({ userName, track }: Props) {
 
                                     <span style={{ color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                                         📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
-                                        {p.fullTextOrLink && (
-                                            <a
-                                                href={p.fullTextOrLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                title="Link para o informativo original"
-                                                style={{ color: 'var(--accent)', textDecoration: 'none', marginLeft: '2px', padding: '1px 5px', background: 'rgba(58,125,68,0.1)', borderRadius: 4, display: 'flex', alignItems: 'center' }}
-                                            >
-                                                🔗 Ver
-                                            </a>
-                                        )}
                                     </span>
                                 </div>
 
@@ -287,12 +351,31 @@ export default function DashboardClient({ userName, track }: Props) {
 
             <style jsx>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+                
+                .modal-overlay {
+                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+                    display: flex; align-items: center; justify-content: center;
+                    z-index: 1000; padding: 2rem;
+                }
+                .modal-content {
+                    background: var(--surface); width: 100%; max-width: 800px;
+                    border-radius: 24px; box-shadow: 0 30px 60px -12px rgba(0,0,0,0.25);
+                    animation: scaleIn 0.2s ease-out; display: flex; flex-direction: column;
+                    border: 1px solid var(--border); overflow: hidden;
+                }
+                .modal-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface2); }
+                .modal-body { padding: 2rem; overflow-y: auto; }
+                .modal-footer { padding: 1.5rem 2rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 1rem; }
+                .btn-close { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-3); }
+                .btn-close:hover { color: var(--rose); }
                 .btn-tag { transition: all 0.2s ease; cursor: pointer; }
                 .btn-tag:hover { border-color: var(--accent); }
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00020
+                Juris Concursos v1.00021 — Detalhes Ricos do Julgado ⚖️
             </div>
         </div>
     );
