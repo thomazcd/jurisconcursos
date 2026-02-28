@@ -238,13 +238,13 @@ export default function DashboardClient({ userName, track }: Props) {
                 className={`prec-item ${isRead ? 'is-read-card' : 'is-unread-card'}`}
                 style={{
                     borderLeft: `5px solid ${isRead ? '#22c55e' : '#fecaca'}`,
-                    padding: '1rem 1.25rem',
+                    padding: compactMode ? '0.4rem 0.85rem' : '1rem 1.25rem',
                     borderRadius: '0 16px 16px 0',
                     background: isRead ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.03)',
                     boxShadow: isRead ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
                     cursor: 'pointer',
                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    marginBottom: '0.75rem',
+                    marginBottom: compactMode ? '0.2rem' : '0.75rem',
                     position: 'relative',
                     border: isRead ? '1px solid rgba(34, 197, 94, 0.1)' : '1px solid rgba(239, 68, 68, 0.1)',
                     borderLeftWidth: '5px'
@@ -266,14 +266,16 @@ export default function DashboardClient({ userName, track }: Props) {
                 }}
             >
 
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                    {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
-                    {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
-                    {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
-                    {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📖 Lido</span>}
-                </div>
+                {!compactMode && (
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                        {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
+                        {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
+                        {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
+                        {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📖 Lido</span>}
+                    </div>
+                )}
 
-                <div className="prec-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.6rem', lineHeight: '1.4' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: compactMode ? '0.9rem' : '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: compactMode ? '0.25rem' : '0.6rem', lineHeight: '1.4' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
@@ -284,9 +286,9 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                     </div>
                 ) : (
-                    <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ marginBottom: compactMode ? '0' : '0.75rem' }}>
                         {flashResult && <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8rem', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
-                        <div style={{ fontSize: '0.92rem', color: 'var(--text-2)', lineHeight: '1.6', opacity: 0.9 }}>{p.summary}</div>
+                        <div style={{ fontSize: compactMode ? '0.83rem' : '0.92rem', color: 'var(--text-2)', lineHeight: compactMode ? '1.4' : '1.6', opacity: 0.9 }}>{p.summary}</div>
                     </div>
                 )}
 
@@ -361,21 +363,6 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </button>
                             )}
                         </div>
-                    </div>
-                )}
-                {compactMode && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
-                        {isRead && (
-                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                <button onClick={(e) => markRead(p.id, e)} className="btn-action-hit no-print" style={{ border: 'none', background: '#22c55e', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Lido mais uma vez">+1</button>
-                                <button onClick={(e) => decrementRead(p.id, e)} className="btn-action-miss no-print" style={{ border: 'none', background: '#ef4444', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Diminuir uma leitura">-1</button>
-                                <div style={{ background: 'var(--surface2)', padding: '3px 8px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', fontSize: '0.75rem' }}>{readData.count}×</div>
-                                <button onClick={(e) => toggleFavorite(p.id, e)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)' }} title={readData.isFavorite ? 'Remover Favorito' : 'Favoritar'}>{readData.isFavorite ? '★' : '☆'}</button>
-                            </div>
-                        )}
-                        {!isRead && (
-                            <button className="btn btn-primary btn-sm" style={{ padding: '5px 14px', fontWeight: 800, borderRadius: 10, fontSize: '0.8rem' }} onClick={(e) => markRead(p.id, e)}>Marcar como Lido</button>
-                        )}
                     </div>
                 )}
             </div>
