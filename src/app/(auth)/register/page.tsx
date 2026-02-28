@@ -1,14 +1,17 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const TRACKS = [
+    { value: 'JUIZ_ESTADUAL', label: '⚖️ Juiz Estadual' },
+    { value: 'JUIZ_FEDERAL', label: '🏛️ Juiz Federal' },
+    { value: 'PROCURADOR', label: '📋 Procurador' },
+];
+
 export default function RegisterPage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [form, setForm] = useState({ name: '', email: '', password: '' });
+    const [form, setForm] = useState({ name: '', email: '', password: '', track: 'JUIZ_ESTADUAL' });
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -37,27 +40,21 @@ export default function RegisterPage() {
                 </div>
 
                 {error && <div className="alert alert-error">{error}</div>}
-                {success && <div className="alert alert-success">{success}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="name">Nome completo</label>
                         <input
-                            id="name"
-                            type="text"
-                            placeholder="Seu nome"
+                            id="name" type="text" placeholder="Seu nome"
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            required
-                            minLength={2}
+                            required minLength={2}
                         />
                     </div>
                     <div className="form-group">
                         <label htmlFor="reg-email">E-mail</label>
                         <input
-                            id="reg-email"
-                            type="email"
-                            placeholder="seu@email.com"
+                            id="reg-email" type="email" placeholder="seu@email.com"
                             value={form.email}
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
                             required
@@ -66,19 +63,33 @@ export default function RegisterPage() {
                     <div className="form-group">
                         <label htmlFor="reg-password">Senha <span style={{ color: 'var(--text-3)' }}>(mín. 6 chars)</span></label>
                         <input
-                            id="reg-password"
-                            type="password"
-                            placeholder="••••••"
+                            id="reg-password" type="password" placeholder="••••••"
                             value={form.password}
                             onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            required
-                            minLength={6}
+                            required minLength={6}
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Trilha de estudo</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.25rem' }}>
+                            {TRACKS.map(t => (
+                                <label key={t.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', padding: '0.4rem 0.6rem', borderRadius: 8, border: `1px solid ${form.track === t.value ? 'var(--accent)' : 'var(--border)'}`, background: form.track === t.value ? 'rgba(58,125,68,0.07)' : 'transparent' }}>
+                                    <input
+                                        type="radio"
+                                        name="track"
+                                        value={t.value}
+                                        checked={form.track === t.value}
+                                        onChange={() => setForm({ ...form, track: t.value })}
+                                    />
+                                    {t.label}
+                                </label>
+                            ))}
+                        </div>
                     </div>
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        style={{ width: '100%', marginTop: '0.5rem' }}
+                        style={{ width: '100%', marginTop: '0.75rem' }}
                         disabled={loading}
                     >
                         {loading ? 'Criando conta…' : 'Criar conta'}
@@ -89,6 +100,9 @@ export default function RegisterPage() {
                     Já tem conta?{' '}
                     <Link href="/login">Faça login</Link>
                 </div>
+            </div>
+            <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
+                v1.00006
             </div>
         </div>
     );

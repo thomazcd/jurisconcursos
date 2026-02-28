@@ -14,10 +14,7 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError('');
-        const res = await signIn('credentials', {
-            ...form,
-            redirect: false,
-        });
+        const res = await signIn('credentials', { ...form, redirect: false });
         setLoading(false);
         if (res?.error) {
             setError('E-mail ou senha inválidos.');
@@ -41,25 +38,19 @@ export default function LoginPage() {
                     <div className="form-group">
                         <label htmlFor="email">E-mail</label>
                         <input
-                            id="email"
-                            type="email"
-                            placeholder="seu@email.com"
+                            id="email" type="email" placeholder="seu@email.com"
                             value={form.email}
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            required
-                            autoComplete="email"
+                            required autoComplete="email"
                         />
                     </div>
                     <div className="form-group">
                         <label htmlFor="password">Senha</label>
                         <input
-                            id="password"
-                            type="password"
-                            placeholder="••••••"
+                            id="password" type="password" placeholder="••••••"
                             value={form.password}
                             onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            required
-                            autoComplete="current-password"
+                            required autoComplete="current-password"
                         />
                     </div>
                     <button
@@ -76,17 +67,9 @@ export default function LoginPage() {
                     Não tem conta?{' '}
                     <Link href="/register">Cadastre-se</Link>
                 </div>
-
-                <div className="divider" />
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', textAlign: 'center' }}>
-                    <strong>Demo:</strong><br />
-                    admin@juris.com / admin123 (Admin)<br />
-                    juiz@juris.com / user123 (Juiz)<br />
-                    procurador@juris.com / user123 (Procurador)
-                </div>
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v1.00005
+                v1.00006
             </div>
         </div>
     );
