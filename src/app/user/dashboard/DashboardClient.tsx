@@ -294,18 +294,38 @@ export default function DashboardClient({ userName, track }: Props) {
 
                 {!compactMode && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', fontSize: '0.75rem' }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
-                            {/* ★ Estrela de Favoritos na linha de meta */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
+                            {/* ★ Estrela de Favoritos ao lado da corte */}
                             <button
                                 onClick={(e) => toggleFavorite(p.id, e)}
-                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.1rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)', transition: 'transform 0.1s', padding: 0 }}
-                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-                                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                                style={{
+                                    border: 'none',
+                                    background: 'var(--surface2)',
+                                    cursor: 'pointer',
+                                    fontSize: '1rem',
+                                    color: readData.isFavorite ? '#f59e0b' : 'var(--text-4)',
+                                    transition: 'all 0.2s',
+                                    padding: '4px',
+                                    borderRadius: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '26px',
+                                    height: '26px'
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.transform = 'scale(1.1)';
+                                    e.currentTarget.style.background = 'var(--border)';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.transform = 'none';
+                                    e.currentTarget.style.background = 'var(--surface2)';
+                                }}
                                 title={readData.isFavorite ? 'Remover Favorito' : 'Adicionar aos Favoritos'}
                             >
                                 {readData.isFavorite ? '★' : '☆'}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 8px', borderRadius: '6px' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             {proc && (
                                 <span
                                     onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
@@ -332,14 +352,12 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                     <button
                                         onClick={(e) => markRead(p.id, e)}
-                                        className="btn-action-hit no-print"
-                                        style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
+                                        className="btn-activity btn-activity-inc no-print"
                                         title="Lido mais uma vez"
                                     >+1</button>
                                     <button
                                         onClick={(e) => decrementRead(p.id, e)}
-                                        className="btn-action-miss no-print"
-                                        style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
+                                        className="btn-activity btn-activity-dec no-print"
                                         title="Diminuir uma leitura"
                                     >-1</button>
                                     <div
@@ -545,6 +563,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                         <button className={`btn-tag ${filterOnlyFavorites ? 'active' : ''}`} onClick={() => { setFilterOnlyFavorites(!filterOnlyFavorites); setFilterHideRead(false); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyFavorites ? 'var(--accent)' : 'transparent', color: filterOnlyFavorites ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>★ Favoritos</button>
+                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => { setFilterHideRead(!filterHideRead); setFilterOnlyFavorites(false); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>📖 Não Lidos</button>
                         <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>❌ Erros</button>
                     </div>
                 </div>
@@ -599,7 +618,14 @@ export default function DashboardClient({ userName, track }: Props) {
                 {loading ? <div style={{ padding: '5rem', textAlign: 'center', opacity: 0.5 }}>Carregando julgados...</div> :
                     (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
                         <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
-                            <div className="subject-header"><h3>📚 {subName}</h3><div className="line" /><span>{list.length}</span></div>
+                            <div className="subject-header">
+                                <div className="subject-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                </div>
+                                <h3>{subName}</h3>
+                                <div className="line" />
+                                <span>{list.length}</span>
+                            </div>
                             {list.map(renderPrecedent)}
                         </div>
                     )) : filtered.map(renderPrecedent))}
@@ -689,10 +715,70 @@ export default function DashboardClient({ userName, track }: Props) {
                     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
                     border: 1px solid var(--border);
                 }
-                .subject-header { display: flex; alignItems: center; gap: 0.75rem; margin-bottom: 1rem; }
-                .subject-header h3 { font-size: 0.75rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
-                .subject-header .line { flex: 1; height: 1px; background: var(--border); }
-                .subject-header span { font-size: 0.65rem; font-weight: 800; color: var(--text-3); background: var(--surface2); padding: 1px 6px; border-radius: 4px; }
+                .subject-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.25rem; margin-top: 2rem; }
+                .subject-icon { 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    width: 40px; 
+                    height: 40px; 
+                    border-radius: 12px; 
+                    background: var(--surface2); 
+                    color: var(--accent); 
+                    border: 1px solid var(--border);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+                }
+                .subject-header h3 { 
+                    font-size: 1.15rem; 
+                    font-weight: 800; 
+                    color: var(--text); 
+                    letter-spacing: -0.03em; 
+                    white-space: nowrap; 
+                    margin: 0; 
+                }
+                .subject-header .line { flex: 1; height: 1.5px; background: linear-gradient(to right, var(--border-strong), transparent); opacity: 0.3; }
+                .subject-header span { 
+                    font-size: 0.8rem; 
+                    font-weight: 700; 
+                    color: var(--text-2); 
+                    background: var(--surface); 
+                    padding: 4px 14px; 
+                    border-radius: 50px;
+                    border: 1px solid var(--border);
+                }
+                
+                .btn-activity {
+                    border: 1px solid var(--border);
+                    background: var(--surface2);
+                    color: var(--text-3);
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: 900;
+                    font-size: 0.6rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                    opacity: 0.4;
+                }
+                .btn-activity:hover {
+                    opacity: 1;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+                    border-color: var(--border-strong);
+                }
+                .btn-activity-inc:hover {
+                    background: #22c55e;
+                    color: white;
+                    border-color: #22c55e;
+                }
+                .btn-activity-dec:hover {
+                    background: #ef4444;
+                    color: white;
+                    border-color: #ef4444;
+                }
                 
                 .focus-mode-active { 
                     position: fixed; 
