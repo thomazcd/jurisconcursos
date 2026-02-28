@@ -494,19 +494,34 @@ export default function DashboardClient({ userName, track }: Props) {
             </div>
 
             {showHelp && (
-                <div className="modal-overlay" style={{ zIndex: 20000, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setShowHelp(false)}>
-                    <div className="modal-content" style={{ maxWidth: '500px', padding: '2.5rem', borderRadius: 24, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{['👋', '📖', '🔍', '🧠', '✨'][helpStep]}</div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1rem' }}>
-                            {[
-                                'Bem-vindo ao Juris!',
-                                'Marque seu progresso',
-                                'Veja os detalhes',
-                                'Modo V/F',
-                                'Filtros Dinâmicos'
-                            ][helpStep]}
+                <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => setShowHelp(false)}>
+                    <div onClick={e => e.stopPropagation()} style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: 24,
+                        padding: '2.5rem',
+                        maxWidth: '480px',
+                        width: '100%',
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+                        animation: 'modalIn 0.2s ease',
+                        textAlign: 'center',
+                        position: 'relative',
+                    }}>
+                        {/* Close button */}
+                        <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+
+                        {/* Emoji ícone com fundo colorido */}
+                        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
+                            {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
+                        </div>
+
+                        {/* Título */}
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
+                            {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
                         </h2>
-                        <p style={{ color: 'var(--text-2)', lineHeight: '1.6', marginBottom: '2rem' }}>
+
+                        {/* Descrição */}
+                        <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
                             {[
                                 'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
                                 'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema.',
@@ -515,10 +530,19 @@ export default function DashboardClient({ userName, track }: Props) {
                                 'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.'
                             ][helpStep]}
                         </p>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                            {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>Voltar</button>}
+
+                        {/* Pontos de progresso */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
+                            {[0, 1, 2, 3, 4].map(i => (
+                                <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
+                            ))}
+                        </div>
+
+                        {/* Botões */}
+                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                            {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
                             <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
-                                {helpStep < 4 ? 'Próximo' : 'Entendi!'}
+                                {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
                             </button>
                         </div>
                     </div>
