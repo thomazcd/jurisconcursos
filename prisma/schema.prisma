@@ -112,6 +112,10 @@ model Precedent {
   theme         String?   // tema (ex: "Tema 1081")
   tags          String[]  @default([])
 
+  // NOVOS CAMPOS PARA FLASHCARDS
+  flashcardQuestion String? @db.Text    // A afirmação para o usuário julgar
+  flashcardAnswer   Boolean @default(true) // Se a afirmação é V (true) ou F (false)
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -130,6 +134,12 @@ model PrecedentRead {
   precedentId String
   readCount   Int      @default(0)
   readEvents  DateTime[] @default([])
+  
+  // NOVOS CAMPOS DE PERFORMANCE
+  correctCount Int      @default(0)
+  wrongCount   Int      @default(0)
+  lastResult   String?  // 'HIT' ou 'MISS'
+
   updatedAt   DateTime @updatedAt
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -12,6 +12,13 @@ type Precedent = {
     readCount: number; isRead: boolean; readEvents: string[];
     subjectId: string;
     subject?: { name: string };
+    // Flashcard fields
+    flashcardQuestion?: string | null;
+    flashcardAnswer?: boolean;
+    // Performance fields
+    correctCount?: number;
+    wrongCount?: number;
+    lastResult?: 'HIT' | 'MISS' | null;
 };
 
 interface Props { userName: string; track: string; }
@@ -27,7 +34,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('ALL');
     const [precedents, setPrecedents] = useState<Precedent[]>([]);
     const [loading, setLoading] = useState(false);
-    const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[] }>>({});
+    const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null }>>({});
     const [search, setSearch] = useState('');
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
@@ -36,6 +43,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
     const [copying, setCopying] = useState<string | null>(null);
+    const [flashcardResults, setFlashcardResults] = useState<Record<string, 'CORRECT' | 'WRONG' | null>>({});
 
     // User Preferences
     const [fontSize, setFontSize] = useState(14); // default base font size in px
@@ -56,13 +64,22 @@ export default function DashboardClient({ userName, track }: Props) {
     const loadPrecedents = useCallback(async (subjectId: string) => {
         setLoading(true);
         setRevealed({});
+        setFlashcardResults({});
         const url = subjectId === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${subjectId}`;
         const r = await fetch(url);
         const d = await r.json();
         const precs: Precedent[] = d.precedents ?? [];
         setPrecedents(precs);
-        const map: Record<string, { count: number, events: string[] }> = {};
-        precs.forEach(p => { map[p.id] = { count: p.readCount, events: p.readEvents }; });
+        const map: Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null }> = {};
+        precs.forEach(p => {
+            map[p.id] = {
+                count: p.readCount,
+                events: p.readEvents,
+                correct: p.correctCount ?? 0,
+                wrong: p.wrongCount ?? 0,
+                last: p.lastResult ?? null
+            };
+        });
         setReadMap(map);
         setLoading(false);
     }, []);
@@ -95,18 +112,50 @@ export default function DashboardClient({ userName, track }: Props) {
             body: JSON.stringify({ precedentId: id, action: 'increment' }),
         });
         const d = await r.json();
-        setReadMap(m => ({ ...m, [id]: { count: d.readCount, events: d.readEvents || [] } }));
+        setReadMap(m => ({
+            ...m,
+            [id]: {
+                ...m[id],
+                count: d.readCount,
+                events: d.readEvents || []
+            }
+        }));
+        loadSubjects();
+    }
+
+    async function handleFlashcard(p: Precedent, userChoice: boolean) {
+        const isCorrectResult = userChoice === (p.flashcardAnswer ?? true);
+        setFlashcardResults(prev => ({ ...prev, [p.id]: isCorrectResult ? 'CORRECT' : 'WRONG' }));
+        setRevealed(prev => ({ ...prev, [p.id]: true }));
+
+        const r = await fetch('/api/user/read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ precedentId: p.id, action: 'flashcard', isCorrect: isCorrectResult }),
+        });
+        const d = await r.json();
+
+        setReadMap(m => ({
+            ...m,
+            [p.id]: {
+                ...m[p.id],
+                count: d.readCount,
+                correct: d.correctCount,
+                wrong: d.wrongCount,
+                last: d.lastResult
+            }
+        }));
         loadSubjects();
     }
 
     async function resetRead(id: string) {
-        if (!confirm('Deseja zerar as leituras deste precedente?')) return;
+        if (!confirm('Deseja zerar o progresso deste precedente?')) return;
         await fetch('/api/user/read', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ precedentId: id, action: 'reset' }),
         });
-        setReadMap(m => ({ ...m, [id]: { count: 0, events: [] } }));
+        setReadMap(m => ({ ...m, [id]: { count: 0, events: [], correct: 0, wrong: 0, last: null } }));
         loadSubjects();
     }
 
@@ -158,10 +207,11 @@ export default function DashboardClient({ userName, track }: Props) {
     }, [selectedSubject, filtered, search, yearFilter, infFilter, courtFilter]);
 
     const renderPrecedent = (p: Precedent) => {
-        const readData = readMap[p.id] || { count: 0, events: [] };
+        const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null };
         const isRead = readData.count > 0;
         const isRevealed = studyMode === 'READ' || revealed[p.id];
         const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
+        const flashResult = flashcardResults[p.id];
 
         return (
             <div
@@ -172,28 +222,70 @@ export default function DashboardClient({ userName, track }: Props) {
                 onMouseEnter={e => e.currentTarget.style.transform = 'translateX(4px)'}
                 onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
-                {p.theme && (
-                    <div style={{ marginBottom: '0.25rem' }}>
-                        <span style={{ fontSize: '0.7em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
-                            📌 {p.theme}
-                        </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        {p.theme && (
+                            <span style={{ fontSize: '0.7em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
+                                📌 {p.theme}
+                            </span>
+                        )}
+                        {readData.last === 'HIT' && <span style={{ fontSize: '0.7em', background: '#dcfce7', color: '#166534', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
+                        {readData.last === 'MISS' && <span style={{ fontSize: '0.7em', background: '#fee2e2', color: '#991b1b', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
                     </div>
-                )}
-                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem', lineHeight: '1.3', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                </div>
+
+                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text)', marginBottom: '0.6rem', lineHeight: '1.3', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
                     {p.title}
                 </div>
-                {!isRevealed ? (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
-                        style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.9em', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
-                    >
-                        👀 Revelar Tese
-                    </button>
+
+                {!isRevealed && studyMode === 'FLASHCARD' ? (
+                    <div style={{ background: 'var(--surface2)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)', marginBottom: '0.6rem' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>Afirmação:</div>
+                        <div style={{ fontSize: '1em', color: 'var(--text)', fontWeight: 500, marginBottom: '1rem', lineHeight: '1.4' }}>
+                            {p.flashcardQuestion || p.summary}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleFlashcard(p, true); }}
+                                className="btn btn-sm"
+                                style={{ flex: 1, background: '#dcfce7', color: '#166534', border: '1px solid #16653450', fontWeight: 800 }}
+                            >
+                                VERDADEIRO
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleFlashcard(p, false); }}
+                                className="btn btn-sm"
+                                style={{ flex: 1, background: '#fee2e2', color: '#991b1b', border: '1px solid #991b1b50', fontWeight: 800 }}
+                            >
+                                FALSO
+                            </button>
+                        </div>
+                    </div>
                 ) : (
-                    <div className="prec-summary" style={{ fontSize: '0.95em', color: 'var(--text-2)', lineHeight: '1.5', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
-                        {p.summary}
+                    <div className="prec-summary-container" style={{ position: 'relative' }}>
+                        {flashResult && (
+                            <div style={{
+                                padding: '0.5rem 1rem',
+                                marginBottom: '0.6rem',
+                                borderRadius: 8,
+                                background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2',
+                                color: flashResult === 'CORRECT' ? '#166534' : '#991b1b',
+                                fontWeight: 800,
+                                fontSize: '0.9em',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                animation: 'fadeIn 0.2s ease-out'
+                            }}>
+                                {flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}
+                            </div>
+                        )}
+                        <div className="prec-summary" style={{ fontSize: '0.95em', color: 'var(--text-2)', lineHeight: '1.5', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
+                            {p.summary}
+                        </div>
                     </div>
                 )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.75em' }} onClick={e => e.stopPropagation()}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
                         <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
@@ -221,19 +313,27 @@ export default function DashboardClient({ userName, track }: Props) {
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                             📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                         </span>
+                        {(readData.correct > 0 || readData.wrong > 0) && (
+                            <span style={{ color: 'var(--text-3)', background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>
+                                📊 {readData.correct}V | {readData.wrong}F
+                            </span>
+                        )}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
                             {isRead ? `✓ ${readData.count}×` : 'Não lido'}
                         </span>
-                        <button
-                            className="btn-read"
-                            style={{ padding: '2px 10px', fontWeight: 600, fontSize: '0.65rem' }}
-                            onClick={() => markRead(p.id)}
-                            title={isRead ? "Marcar mais uma leitura (+1)" : "Marcar como lido"}
-                        >
-                            {isRead ? '+1' : 'Ler'}
-                        </button>
+                        {studyMode === 'READ' && (
+                            <button
+                                className="btn-read"
+                                style={{ padding: '2px 10px', fontWeight: 600, fontSize: '0.65rem' }}
+                                onClick={() => markRead(p.id)}
+                                title={isRead ? "Marcar mais uma leitura (+1)" : "Marcar como lido"}
+                            >
+                                {isRead ? '+1' : 'Ler'}
+                            </button>
+                        )}
+                        {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar progresso">✕</button>}
                     </div>
                 </div>
             </div>
@@ -322,7 +422,7 @@ export default function DashboardClient({ userName, track }: Props) {
                         <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.min(24, f + 2))} title="Aumentar fonte" style={{ minWidth: 24, padding: 0 }}>A+</button>
                     </div>
                     <button className={`btn btn-sm ${studyMode === 'READ' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('READ')}>📖 Leitura</button>
-                    <button className={`btn btn-sm ${studyMode === 'FLASHCARD' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('FLASHCARD')}>🧠 Treino</button>
+                    <button className={`btn btn-sm ${studyMode === 'FLASHCARD' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('FLASHCARD')}>🧠 Simulado V/F</button>
                 </div>
             </div>
 
@@ -446,7 +546,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00028
+                v1.00029
             </div>
         </div>
     );
