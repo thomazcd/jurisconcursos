@@ -5,7 +5,19 @@ import { Track } from '@prisma/client';
  * Uses multi-track boolean fields.
  */
 export function getApplicabilityFilter(track: Track) {
-    // TEMPORARILY DISABLED: Show everything to restore user state
+    if (track === 'PROCURADOR') return { OR: [{ forAll: true }, { forProcurador: true }] };
+    if (track === 'JUIZ_FEDERAL') return { OR: [{ forAll: true }, { forJuizFederal: true }] };
+    if (track === 'JUIZ_ESTADUAL') return { OR: [{ forAll: true }, { forJuizEstadual: true }] };
+    return { forAll: true };
+}
+
+/**
+ * Returns a Prisma WHERE clause fragment for the Subject model based on the user's active track.
+ */
+export function getSubjectFilter(track: Track) {
+    if (track === 'PROCURADOR') return { forProcurador: true };
+    if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
+    if (track === 'JUIZ_ESTADUAL') return { forJuizEstadual: true };
     return {};
 }
 

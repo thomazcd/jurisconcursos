@@ -10,31 +10,42 @@ export async function GET(req: NextRequest) {
         if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const userId = (session.user as any).id;
-        console.log(`[Precedents API] User ID: ${userId}`);
+        const profile = await prisma.userProfile.findUnique({ where: { userId } });
+        const track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as any;
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
+        const q = searchParams.get('q'); // Search query
 
-        // Step 1: Count total to verify DB access
-        const total = await prisma.precedent.count();
-        console.log(`[Precedents API] Total Precedents in DB: ${total}`);
+        // Core Filters
+        const appFilter = getApplicabilityFilter(track);
+        const where: any = { ...appFilter };
 
-        // Step 2: Fetch minimal data
-        const where: any = {};
         if (subjectId && subjectId !== 'ALL') {
             where.subjectId = subjectId;
+        }
+        if (q) {
+            where.OR = [
+                { title: { contains: q, mode: 'insensitive' } },
+                { summary: { contains: q, mode: 'insensitive' } },
+                { theme: { contains: q, mode: 'insensitive' } },
+                { processNumber: { contains: q, mode: 'insensitive' } }
+            ];
         }
 
         const precedents = await prisma.precedent.findMany({
             where,
-            orderBy: { createdAt: 'desc' },
-            take: 200,
+            orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
+            include: {
+                subject: { select: { name: true } },
+            },
+            distinct: ['processNumber', 'processClass', 'title'],
+            take: 500,
         });
-        console.log(`[Precedents API] Fetched ${precedents.length} precedents`);
 
-        // Step 3: Fetch reads separately to avoid complex includes if they are breaking
+        // Fetch User's Specific Data separately (PrecedentRead)
         const reads = await prisma.precedentRead.findMany({
-            where: { userId }
+            where: { userId, precedent: appFilter }
         });
         const readMap = new Map<string, any>(reads.map((r: any) => [r.precedentId, r]));
 
@@ -55,11 +66,10 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ precedents: result });
     } catch (err: any) {
-        console.error('FATAL ERROR in GET /api/user/precedents:', err);
+        console.error('ERROR in GET /api/user/precedents:', err);
         return NextResponse.json({
             error: err.message,
-            stack: err.stack,
-            phase: 'execution'
+            stack: err.stack
         }, { status: 500 });
     }
 }

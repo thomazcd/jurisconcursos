@@ -5,8 +5,9 @@ import { getApplicabilityFilter } from '@/lib/eligibility';
 import { Track, TrackScope } from '@prisma/client';
 
 function getSubjectFilter(track: Track) {
-    // TEMPORARILY DISABLED: Show all subjects
-    return {};
+    if (track === 'PROCURADOR') return { forProcurador: true };
+    if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
+    return { forJuizEstadual: true };
 }
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
@@ -19,13 +20,6 @@ export async function GET(req: NextRequest) {
     const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
     const subjectFilter = getSubjectFilter(track);
     const appFilter = getApplicabilityFilter(track);
-
-    console.log(`[Subjects API] User ID: ${userId}, Active Track: ${track}`);
-    console.log(`[Subjects API] Subject Filter: ${JSON.stringify(subjectFilter)}`);
-    console.log(`[Subjects API] Applicability Filter: ${JSON.stringify(appFilter)}`);
-
-    const totalSubjectsRaw = await prisma.subject.count();
-    console.log(`DEBUG: Total subjects in DB: ${totalSubjectsRaw}`);
 
     const subjects = await prisma.subject.findMany({
         where: subjectFilter,
