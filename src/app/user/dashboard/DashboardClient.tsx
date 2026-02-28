@@ -330,13 +330,13 @@ export default function DashboardClient({ userName, track }: Props) {
                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                 <button
                                     onClick={(e) => markRead(p.id, e)}
-                                    className="btn-action-hit"
+                                    className="btn-action-hit no-print"
                                     style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
                                     title="Lido mais uma vez"
                                 >+1</button>
                                 <button
                                     onClick={(e) => decrementRead(p.id, e)}
-                                    className="btn-action-miss"
+                                    className="btn-action-miss no-print"
                                     style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
                                     title="Diminuir uma leitura"
                                 >-1</button>
@@ -348,7 +348,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                 >
                                     {readData.count}×
                                 </div>
-                                <button onClick={(e) => resetRead(p.id, e)} style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
+                                <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
                             </div>
                         )}
                         {!isRead && (
@@ -603,9 +603,10 @@ export default function DashboardClient({ userName, track }: Props) {
                     .no-print { display: none !important; } 
                     .dashboard-container { padding: 0 !important; width: 100% !important; background: white !important; } 
                     .focus-mode-active { position: static !important; padding: 0 !important; background: transparent !important; }
-                    .prec-item { break-inside: avoid; border: 1px solid #ccc !important; margin-bottom: 1.5rem !important; padding: 1.5rem !important; border-radius: 8px !important; } 
-                    .prec-title { color: black !important; font-size: 1.2rem !important; }
+                    .prec-item { break-inside: avoid; border: 1px solid #eee !important; margin-bottom: 0.5rem !important; padding: 0.75rem !important; border-radius: 4px !important; } 
+                    .prec-title { color: black !important; font-size: 1.1rem !important; margin-bottom: 0.3rem !important; }
                     .prec-list { padding: 0 !important; }
+                    .subject-header { margin-bottom: 0.5rem !important; }
                     body { background: white !important; }
                 }
             `}</style>
