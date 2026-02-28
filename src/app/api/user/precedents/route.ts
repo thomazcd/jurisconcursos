@@ -27,7 +27,6 @@ export async function GET(req: NextRequest) {
                 subject: { select: { name: true } },
                 reads: { where: { userId } },
             },
-            distinct: ['processNumber', 'processClass', 'title'],
             take: 500, // Limit for performance
         });
 
@@ -47,6 +46,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ precedents: result });
     } catch (err: any) {
         console.error('GET /api/user/precedents:', err);
-        return NextResponse.json({ error: err.message, precedents: [] }, { status: 500 });
+        return NextResponse.json({
+            error: err.message,
+            stack: err.stack,
+            precedents: []
+        }, { status: 500 });
     }
 }
