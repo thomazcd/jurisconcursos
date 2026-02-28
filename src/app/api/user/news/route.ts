@@ -18,11 +18,11 @@ export async function GET(req: NextRequest) {
     const precedents = await prisma.precedent.findMany({
         where: {
             ...appFilter,
-            subject: { trackScope: { in: scopes as any[] } },
+            subjects: { some: { trackScope: { in: scopes as any[] } } },
             reads: { none: { userId } },
         },
         include: {
-            subject: { select: { id: true, name: true } },
+            subjects: { select: { id: true, name: true } },
         },
         orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
         take: 30,
