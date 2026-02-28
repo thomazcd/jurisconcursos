@@ -428,31 +428,88 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
             )}
 
-            <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button onClick={() => setIsFocusMode(!isFocusMode)} className="btn btn-secondary btn-sm" title="Alternar Modo Foco">
-                        {isFocusMode ? '🔓 Sair Modo Foco' : '🎯 Modo Foco'}
-                    </button>
-                    <div><h1 style={{ fontSize: '1.1rem', fontWeight: 900 }}>{TRACK_LABELS[track] ?? track}</h1><div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Olá, {userName}</div></div>
-                </div>
-                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                    <button className="btn btn-secondary btn-sm" onClick={() => setShowHelp(true)} title="Tutorial do Sistema">❓ Ajuda</button>
-                    <button className="btn btn-secondary btn-sm" onClick={() => window.print()} title="Gerar PDF completo da lista filtrada">🖨️ PDF Completo</button>
-                    <div style={{ display: 'flex', background: 'var(--surface2)', borderRadius: 10, padding: '2px', margin: '0 0.5rem' }}>
-                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.max(10, f - 1))}>A-</button>
-                        <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.min(24, f + 1))}>A+</button>
+            <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ marginBottom: '1.25rem', padding: '0.75rem 1.25rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+
+                {/* LEFT — Logo + Título + Saudação */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', minWidth: 0 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0, boxShadow: '0 2px 8px rgba(20,184,166,0.3)' }}>⚖️</div>
+                    <div style={{ minWidth: 0 }}>
+                        <h1 style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{TRACK_LABELS[track] ?? track}</h1>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600, marginTop: 1 }}>👤 {userName}</div>
                     </div>
-                    <button className={`btn btn-sm ${studyMode === 'READ' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('READ')}>📖 Leitura</button>
-                    <button className={`btn btn-sm ${studyMode === 'FLASHCARD' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('FLASHCARD')}>🧠 V/F</button>
+                </div>
+
+                {/* CENTER — Pill toggles de modo */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {/* Modo de estudo */}
+                    <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '3px', gap: '2px' }}>
+                        <button
+                            onClick={() => setStudyMode('READ')}
+                            style={{ padding: '5px 14px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'READ' ? 'var(--accent)' : 'transparent', color: studyMode === 'READ' ? '#fff' : 'var(--text-3)' }}
+                            title="Modo Leitura"
+                        >📖 Leitura</button>
+                        <button
+                            onClick={() => setStudyMode('FLASHCARD')}
+                            style={{ padding: '5px 14px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'FLASHCARD' ? 'var(--accent)' : 'transparent', color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)' }}
+                            title="Modo Flashcard V/F"
+                        >🧠 V/F</button>
+                    </div>
+
+                    {/* Separador visual */}
+                    <div style={{ width: 1, height: 28, background: 'var(--border)', margin: '0 2px' }} />
+
+                    {/* Compacto toggle */}
                     <button
-                        className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
                         onClick={() => setCompactMode(c => !c)}
-                        title={compactMode ? 'Exibir informações completas dos julgados' : 'Modo compacto: mostrar só título e tese'}
-                    >
-                        {compactMode ? '🗂️ Completo' : '⬛ Compacto'}
-                    </button>
+                        title={compactMode ? 'Modo completo' : 'Modo compacto: só título e tese'}
+                        style={{ padding: '5px 14px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 800, border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s', background: compactMode ? 'var(--accent)' : 'var(--surface2)', color: compactMode ? '#fff' : 'var(--text-3)' }}
+                    >{compactMode ? '⬚ Compacto' : '▤ Compacto'}</button>
+                </div>
+
+                {/* RIGHT — Ações secundárias (icon-only com tooltip) */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    {/* Font size */}
+                    <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+                        <button onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '5px 10px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', lineHeight: 1 }}>A−</button>
+                        <div style={{ width: 1, background: 'var(--border)' }} />
+                        <button onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '5px 10px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-3)', lineHeight: 1 }}>A+</button>
+                    </div>
+
+                    {/* Separador */}
+                    <div style={{ width: 1, height: 28, background: 'var(--border)', margin: '0 4px' }} />
+
+                    {/* PDF */}
+                    <button
+                        onClick={() => window.print()}
+                        title="Gerar PDF completo da lista filtrada"
+                        style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 10px', borderRadius: 10, fontSize: '1rem', lineHeight: 1, transition: 'all 0.15s', color: 'var(--text-2)' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                    >🖨️</button>
+
+                    {/* Ajuda */}
+                    <button
+                        onClick={() => setShowHelp(true)}
+                        title="Tutorial do sistema"
+                        style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '6px 10px', borderRadius: 10, fontSize: '1rem', lineHeight: 1, transition: 'all 0.15s', color: 'var(--text-2)' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                    >❓</button>
+
+                    {/* Separador */}
+                    <div style={{ width: 1, height: 28, background: 'var(--border)', margin: '0 4px' }} />
+
+                    {/* Modo Foco — destaque */}
+                    <button
+                        onClick={() => setIsFocusMode(!isFocusMode)}
+                        title={isFocusMode ? 'Sair do Modo Foco' : 'Entrar no Modo Foco — oculta filtros e header'}
+                        style={{ border: 'none', cursor: 'pointer', padding: '6px 14px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 900, transition: 'all 0.15s', background: isFocusMode ? '#f59e0b' : 'linear-gradient(135deg, var(--accent), #0ea5e9)', color: '#fff', boxShadow: isFocusMode ? '0 2px 8px rgba(245,158,11,0.35)' : '0 2px 8px rgba(20,184,166,0.25)', letterSpacing: '0.02em' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                    >{isFocusMode ? '🔓 Sair' : '🎯 Foco'}</button>
                 </div>
             </div>
+
 
             <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
