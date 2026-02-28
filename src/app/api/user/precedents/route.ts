@@ -5,37 +5,44 @@ import { prisma } from '@/lib/prisma';
 import { getApplicabilityFilter } from '@/lib/eligibility';
 
 export async function GET(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const userId = (session.user as any).id;
-    const profile = await prisma.userProfile.findUnique({ where: { userId } });
-    const track = profile?.activeTrack ?? 'JUIZ_ESTADUAL';
+        const userId = (session.user as any).id;
+        const profile = await prisma.userProfile.findUnique({ where: { userId } });
+        const track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as any;
 
-    const { searchParams } = new URL(req.url);
-    const subjectId = searchParams.get('subjectId');
+        const { searchParams } = new URL(req.url);
+        const subjectId = searchParams.get('subjectId');
 
-    const where: any = {
-        OR: getApplicabilityFilter(track),
-        ...(subjectId ? { subjectId } : {}),
-    };
+        // getApplicabilityFilter returns { OR: [...] } — spread it correctly
+        const appFilter = getApplicabilityFilter(track);
+        const where: any = {
+            ...appFilter,
+            ...(subjectId ? { subjectId } : {}),
+        };
 
-    const precedents = await prisma.precedent.findMany({
-        where,
-        orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
-        include: {
-            subject: { select: { name: true } },
-            reads: { where: { userId }, select: { readCount: true } },
-        },
-        take: 500,
-    });
+        const precedents = await prisma.precedent.findMany({
+            where,
+            orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
+            include: {
+                subject: { select: { name: true } },
+                reads: { where: { userId }, select: { readCount: true } },
+            },
+            take: 500,
+        });
 
-    const result = precedents.map((p) => ({
-        ...p,
-        readCount: p.reads[0]?.readCount ?? 0,
-        isRead: (p.reads[0]?.readCount ?? 0) > 0,
-        reads: undefined,
-    }));
+        const result = precedents.map((p: any) => ({
+            ...p,
+            readCount: p.reads[0]?.readCount ?? 0,
+            isRead: (p.reads[0]?.readCount ?? 0) > 0,
+            reads: undefined,
+        }));
 
-    return NextResponse.json({ precedents: result });
+        return NextResponse.json({ precedents: result });
+    } catch (err: any) {
+        console.error('GET /api/user/precedents:', err);
+        return NextResponse.json({ error: err.message, precedents: [] }, { status: 500 });
+    }
 }
