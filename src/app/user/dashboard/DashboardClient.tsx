@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { signOut } from 'next-auth/react';
 import { APP_VERSION } from '@/lib/version';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 type Subject = { id: string; name: string; total: number; readCount: number; unreadCount: number };
 type Precedent = {
@@ -25,10 +26,10 @@ type Precedent = {
 
 interface Props { userName: string; track: string; }
 
-const TRACK_LABELS: Record<string, string> = {
-    JUIZ_ESTADUAL: '⚖️ Juiz Estadual',
-    JUIZ_FEDERAL: '🏛️ Juiz Federal',
-    PROCURADOR: '📋 Procurador',
+const TRACK_LABELS: Record<string, React.ReactNode> = {
+    JUIZ_ESTADUAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Scale size={16} /> Juiz Estadual</span>,
+    JUIZ_FEDERAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Landmark size={16} /> Juiz Federal</span>,
+    PROCURADOR: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Briefcase size={16} /> Procurador</span>,
 };
 
 export default function DashboardClient({ userName, track }: Props) {
@@ -55,6 +56,23 @@ export default function DashboardClient({ userName, track }: Props) {
     const [compactMode, setCompactMode] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [helpStep, setHelpStep] = useState(0);
+    const [isDark, setIsDark] = useState(false);
+
+    useEffect(() => {
+        setIsDark(document.documentElement.classList.contains('dark-theme'));
+    }, []);
+
+    const toggleTheme = () => {
+        const next = !isDark;
+        setIsDark(next);
+        document.documentElement.classList.toggle('dark-theme', next);
+        localStorage.setItem('juris-theme', next ? 'dark' : 'light');
+    };
+
+    const ThemeIcons = {
+        sun: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>,
+        moon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+    };
 
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
     const [historyModal, setHistoryModal] = useState<{ id: string, events: string[] } | null>(null);
@@ -326,10 +344,10 @@ export default function DashboardClient({ userName, track }: Props) {
 
                 {!compactMode && (
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
-                        {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
-                        {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
-                        {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📖 Lido</span>}
+                        {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme}</span>}
+                        {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={10} /> Dominado</span>}
+                        {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.X size={10} /> Revisar</span>}
+                        {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Book size={10} /> Lido</span>}
                     </div>
                 )}
 
@@ -381,7 +399,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                 }}
                                 title={readData.isFavorite ? 'Remover Favorito' : 'Adicionar aos Favoritos'}
                             >
-                                {readData.isFavorite ? '★' : '☆'}
+                                {readData.isFavorite ? <SvgIcons.Star size={16} fill="#f59e0b" color="#f59e0b" /> : <SvgIcons.Star size={16} />}
                             </button>
                             {/* 📝 Botão de Anotações */}
                             <button
@@ -412,10 +430,10 @@ export default function DashboardClient({ userName, track }: Props) {
                                 }}
                                 title={readData.notes ? 'Ver/Editar Anotação' : 'Adicionar Anotação'}
                             >
-                                📝
+                                <SvgIcons.MessageSquare size={16} />
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 8px', borderRadius: '6px' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 12px', borderRadius: '6px' }}><SvgIcons.Landmark size={12} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             {proc && (
                                 <span
                                     onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
@@ -424,17 +442,17 @@ export default function DashboardClient({ userName, track }: Props) {
                                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
                                     onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                                 >
-                                    🔍 {proc}
+                                    <SvgIcons.Search size={12} /> {proc}
                                 </span>
                             )}
-                            {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📅 Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                            {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
                             <span
                                 style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default' }}
                                 title={!p.publicationDate ? "Na publicação do informativo não foi informada data de publicação do julgado." : undefined}
                             >
-                                📢 Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
+                                <SvgIcons.FileText size={12} /> Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
                             </span>
-                            {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
+                            {(readData.correct > 0 || readData.wrong > 0) && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 8px', borderRadius: 4 }}><SvgIcons.Chart size={12} /> {readData.correct}V | {readData.wrong}F</span>}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={e => e.stopPropagation()}>
@@ -457,7 +475,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                     >
                                         {readData.count}×
                                     </div>
-                                    <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
+                                    <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="Marcar como Não Lido"><SvgIcons.RefreshCw size={14} /></button>
                                 </div>
                             )}
                             {!isRead && (
@@ -477,7 +495,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                         onClick={(e) => { e.stopPropagation(); setShowHints(prev => ({ ...prev, [p.id]: true })) }}
                                         style={{ background: 'transparent', border: 'none', color: 'var(--accent)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 auto' }}
                                     >
-                                        💡 Ver Dica (Recuperar Memória)
+                                        <SvgIcons.Lightbulb size={16} /> Ver Dica (Recuperar Memória)
                                     </button>
                                 ) : (
                                     <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', fontStyle: 'italic', animation: 'fadeIn 0.3s' }}>
@@ -500,8 +518,8 @@ export default function DashboardClient({ userName, track }: Props) {
                 <div className="modal-overlay" onClick={() => setNotesModal(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', padding: '1.5rem', borderRadius: '20px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900 }}>📝 Minhas Anotações</h3>
-                            <button onClick={() => setNotesModal(null)} style={{ border: 'none', background: 'var(--surface2)', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontWeight: 900 }}>✕</button>
+                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><SvgIcons.MessageSquare size={24} /> Minhas Anotações</h3>
+                            <button onClick={() => setNotesModal(null)} style={{ border: 'none', background: 'var(--surface2)', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontWeight: 900, display: 'flex', alignItems: 'center', justifySelf: 'center', padding: 8 }}><SvgIcons.X size={16} /></button>
                         </div>
 
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginBottom: '1rem', lineHeight: '1.4' }}>
@@ -557,12 +575,12 @@ export default function DashboardClient({ userName, track }: Props) {
                 <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
                     <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '700px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
                         <div className="modal-header" style={{ position: 'relative', justifyContent: 'center' }}>
-                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)', textAlign: 'center' }}>🔍 Detalhes do Julgado</h2>
+                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)', textAlign: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.Search size={16} /> Detalhes do Julgado</h2>
                             <button
                                 onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}
                                 className="btn-close"
-                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)' }}
-                            >✕</button>
+                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', padding: 4 }}
+                            ><SvgIcons.X size={18} /></button>
                         </div>
 
                         <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 3}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
@@ -585,24 +603,24 @@ export default function DashboardClient({ userName, track }: Props) {
                                 color: 'var(--text-2)',
                                 border: '1px solid var(--border)'
                             }}>
-                                <div><strong style={{ color: 'var(--text-3)' }}>🏛️ Tribunal:</strong> {selectedPrecedent.court}</div>
-                                <div><strong style={{ color: 'var(--text-3)' }}>📰 Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
-                                <div><strong style={{ color: 'var(--text-3)' }}>⚖️ Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
-                                <div><strong style={{ color: 'var(--text-3)' }}>👤 Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={14} /> Tribunal:</strong> {selectedPrecedent.court}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.FileText size={14} /> Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.User size={14} /> Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
                                 <div title="Data de Publicação: Data em que o acórdão foi publicado no Diário da Justiça (DJEN/DJe)">
-                                    <strong style={{ color: 'var(--text-3)' }}>📅 Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : 'Não informada a existência de publicação na divulgação do informativo'}
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={14} /> Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : 'Não informada a existência de publicação na divulgação do informativo'}
                                 </div>
                                 <div title="Data de Julgamento: Data da sessão em que o processo foi julgado pelo tribunal">
-                                    <strong style={{ color: 'var(--text-3)' }}>⚖️ Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                                 </div>
-                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}>📌 Tema:</strong> {selectedPrecedent.theme}</div>}
-                                {selectedPrecedent.isRG && <div style={{ gridColumn: 'span 2', color: 'var(--accent)', fontWeight: 800 }}>⚖️ Repercussão Geral</div>}
+                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}><SvgIcons.Pin size={12} style={{ display: 'inline', marginRight: 4 }} /> Tema:</strong> {selectedPrecedent.theme}</div>}
+                                {selectedPrecedent.isRG && <div style={{ gridColumn: 'span 2', color: 'var(--accent)', fontWeight: 800 }}><SvgIcons.Scale size={14} style={{ display: 'inline', marginRight: 4 }} /> Repercussão Geral</div>}
                             </div>
                         </div>
 
                         <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1.25rem', borderRadius: '0 0 16px 16px', justifyContent: 'center' }}>
                             {selectedPrecedent.fullTextOrLink && (
-                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px' }}>🔗 Inteiro Teor</a>
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={18} /> Inteiro Teor</a>
                             )}
                             {!selectedPrecedent.fullTextOrLink && <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Sem link disponível</div>}
                         </div>
@@ -629,12 +647,12 @@ export default function DashboardClient({ userName, track }: Props) {
                     <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '3px', gap: '2px' }}>
                         <button
                             onClick={() => setStudyMode('READ')}
-                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'READ' ? 'var(--accent)' : 'transparent', color: studyMode === 'READ' ? '#fff' : 'var(--text-3)' }}
-                        >📖 Leitura</button>
+                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'READ' ? 'var(--accent)' : 'transparent', color: studyMode === 'READ' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        ><SvgIcons.Book size={14} /> Leitura</button>
                         <button
                             onClick={() => setStudyMode('FLASHCARD')}
-                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'FLASHCARD' ? 'var(--accent)' : 'transparent', color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)' }}
-                        >🧠 V/F</button>
+                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'FLASHCARD' ? 'var(--accent)' : 'transparent', color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        ><SvgIcons.Brain size={14} /> V/F</button>
                     </div>
 
                     <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
@@ -644,8 +662,8 @@ export default function DashboardClient({ userName, track }: Props) {
                         <button
                             onClick={() => setCompactMode(c => !c)}
                             title={compactMode ? 'Modo completo' : 'Modo compacto: só título e tese'}
-                            style={{ padding: '6px 14px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 800, border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s', background: compactMode ? 'var(--accent)' : 'var(--surface2)', color: compactMode ? '#fff' : 'var(--text-3)', height: '34px' }}
-                        >{compactMode ? '⬚ Compacto' : '▤ Compacto'}</button>
+                            style={{ padding: '6px 14px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 800, border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s', background: compactMode ? 'var(--accent)' : 'var(--surface2)', color: compactMode ? '#fff' : 'var(--text-3)', height: '34px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >{compactMode ? <><SvgIcons.Minimize2 size={14} /> Compacto</> : <><SvgIcons.Layout size={14} /> Compacto</>}</button>
 
                         <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', height: '34px' }}>
                             <button onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 12px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)' }}>A−</button>
@@ -701,18 +719,42 @@ export default function DashboardClient({ userName, track }: Props) {
                         }}
                         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.12)' : 'rgba(20, 184, 166, 0.12)'; }}
-                    >{isFocusMode ? '🔓 SAIR FOCO' : '🎯 MODO FOCO'}</button>
+                    >{isFocusMode ? <><SvgIcons.Unlock size={14} /> SAIR FOCO</> : <><SvgIcons.Target size={14} /> MODO FOCO</>}</button>
+                    <button
+                        onClick={toggleTheme}
+                        style={{
+                            background: 'var(--surface2)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            width: 36,
+                            height: 36,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: 'var(--text-3)',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                        title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                    >
+                        {isDark ? ThemeIcons.sun : ThemeIcons.moon}
+                    </button>
                 </div>
             </div>
 
 
             <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                    <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 220px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
-                        <option value="ALL">📚 Todas as Matérias</option>
+                    <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 240px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
+                        <option value="ALL">Todas as Matérias</option>
                         {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
-                    <input type="search" placeholder="🔍 Buscar em tudo..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }} />
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}><SvgIcons.Search size={16} /></span>
+                        <input type="search" placeholder="Buscar em tudo..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }} />
+                    </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
@@ -739,202 +781,203 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                        <button className={`btn-tag ${filterOnlyFavorites ? 'active' : ''}`} onClick={() => { setFilterOnlyFavorites(!filterOnlyFavorites); setFilterHideRead(false); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyFavorites ? 'var(--accent)' : 'transparent', color: filterOnlyFavorites ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>★ Favoritos</button>
-                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => { setFilterHideRead(!filterHideRead); setFilterOnlyFavorites(false); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>📖 Não Lidos</button>
-                        <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>❌ Erros</button>
+                        <button className={`btn-tag ${filterOnlyFavorites ? 'active' : ''}`} onClick={() => { setFilterOnlyFavorites(!filterOnlyFavorites); setFilterHideRead(false); setFilterOnlyErrors(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyFavorites ? 'var(--accent)' : 'transparent', color: filterOnlyFavorites ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
+                            <SvgIcons.Star size={12} fill={filterOnlyFavorites ? '#fff' : 'none'} /> Favoritos
+                        </button>
+                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => { setFilterHideRead(!filterHideRead); setFilterOnlyFavorites(false); setFilterOnlyErrors(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
+                            <SvgIcons.Sparkles size={12} /> Não Lidos
+                        </button>
+                        <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
+                            <SvgIcons.X size={12} /> Erros
+                        </button>
                     </div>
                 </div>
-
-                <div className="filter-chips" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
-                    <button
-                        className={`chip ${filterOnlyFavorites ? 'active' : ''}`}
-                        onClick={() => setFilterOnlyFavorites(!filterOnlyFavorites)}
-                    >
-                        <span>⭐</span> Favoritos
-                    </button>
-                    <button
-                        className={`chip ${filterOnlyErrors ? 'active' : ''}`}
-                        onClick={() => setFilterOnlyErrors(!filterOnlyErrors)}
-                    >
-                        <span>❌</span> Errados
-                    </button>
-                    <button
-                        className={`chip ${filterHideRead ? 'active' : ''}`}
-                        onClick={() => setFilterHideRead(!filterHideRead)}
-                    >
-                        <span>🆕</span> Não Lidos
-                    </button>
-                    {courtFilter !== 'ALL' && (
-                        <select
-                            value={infFilter}
-                            onChange={e => setInfFilter(e.target.value)}
-                            className="chip"
-                            style={{ padding: '4px 12px', height: '32px', appearance: 'none', textAlign: 'center' }}
-                        >
-                            <option value="ALL">📑 Inf. Todos</option>
-                            {availableInformatories.map(inf => (
-                                <option key={inf} value={inf}>📑 Inf. {inf}</option>
-                            ))}
-                        </select>
-                    )}
-                </div>
             </div>
+        </div>
 
-            {/* Barra flutuante do Modo Foco */}
-            {isFocusMode && (
-                <div style={{
-                    position: 'fixed',
-                    top: '0.75rem',
-                    right: '1rem',
-                    zIndex: 9999,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 12,
-                    padding: '6px 10px',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                    opacity: 0.6,
-                    transition: 'opacity 0.2s',
-                }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                    onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+            {/* Barra flutuante do Modo Foco */ }
+    {
+        isFocusMode && (
+            <div style={{
+                position: 'fixed',
+                top: '0.75rem',
+                right: '1rem',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
+                padding: '6px 10px',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                opacity: 0.6,
+                transition: 'opacity 0.2s',
+            }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
+            >
+                <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ fontSize: '0.75rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    onClick={() => setIsFocusMode(false)}
+                    title="Sair do Modo Foco"
                 >
-                    <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ fontSize: '0.75rem', padding: '4px 10px' }}
-                        onClick={() => setIsFocusMode(false)}
-                        title="Sair do Modo Foco"
-                    >🔓 Sair Foco</button>
+                    <SvgIcons.Minimize2 size={14} /> Sair Foco
+                </button>
 
-                    <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
+                <button
+                    onClick={toggleTheme}
+                    style={{
+                        background: 'var(--surface2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        width: 32,
+                        height: 32,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'var(--text-3)',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                    title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                >
+                    {isDark ? ThemeIcons.sun : ThemeIcons.moon}
+                </button>
 
-                    <button
-                        className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ fontSize: '0.75rem', padding: '4px 10px' }}
-                        onClick={() => setCompactMode(c => !c)}
-                        title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
-                    >{compactMode ? '🗂️ Completo' : '⬛ Compacto'}</button>
+                <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
 
-                    <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
+                <button
+                    className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                    onClick={() => setCompactMode(c => !c)}
+                    title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
+                >{compactMode ? '🗂️ Completo' : '⬛ Compacto'}</button>
 
-                    <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte">A-</button>
-                    <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte">A+</button>
-                </div>
-            )}
+                <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
 
-            <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
-
-                {loading ? (
-                    <div className="main-content">
-                        <div className="page-header" style={{ marginBottom: '2rem' }}>
-                            <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
-                        </div>
-                        <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
-                            ))}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {[1, 2, 3, 4, 5].map(i => (
-                                <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
-                            ))}
-                        </div>
-                    </div>
-                ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-                    <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
-                        <div className="subject-header">
-                            <div className="subject-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                            </div>
-                            <h3>{subName}</h3>
-                            <div className="line" />
-                            <span>{list.length}</span>
-                        </div>
-                        {list.map(renderPrecedent)}
-                    </div>
-                )) : filtered.map(renderPrecedent))}
+                <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte">A-</button>
+                <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte">A+</button>
             </div>
+        )
+    }
 
-            {showHelp && (
-                <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
-                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border-strong)',
-                        borderRadius: 30,
-                        padding: '2.5rem',
-                        maxWidth: '550px',
-                        width: 'calc(100% - 2rem)',
-                        boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        {/* Close button */}
-                        <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+    <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
 
-                        {/* Emoji ícone com fundo colorido */}
-                        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
-                            {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
-                        </div>
+        {loading ? (
+            <div className="main-content">
+                <div className="page-header" style={{ marginBottom: '2rem' }}>
+                    <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
+                </div>
+                <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
+                    ))}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
+                    ))}
+                </div>
+            </div>
+        ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
+            <div key={subName} style={{ marginBottom: isFocusMode ? '3rem' : '1.5rem' }}>
+                <div className="subject-header">
+                    <div className="subject-icon">
+                        <SvgIcons.BookOpen size={20} />
+                    </div>
+                    <h3>{subName}</h3>
+                    <div className="line" />
+                    <span>{list.length}</span>
+                </div>
+                {list.map(renderPrecedent)}
+            </div>
+        )) : filtered.map(renderPrecedent))}
+    </div>
 
-                        {/* Título */}
-                        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
-                            {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
-                        </h2>
+    {
+        showHelp && (
+            <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
+                <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: 30,
+                    padding: '2.5rem',
+                    maxWidth: '550px',
+                    width: 'calc(100% - 2rem)',
+                    boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Close button */}
+                    <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
 
-                        {/* Descrição */}
-                        <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
-                            {[
-                                'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
-                                'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
-                                'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
-                                'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
-                                'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
-                                'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
-                            ][helpStep]}
-                        </p>
+                    {/* Emoji ícone com fundo colorido */}
+                    <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 1.25rem', boxShadow: '0 10px 20px rgba(13,148,136,0.25)' }}>
+                        {['👋', '📖', '🔍', '🧠', '✨'][helpStep]}
+                    </div>
 
-                        {helpStep === 4 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
-                                <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
-                                    <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
-                                    <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
-                                </div>
-                                <button
-                                    onClick={resetAllReads}
-                                    className="btn btn-secondary"
-                                    style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
-                                >♻️ Marcar TUDO como Não Lido</button>
-                                <button
-                                    onClick={resetAllStats}
-                                    className="btn btn-secondary"
-                                    style={{ fontSize: '0.75rem', fontWeight: 800 }}
-                                >📊 Zerar Estatísticas de V/F</button>
+                    {/* Título */}
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
+                        {['Bem-vindo ao Juris!', 'Marque seu progresso', 'Veja os detalhes', 'Modo V/F', 'Filtros Dinâmicos'][helpStep]}
+                    </h2>
+
+                    {/* Descrição */}
+                    <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
+                        {[
+                            'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
+                            'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
+                            'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
+                            'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
+                            'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
+                            'Ações Globais: Aqui você pode gerenciar seus dados de leitura e desempenho.'
+                        ][helpStep]}
+                    </p>
+
+                    {helpStep === 4 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface2)', borderRadius: 16, border: '1px solid var(--border)' }}>
+                            <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
+                                <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Configurações de Reset</h4>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações não podem ser desfeitas.</p>
                             </div>
-                        )}
-
-                        {/* Pontos de progresso */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
-                            {[0, 1, 2, 3, 4].map(i => (
-                                <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
-                            ))}
+                            <button
+                                onClick={resetAllReads}
+                                className="btn btn-secondary"
+                                style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800 }}
+                            >♻️ Marcar TUDO como Não Lido</button>
+                            <button
+                                onClick={resetAllStats}
+                                className="btn btn-secondary"
+                                style={{ fontSize: '0.75rem', fontWeight: 800 }}
+                            >📊 Zerar Estatísticas de V/F</button>
                         </div>
+                    )}
 
-                        {/* Botões */}
-                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                            {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                            <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
-                                {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
-                            </button>
-                        </div>
+                    {/* Pontos de progresso */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginBottom: '1.5rem' }}>
+                        {[0, 1, 2, 3, 4].map(i => (
+                            <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
+                        ))}
+                    </div>
+
+                    {/* Botões */}
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                        {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
+                        <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
+                            {helpStep < 4 ? 'Próximo →' : '✅ Entendi!'}
+                        </button>
                     </div>
                 </div>
-            )}
+            </div>
+        )
+    }
 
 
 
-            <style jsx>{`
+    <style jsx>{`
                 .hidden-focus { display: none !important; }
                 .focus-exit {
                     position: fixed;
@@ -1068,48 +1111,52 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            {historyModal && (
-                <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
-                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border-strong)',
-                        borderRadius: 20,
-                        padding: '1.5rem',
-                        maxWidth: '320px',
-                        width: 'calc(100% - 2rem)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-                        position: 'relative'
-                    }}>
-                        <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>📖 Histórico de Leitura</h3>
-                        <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
-                            {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
-                                <div key={idx} style={{
-                                    padding: '8px 12px',
-                                    background: 'var(--surface2)',
-                                    borderRadius: 10,
-                                    fontSize: '0.85rem',
-                                    border: '1px solid var(--border)',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
-                                    <span style={{ color: 'var(--text)' }}>
-                                        {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                </div>
-                            )) : (
-                                <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
-                            )}
-                        </div>
+    {
+        historyModal && (
+            <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
+                <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-strong)',
+                    borderRadius: 20,
+                    padding: '1.5rem',
+                    maxWidth: '320px',
+                    width: 'calc(100% - 2rem)',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+                    position: 'relative'
+                }}>
+                    <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <SvgIcons.History size={18} style={{ color: 'var(--accent)' }} /> Histórico de Leitura
+                    </h3>
+                    <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
+                        {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
+                            <div key={idx} style={{
+                                padding: '8px 12px',
+                                background: 'var(--surface2)',
+                                borderRadius: 10,
+                                fontSize: '0.85rem',
+                                border: '1px solid var(--border)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
+                                <span style={{ color: 'var(--text)' }}>
+                                    {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                        )) : (
+                            <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
+                        )}
                     </div>
                 </div>
-            )}
-
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
-                v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
             </div>
-        </div>
+        )
+    }
+
+    <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
+        v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
+    </div>
+        </div >
     );
 }

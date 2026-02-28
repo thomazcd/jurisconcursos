@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 interface Informatory {
     court: string;
@@ -36,16 +37,20 @@ export default function NovidadesClient() {
     return (
         <div className="animate-fadeIn">
             <header className="page-header" style={{ marginBottom: '3rem' }}>
-                <div>
-                    <h1 className="page-title">✨ Novidades e Atualizações</h1>
-                    <p className="page-subtitle">Acompanhe a alimentação da nossa base de dados em tempo real.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <SvgIcons.Sparkles size={24} style={{ color: 'var(--accent)' }} /> Novidades e Atualizações
+                    </h1>
                 </div>
+                <p className="page-subtitle">Acompanhe a alimentação da nossa base de dados em tempo real.</p>
             </header>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                 <div className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div style={{ padding: '0.8rem', background: 'var(--accent-g)', borderRadius: '12px', fontSize: '1.5rem' }}>📅</div>
+                        <div style={{ padding: '0.8rem', background: 'var(--accent-g)', borderRadius: '12px', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SvgIcons.Calendar size={24} />
+                        </div>
                         <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Última Atualização</h2>
                     </div>
                     <p style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent)' }}>
@@ -58,7 +63,9 @@ export default function NovidadesClient() {
 
                 <div className="card" style={{ gridRow: 'span 2' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <div style={{ padding: '0.8rem', background: 'rgba(5, 150, 105, 0.1)', borderRadius: '12px', fontSize: '1.5rem', color: '#059669' }}>📚</div>
+                        <div style={{ padding: '0.8rem', background: 'rgba(5, 150, 105, 0.1)', borderRadius: '12px', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <SvgIcons.Book size={24} />
+                        </div>
                         <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Informativos no Banco</h2>
                     </div>
 
@@ -89,7 +96,9 @@ export default function NovidadesClient() {
                 </div>
 
                 <div className="card" style={{ background: 'var(--accent-g)', color: 'white' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.8rem' }}>🎯 Qualidade Máxima</h3>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <SvgIcons.Target size={20} /> Qualidade Máxima
+                    </h3>
                     <p style={{ fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.6 }}>
                         Todos os julgados são revisados manualmente para garantir que o <strong>Destaque original (Tese)</strong> seja preservado integralmente, facilitando sua memorização para provas de 2ª fase.
                     </p>

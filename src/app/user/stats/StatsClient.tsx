@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
 import { APP_VERSION } from '@/lib/version';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 type SubjectStat = { id: string; name: string; total: number; read: number; hits: number; misses: number; percent: number; hitRate: number };
 type StatsData = {
@@ -141,13 +142,13 @@ export default function StatsClient() {
     if (loading) return (
         <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)' }}>
             <div className="skeleton-box" style={{ width: '60px', height: '60px', borderRadius: '50%', margin: '0 auto 1.5rem' }} />
-            <div style={{ color: 'var(--text-3)', fontStyle: 'italic', fontSize: '0.9rem', fontWeight: 600 }}>Analisando seu desempenho e gerando estatísticas avançadas... 📊</div>
+            <div style={{ color: 'var(--text-3)', fontStyle: 'italic', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>Analisando seu desempenho e gerando estatísticas avançadas... <SvgIcons.Chart size={18} /></div>
         </div>
     );
 
     if (!data || !timeStats || !data.summary) return (
         <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)', color: 'var(--text-3)' }}>
-            <p>Nenhum dado de desempenho encontrado para exibir no momento. 📈</p>
+            <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>Nenhum dado de desempenho encontrado para exibir no momento. <SvgIcons.Chart size={18} /></p>
             <p style={{ fontSize: '0.8rem', marginTop: '1rem' }}>Comece a ler os informativos para ver sua evolução aqui!</p>
         </div>
     );
@@ -160,7 +161,9 @@ export default function StatsClient() {
         <div className="stats-container" style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>
             <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, var(--accent), #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>📊 Seu Painel de Performance</h1>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, var(--accent), #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <SvgIcons.Chart size={28} style={{ color: 'var(--accent)' }} /> Seu Painel de Performance
+                    </h1>
                     <p style={{ color: 'var(--text-3)', fontSize: '0.9rem' }}>Acompanhe sua evolução e identifique pontos de foco nos informativos.</p>
                 </div>
                 <button
@@ -182,7 +185,7 @@ export default function StatsClient() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface)'; }}
                 >
-                    Zerar Estatísticas
+                    <SvgIcons.RefreshCw size={14} /> Zerar Estatísticas
                 </button>
             </div>
 
@@ -190,7 +193,9 @@ export default function StatsClient() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
                 {/* Streak Card */}
                 <div className="streak-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                    <div style={{ fontSize: '3rem' }}>🔥</div>
+                    <div style={{ color: '#ffae00', background: 'rgba(255, 174, 0, 0.2)', padding: '12px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <SvgIcons.Fire size={36} fill="#ffae00" />
+                    </div>
                     <div>
                         <h4 style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Sequência Atual</h4>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
@@ -225,7 +230,9 @@ export default function StatsClient() {
                 {/* Performance by Subject */}
                 <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800 }}>📚 Foco por Matéria</h2>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <SvgIcons.BookOpen size={20} style={{ color: 'var(--accent)' }} /> Foco por Matéria
+                        </h2>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>ORDENADO POR LEITURAS</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -248,7 +255,9 @@ export default function StatsClient() {
 
                 {/* Tribunals */}
                 <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)' }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem' }}>🏛️ Tribunais</h2>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <SvgIcons.Landmark size={20} style={{ color: 'var(--accent)' }} /> Tribunais
+                    </h2>
                     {([
                         { label: 'STF - Supremo Tribunal Federal', ...data.byCourt.STF, color: '#2563eb' },
                         { label: 'STJ - Superior Tribunal de Justiça', ...data.byCourt.STJ, color: '#7c3aed' },
@@ -278,7 +287,9 @@ export default function StatsClient() {
                 {/* Evolution Chart (Custom SVG) */}
                 <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: 24, border: '1px solid var(--border)', gridColumn: 'span 2' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800 }}>📈 Evolução de Estudos (Últimos 7 dias)</h2>
+                        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <SvgIcons.Chart size={20} style={{ color: 'var(--accent)' }} /> Evolução de Estudos (Últimos 7 dias)
+                        </h2>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>PICO: {Math.max(...timeStats.last7Days.map(d => d.count))} LEITURAS</span>
                     </div>
 
@@ -330,7 +341,9 @@ export default function StatsClient() {
 
             {/* Consistência */}
             <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 24, border: '1px solid var(--border)', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem' }}>⏳ Consistência de Estudo (Últimos 35 dias)</h2>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <SvgIcons.Calendar size={20} style={{ color: 'var(--accent)' }} /> Consistência de Estudo (Últimos 35 dias)
+                </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
                     {Array.from({ length: 35 }).map((_, i) => {
                         const d = new Date(); d.setDate(d.getDate() - (34 - i));

@@ -1,5 +1,5 @@
-'use client';
 import { useState } from 'react';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 interface PrecedentCardProps {
     precedent: {
@@ -64,8 +64,8 @@ export function PrecedentCard({ precedent: p, onToggleRead }: PrecedentCardProps
                     <div className="flex items-center gap-1" style={{ marginBottom: '0.4rem', flexWrap: 'wrap' }}>
                         <span className={COURT_BADGE[p.court] ?? 'badge'}>{p.court}</span>
                         <span className={APPL_BADGE[p.applicability] ?? 'badge'}>{APPL_LABEL[p.applicability]}</span>
-                        {!isRead && <span className="badge badge-unread" style={{ fontSize: '0.7rem' }}>Não lido</span>}
-                        {isRead && <span className="badge badge-read" style={{ fontSize: '0.7rem' }}>✓ Lido</span>}
+                        {!isRead && <span className="badge badge-unread" style={{ fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Sparkles size={10} /> Não lido</span>}
+                        {isRead && <span className="badge badge-read" style={{ fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={10} /> Lido</span>}
                     </div>
                     <div className="precedent-title">{p.title}</div>
                 </div>
@@ -76,7 +76,7 @@ export function PrecedentCard({ precedent: p, onToggleRead }: PrecedentCardProps
                     title={isRead ? 'Marcar como não lido' : 'Marcar como lido'}
                     style={{ flexShrink: 0 }}
                 >
-                    {loading ? '…' : isRead ? '↩ Não lido' : '✓ Lido'}
+                    {loading ? <SvgIcons.RotateCw size={14} className="animate-spin" /> : isRead ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.RotateCcw size={14} /> Não lido</span> : <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={14} /> Lido</span>}
                 </button>
             </div>
 
@@ -85,16 +85,20 @@ export function PrecedentCard({ precedent: p, onToggleRead }: PrecedentCardProps
             </p>
 
             {p.summary.length > 200 && (
-                <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', padding: '0 0' }} onClick={() => setExpanded(!expanded)}>
-                    {expanded ? '▲ Ver menos' : '▼ Ver mais'}
+                <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start', padding: '0 0', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }} onClick={() => setExpanded(!expanded)}>
+                    {expanded ? <><SvgIcons.ChevronUp size={14} /> Ver menos</> : <><SvgIcons.ChevronDown size={14} /> Ver mais</>}
                 </button>
             )}
 
             <div className="precedent-meta">
-                <span>📅 {date}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> {date}</span>
                 {p.subject && <span>• {p.subject.name}</span>}
                 {p.fullTextOrLink && (
-                    <span>• <a href={p.fullTextOrLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-h)' }}>Ver inteiro teor ↗</a></span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        • <a href={p.fullTextOrLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-h)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            Ver inteiro teor <SvgIcons.ExternalLink size={12} />
+                        </a>
+                    </span>
                 )}
             </div>
 

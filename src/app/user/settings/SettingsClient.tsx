@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 const TRACKS = [
-    { value: 'JUIZ_ESTADUAL', icon: '⚖️', label: 'Juiz Estadual', desc: 'Magistratura Estadual' },
-    { value: 'JUIZ_FEDERAL', icon: '🏛️', label: 'Juiz Federal', desc: 'Magistratura Federal' },
-    { value: 'PROCURADOR', icon: '📋', label: 'Procurador do Estado', desc: 'Procuradoria do Estado' },
+    { value: 'JUIZ_ESTADUAL', icon: <SvgIcons.Scale size={20} />, label: 'Juiz Estadual', desc: 'Magistratura Estadual' },
+    { value: 'JUIZ_FEDERAL', icon: <SvgIcons.Landmark size={20} />, label: 'Juiz Federal', desc: 'Magistratura Federal' },
+    { value: 'PROCURADOR', icon: <SvgIcons.Briefcase size={20} />, label: 'Procurador do Estado', desc: 'Procuradoria do Estado' },
 ];
 
 export default function UserSettingsPage() {
@@ -113,25 +114,27 @@ export default function UserSettingsPage() {
                                 transition: 'all 0.15s',
                             }}
                         >
-                            <span style={{ fontSize: '1.3rem' }}>{t.icon}</span>
+                            <span style={{ fontSize: '1.3rem', display: 'flex' }}>{t.icon}</span>
                             <div>
                                 <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.label}</div>
                                 <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{t.desc}</div>
                             </div>
-                            {track === t.value && <span style={{ marginLeft: 'auto', fontSize: '0.8rem' }}>✓ Ativo</span>}
+                            {track === t.value && <span style={{ marginLeft: 'auto', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={14} /> Ativo</span>}
                         </button>
                     ))}
                 </div>
 
                 {activeTrack && (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.75rem' }}>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {activeTrack.icon} Trilha <strong>{activeTrack.label}</strong> ativa. Você verá matérias e precedentes específicos desta carreira.
                     </p>
                 )}
 
                 <div className="divider" style={{ margin: '1.5rem 0' }} />
 
-                <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444', marginBottom: '0.5rem' }}>🔥 Zona de Perigo</h2>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <SvgIcons.Fire size={20} fill="#ef4444" /> Zona de Perigo
+                </h2>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginBottom: '1.5rem' }}>
                     Ações irreversíveis sobre seus dados de estudo. Tenha cuidado!
                 </p>
@@ -150,12 +153,13 @@ export default function UserSettingsPage() {
                             fontWeight: 800,
                             cursor: 'pointer',
                             transition: 'all 0.2s',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                         }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none'; }}
                     >
-                        ♻️ Resetar Marcas de "Lido" (Informativos)
+                        <SvgIcons.RefreshCw size={16} /> Resetar Marcas de "Lido" (Informativos)
                     </button>
 
                     <button
@@ -171,12 +175,13 @@ export default function UserSettingsPage() {
                             fontWeight: 800,
                             cursor: 'pointer',
                             transition: 'all 0.2s',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                         }}
                         onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'none'; }}
                     >
-                        📊 Zerar Estatísticas (V/F)
+                        <SvgIcons.Chart size={16} /> Zerar Estatísticas (V/F)
                     </button>
 
                     <button

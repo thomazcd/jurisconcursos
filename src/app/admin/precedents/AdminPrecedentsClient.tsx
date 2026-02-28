@@ -1,5 +1,5 @@
-'use client';
 import { useEffect, useState } from 'react';
+import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 type Subject = { id: string; name: string };
 type Precedent = {
@@ -22,12 +22,17 @@ const EMPTY_FORM = {
 };
 
 function visibilityLabel(p: Precedent) {
-    if (p.forAll) return 'Geral';
+    if (p.forAll) return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Sparkles size={14} /> Geral</span>;
     const t = [];
-    if (p.forJuizEstadual) t.push('J.Est');
-    if (p.forJuizFederal) t.push('J.Fed');
-    if (p.forProcurador) t.push('PGE');
-    return t.join(' + ') || '—';
+    if (p.forJuizEstadual) t.push(<span key="je" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> J.Est</span>);
+    if (p.forJuizFederal) t.push(<span key="jf" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={14} /> J.Fed</span>);
+    if (p.forProcurador) t.push(<span key="pg" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Briefcase size={14} /> PGE</span>);
+
+    return (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {t.length > 0 ? t : '—'}
+        </div>
+    );
 }
 
 function DetailRow({ label, value }: { label: string; value?: string | null | boolean }) {
@@ -205,19 +210,19 @@ export default function AdminPrecedentsClient() {
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', padding: '0.25rem 0' }}>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.isRG} onChange={e => set('isRG', e.target.checked)} /> RG (Repercussão Geral)
+                        <input type="checkbox" checked={f.isRG} onChange={e => set('isRG', e.target.checked)} /> <SvgIcons.Target size={14} /> RG (Repercussão Geral)
                     </label>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forAll} onChange={e => set('forAll', e.target.checked)} /> Geral (todos)
+                        <input type="checkbox" checked={f.forAll} onChange={e => set('forAll', e.target.checked)} /> <SvgIcons.Sparkles size={14} /> Geral (todos)
                     </label>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forJuizEstadual} onChange={e => set('forJuizEstadual', e.target.checked)} /> ⚖️ Juiz Estadual
+                        <input type="checkbox" checked={f.forJuizEstadual} onChange={e => set('forJuizEstadual', e.target.checked)} /> <SvgIcons.Scale size={14} /> Juiz Estadual
                     </label>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forJuizFederal} onChange={e => set('forJuizFederal', e.target.checked)} /> 🏛️ Juiz Federal
+                        <input type="checkbox" checked={f.forJuizFederal} onChange={e => set('forJuizFederal', e.target.checked)} /> <SvgIcons.Landmark size={14} /> Juiz Federal
                     </label>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forProcurador} onChange={e => set('forProcurador', e.target.checked)} /> 📋 Procurador
+                        <input type="checkbox" checked={f.forProcurador} onChange={e => set('forProcurador', e.target.checked)} /> <SvgIcons.Briefcase size={14} /> Procurador
                     </label>
                 </div>
             </div>
@@ -233,7 +238,9 @@ export default function AdminPrecedentsClient() {
                         <h1 className="page-title">Precedentes</h1>
                         <p className="page-subtitle">{precedents.length} cadastrados</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => { setCreateForm(EMPTY_FORM); setShowCreate(true); }}>+ Novo</button>
+                    <button className="btn btn-primary" onClick={() => { setCreateForm(EMPTY_FORM); setShowCreate(true); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <SvgIcons.RefreshCw size={16} /> Novo
+                    </button>
                 </div>
 
                 {/* Filters */}
@@ -271,12 +278,14 @@ export default function AdminPrecedentsClient() {
                                             {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '—'}
                                         </td>
                                         <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
-                                        <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>📌 {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
+                                        <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={12} /> {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
                                         <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
                                         <td style={{ fontSize: '0.78rem' }}>{p.subject?.name ?? '—'}</td>
                                         <td style={{ fontSize: '0.78rem' }}>{visibilityLabel(p)}</td>
                                         <td onClick={e => e.stopPropagation()}>
-                                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id, p.title)}>✕</button>
+                                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id, p.title)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <SvgIcons.X size={14} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -295,7 +304,9 @@ export default function AdminPrecedentsClient() {
                             {!editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Editar</button>}
                             {editing && <button className="btn btn-primary btn-sm" onClick={handleUpdate} disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</button>}
                             {editing && <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancelar</button>}
-                            <button className="btn btn-secondary btn-sm" onClick={() => setPanel(null)}>✕</button>
+                            <button className="btn btn-secondary btn-sm" onClick={() => setPanel(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <SvgIcons.X size={14} />
+                            </button>
                         </div>
                     </div>
 
@@ -319,8 +330,8 @@ export default function AdminPrecedentsClient() {
                                 <DetailRow label="Visível para" value={visibilityLabel(panel)} />
                             </div>
                             {panel.fullTextOrLink && (
-                                <a href={panel.fullTextOrLink} target="_blank" rel="noreferrer" style={{ display: 'block', marginTop: '0.75rem', fontSize: '0.82rem', color: 'var(--accent)' }}>
-                                    🔗 Ver inteiro teor
+                                <a href={panel.fullTextOrLink} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '0.75rem', fontSize: '0.82rem', color: 'var(--accent)', textDecoration: 'none' }}>
+                                    <SvgIcons.Link size={14} /> Ver inteiro teor
                                 </a>
                             )}
                         </div>
@@ -334,7 +345,9 @@ export default function AdminPrecedentsClient() {
                     <div className="modal" style={{ maxWidth: 640, width: '95vw' }} onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2 className="modal-title">Novo precedente</h2>
-                            <button className="modal-close" onClick={() => setShowCreate(false)}>✕</button>
+                            <button className="modal-close" onClick={() => setShowCreate(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <SvgIcons.X size={18} />
+                            </button>
                         </div>
                         {formError && <div className="alert alert-error" style={{ marginBottom: '0.5rem' }}>{formError}</div>}
                         <div style={{ maxHeight: '70vh', overflowY: 'auto', padding: '0.25rem 0' }}>
