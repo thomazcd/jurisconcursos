@@ -102,7 +102,7 @@ export default function RegisterPage() {
                 </div>
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v1.00008
+                v1.00009
             </div>
         </div>
     );

@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
 
-        // getApplicabilityFilter returns { OR: [...] } — spread it correctly
         const appFilter = getApplicabilityFilter(track);
         const where: any = {
             ...appFilter,
@@ -30,6 +29,7 @@ export async function GET(req: NextRequest) {
                 subject: { select: { name: true } },
                 reads: { where: { userId }, select: { readCount: true } },
             },
+            distinct: ['processNumber', 'processClass', 'title'],
             take: 500,
         });
 

@@ -26,7 +26,6 @@ export default function DashboardClient({ userName, track }: Props) {
     const [loading, setLoading] = useState(false);
     const [readMap, setReadMap] = useState<Record<string, number>>({});
     const [search, setSearch] = useState('');
-    const [expanded, setExpanded] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/api/user/subjects')
@@ -41,7 +40,6 @@ export default function DashboardClient({ userName, track }: Props) {
     const loadPrecedents = useCallback(async (subjectId: string) => {
         if (!subjectId) return;
         setLoading(true);
-        setExpanded(null);
         const r = await fetch(`/api/user/precedents?subjectId=${subjectId}`);
         const d = await r.json();
         const precs: Precedent[] = d.precedents ?? [];
@@ -91,9 +89,7 @@ export default function DashboardClient({ userName, track }: Props) {
             {/* Header */}
             <div className="page-header no-print" style={{ marginBottom: '0.75rem' }}>
                 <h1 className="page-title" style={{ fontSize: '1rem' }}>{TRACK_LABELS[track] ?? track}</h1>
-                <button className="btn btn-secondary btn-sm" onClick={() => window.print()} title="Imprimir / Salvar PDF">
-                    🖨️ Imprimir
-                </button>
+                <button className="btn btn-secondary btn-sm" onClick={() => window.print()}>🖨️ Imprimir</button>
             </div>
 
             {/* Selectors */}
@@ -113,79 +109,41 @@ export default function DashboardClient({ userName, track }: Props) {
                 />
             </div>
 
-            {/* Print header */}
-            <div className="print-only" style={{ marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 700 }}>{selectedSubjectName}</h2>
-                <p style={{ fontSize: '0.75rem', color: '#666' }}>{TRACK_LABELS[track]} — {new Date().toLocaleDateString('pt-BR')}</p>
-                <hr />
-            </div>
-
             {/* States */}
             {loading && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', padding: '1rem 0' }}>Carregando…</p>}
-            {!loading && filtered.length === 0 && (
-                <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', padding: '1rem 0' }}>
-                    {q ? `Nenhum resultado para "${search}"` : 'Nenhum precedente para esta matéria.'}
-                </p>
-            )}
-            {!loading && q && filtered.length > 0 && (
-                <p style={{ color: 'var(--text-3)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
-                    {filtered.length} resultado{filtered.length > 1 ? 's' : ''} para "{search}"
-                </p>
-            )}
 
             {/* Precedent list */}
             <div className="prec-list">
                 {filtered.map((p) => {
                     const count = readMap[p.id] ?? p.readCount;
                     const isRead = count > 0;
-                    const isOpen = expanded === p.id;
                     const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
 
                     return (
                         <div
                             key={p.id}
                             className="prec-item"
-                            style={{ borderLeft: `3px solid ${isRead ? '#86efac' : '#fca5a5'}` }}
+                            style={{ borderLeft: `3px solid ${isRead ? '#86efac' : '#fca5a5'}`, paddingBottom: '0.75rem' }}
                         >
-                            {/* Clickable title row */}
-                            <div
-                                className="prec-title"
-                                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}
-                                onClick={() => setExpanded(isOpen ? null : p.id)}
-                            >
-                                <span>{p.title}</span>
-                                <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', flexShrink: 0, marginTop: '2px' }}>
-                                    {isOpen ? '▲' : '▼'}
-                                </span>
-                            </div>
-
-                            {/* Expanded detail */}
-                            {isOpen && (
-                                <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
-                                    {p.theme && (
-                                        <div style={{ marginBottom: '0.4rem' }}>
-                                            <span style={{ fontSize: '0.7rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>
-                                                📌 {p.theme}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="prec-summary" style={{ marginBottom: '0.5rem', fontWeight: 500 }}>
-                                        {p.summary}
-                                    </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
-                                        {proc && <span>📄 {proc}</span>}
-                                        {p.organ && <span>🏛 {p.organ}</span>}
-                                        {p.rapporteur && <span>👤 {p.rapporteur}</span>}
-                                        {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
-                                        {p.informatoryNumber && <span>📰 Informativo {p.court} {p.informatoryNumber}</span>}
-                                        {p.fullTextOrLink && (
-                                            <a href={p.fullTextOrLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
-                                                🔗 Texto completo
-                                            </a>
-                                        )}
-                                    </div>
+                            {p.theme && (
+                                <div style={{ marginBottom: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.65rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>
+                                        📌 {p.theme}
+                                    </span>
                                 </div>
                             )}
+                            <div className="prec-title" style={{ marginBottom: '0.4rem', color: 'var(--text)', fontWeight: 700 }}>
+                                {p.title}
+                            </div>
+                            <div className="prec-summary" style={{ marginBottom: '0.6rem', color: 'var(--text-2)', lineHeight: '1.4' }}>
+                                {p.summary}
+                            </div>
+
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.7rem', color: 'var(--text-3)', borderTop: '0.5px solid var(--border)', paddingTop: '0.5rem' }}>
+                                {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                                {proc && <span>📄 {proc}</span>}
+                                {p.informatoryNumber && <span>📰 Informativo {p.court} {p.informatoryNumber}</span>}
+                            </div>
 
                             {/* Read controls */}
                             <div className="prec-actions no-print">
@@ -201,6 +159,10 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                     );
                 })}
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '2rem', padding: '1rem', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
+                v1.00009
             </div>
         </div>
     );
