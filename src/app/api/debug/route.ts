@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
         const u = await prisma.user.count();
         const p = await prisma.precedent.count();
         const s = await prisma.subject.count();
@@ -11,6 +14,8 @@ export async function GET() {
 
         return NextResponse.json({
             status: 'ok',
+            session_active: !!session,
+            user_id_in_session: (session?.user as any)?.id,
             counts: {
                 users: u,
                 precedents: p,
