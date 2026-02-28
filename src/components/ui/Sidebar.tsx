@@ -33,7 +33,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                     <>
                         <p className="sidebar-section-title">Gestão</p>
                         <Link href="/admin" className={active('/admin') && !pathname.startsWith('/admin/subjects') && !pathname.startsWith('/admin/precedents') ? 'active' : ''}>
-                            🏠 Dashboard
+                            🏠 Home
                         </Link>
                         <Link href="/admin/subjects" className={active('/admin/subjects')}>
                             📚 Matérias
@@ -46,10 +46,13 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                     <>
                         <p className="sidebar-section-title">Estudo</p>
                         <Link href="/user/dashboard" className={active('/user/dashboard')}>
-                            🏠 Dashboard
+                            📰 Informativos
                         </Link>
-                        <Link href="/user/dashboard?tab=news" className="">
-                            🔔 Novidades
+                        <Link href="/user/teses" className={active('/user/teses')}>
+                            📜 Teses STF/STJ
+                        </Link>
+                        <Link href="/user/stats" className={active('/user/stats')}>
+                            📊 Desempenho
                         </Link>
                         <Link href="/user/settings" className={active('/user/settings')}>
                             ⚙️ Configurações
@@ -66,7 +69,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                     </div>
                 </div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textAlign: 'center', marginBottom: '0.5rem', opacity: 0.6 }}>
-                    v1.00016
+                    v1.00017
                 </div>
                 <button className="btn btn-ghost btn-sm" style={{ width: '100%' }} onClick={handleSignOut}>
                     Sair
@@ -75,4 +78,3 @@ export function Sidebar({ role, name, track }: SidebarProps) {
         </aside>
     );
 }
-
