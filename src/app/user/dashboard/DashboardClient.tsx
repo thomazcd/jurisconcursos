@@ -10,6 +10,8 @@ type Precedent = {
     organ?: string | null; rapporteur?: string | null;
     theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
     readCount: number; isRead: boolean; readEvents: string[];
+    subjectId: string;
+    subject?: { name: string };
 };
 
 interface Props { userName: string; track: string; }
@@ -22,7 +24,7 @@ const TRACK_LABELS: Record<string, string> = {
 
 export default function DashboardClient({ userName, track }: Props) {
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState('');
+    const [selectedSubject, setSelectedSubject] = useState('ALL');
     const [precedents, setPrecedents] = useState<Precedent[]>([]);
     const [loading, setLoading] = useState(false);
     const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[] }>>({});
@@ -45,17 +47,17 @@ export default function DashboardClient({ userName, track }: Props) {
             .then(d => {
                 const subs: Subject[] = d.subjects ?? [];
                 setSubjects(subs);
-                if (subs.length > 0 && !selectedSubject) setSelectedSubject(subs[0].id);
+                // No longer auto-select first subject, 'ALL' is default
             });
-    }, [selectedSubject]);
+    }, []);
 
     useEffect(() => { loadSubjects(); }, [loadSubjects]);
 
     const loadPrecedents = useCallback(async (subjectId: string) => {
-        if (!subjectId) return;
         setLoading(true);
         setRevealed({});
-        const r = await fetch(`/api/user/precedents?subjectId=${subjectId}`);
+        const url = subjectId === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${subjectId}`;
+        const r = await fetch(url);
         const d = await r.json();
         const precs: Precedent[] = d.precedents ?? [];
         setPrecedents(precs);
@@ -66,7 +68,7 @@ export default function DashboardClient({ userName, track }: Props) {
     }, []);
 
     useEffect(() => {
-        if (selectedSubject) loadPrecedents(selectedSubject);
+        loadPrecedents(selectedSubject);
     }, [selectedSubject, loadPrecedents]);
 
     const availableYears = useMemo(() => {
@@ -109,9 +111,9 @@ export default function DashboardClient({ userName, track }: Props) {
     }
 
     const currentSub = subjects.find(s => s.id === selectedSubject);
-    const progressPercent = currentSub && currentSub.total > 0
-        ? Math.round((currentSub.readCount / currentSub.total) * 100)
-        : 0;
+    const progressPercent = selectedSubject === 'ALL'
+        ? (subjects.reduce((acc, s) => acc + s.total, 0) > 0 ? Math.round((subjects.reduce((acc, s) => acc + s.readCount, 0) / subjects.reduce((acc, s) => acc + s.total, 0)) * 100) : 0)
+        : (currentSub && currentSub.total > 0 ? Math.round((currentSub.readCount / currentSub.total) * 100) : 0);
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -132,6 +134,93 @@ export default function DashboardClient({ userName, track }: Props) {
                 (p.theme ?? '').toLowerCase().includes(q);
         });
     }, [precedents, search, filterHideRead, courtFilter, yearFilter, infFilter, readMap]);
+
+    // Grouping for "All Subjects" view
+    const groupedPrecedents = useMemo(() => {
+        if (selectedSubject !== 'ALL' || search.trim() !== '' || yearFilter !== 'ALL' || infFilter !== 'ALL' || courtFilter !== 'ALL') return null;
+
+        const groups: Record<string, Precedent[]> = {};
+        filtered.forEach(p => {
+            const subName = p.subject?.name || 'Geral';
+            if (!groups[subName]) groups[subName] = [];
+            groups[subName].push(p);
+        });
+
+        // Filter out empty groups and sort by priority subjects or alphabetical
+        return Object.entries(groups)
+            .filter(([_, list]) => list.length > 0)
+            .sort(([a], [b]) => a.localeCompare(b));
+    }, [selectedSubject, filtered, search, yearFilter, infFilter, courtFilter]);
+
+    const renderPrecedent = (p: Precedent) => {
+        const readData = readMap[p.id] || { count: 0, events: [] };
+        const isRead = readData.count > 0;
+        const isRevealed = studyMode === 'READ' || revealed[p.id];
+        const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
+
+        return (
+            <div
+                key={p.id}
+                className="prec-item"
+                style={{ borderLeft: `4px solid ${isRead ? '#22c55e' : '#ef4444'}`, padding: '0.75rem', borderRadius: '0 8px 8px 0', background: 'var(--surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s', marginBottom: '0.6rem' }}
+                onClick={() => setSelectedPrecedent(p)}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateX(4px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+            >
+                {p.theme && (
+                    <div style={{ marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.7em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
+                            📌 {p.theme}
+                        </span>
+                    </div>
+                )}
+                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem', lineHeight: '1.3', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
+                    {p.title}
+                </div>
+                {!isRevealed ? (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
+                        style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.9em', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
+                    >
+                        👀 Revelar Tese
+                    </button>
+                ) : (
+                    <div className="prec-summary" style={{ fontSize: '0.95em', color: 'var(--text-2)', lineHeight: '1.5', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
+                        {p.summary}
+                    </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.75em' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
+                        <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
+                            📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
+                        </span>
+                        <span title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'} style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}>
+                            ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                        </span>
+                        {proc && <span>📄 {proc}</span>}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
+                        </span>
+                        {selectedSubject === 'ALL' && <span style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontWeight: 600, color: 'var(--accent)' }}>{p.subject?.name}</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
+                            {isRead ? `✓ ${readData.count}×` : 'Não lido'}
+                        </span>
+                        <button
+                            className="btn-read"
+                            style={{ padding: '2px 10px', fontWeight: 600, fontSize: '0.65rem' }}
+                            onClick={() => markRead(p.id)}
+                            title={isRead ? "Marcar mais uma leitura (+1)" : "Marcar como lido"}
+                        >
+                            {isRead ? '+1' : 'Ler'}
+                        </button>
+                        {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar leituras">✕</button>}
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="dashboard-container" style={{ fontSize: `${fontSize}px` }}>
@@ -176,6 +265,10 @@ export default function DashboardClient({ userName, track }: Props) {
                                     <span style={{ fontWeight: 600 }}>{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? ` / ${selectedPrecedent.informatoryYear}` : ''}</span>
                                 </div>
                                 <div className="detail-item">
+                                    <span style={{ color: 'var(--text-3)', display: 'block' }}>Publicação</span>
+                                    <span style={{ fontWeight: 600 }}>{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '---'}</span>
+                                </div>
+                                <div className="detail-item">
                                     <span style={{ color: 'var(--text-3)', display: 'block' }}>Julgamento</span>
                                     <span style={{ fontWeight: 600 }}>{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
                                 </div>
@@ -217,6 +310,7 @@ export default function DashboardClient({ userName, track }: Props) {
                         onChange={e => { setSelectedSubject(e.target.value); setYearFilter('ALL'); setInfFilter('ALL'); }}
                         style={{ flex: '0 0 220px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
                     >
+                        <option value="ALL">📚 Todas as Matérias</option>
                         {subjects.map(s => (
                             <option key={s.id} value={s.id}>
                                 {s.name}
@@ -263,86 +357,51 @@ export default function DashboardClient({ userName, track }: Props) {
                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)' }}>
                             {filtered.length} julgados
                         </div>
-                        {currentSub && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <div style={{ width: 100, height: 6, background: 'var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-                                    <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
-                                </div>
-                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-2)' }}>{progressPercent}%</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: 100, height: 6, background: 'var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+                                <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
                             </div>
-                        )}
+                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-2)' }}>{progressPercent}%</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="prec-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {filtered.map((p) => {
-                    const readData = readMap[p.id] || { count: 0, events: [] };
-                    const isRead = readData.count > 0;
-                    const isRevealed = studyMode === 'READ' || revealed[p.id];
-                    const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
-                    return (
-                        <div
-                            key={p.id}
-                            className="prec-item"
-                            style={{ borderLeft: `4px solid ${isRead ? '#22c55e' : '#ef4444'}`, padding: '0.75rem', borderRadius: '0 8px 8px 0', background: 'var(--surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s' }}
-                            onClick={() => setSelectedPrecedent(p)}
-                            onMouseEnter={e => e.currentTarget.style.transform = 'translateX(4px)'}
-                            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-                        >
-                            {p.theme && (
-                                <div style={{ marginBottom: '0.25rem' }}>
-                                    <span style={{ fontSize: '0.7em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>
-                                        📌 {p.theme}
-                                    </span>
-                                </div>
-                            )}
-                            <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 700, color: 'var(--text)', marginBottom: '0.4rem', lineHeight: '1.3', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
-                                {p.title}
+            <div className="prec-list">
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-3)' }}>Carregando julgados...</div>
+                ) : groupedPrecedents ? (
+                    groupedPrecedents.map(([subName, list]) => (
+                        <div key={subName} style={{ marginBottom: '1.5rem' }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                                marginBottom: '1rem',
+                                padding: '0.5rem 1rem',
+                                background: 'var(--surface2)',
+                                borderRadius: 12,
+                                border: '1px solid var(--border)'
+                            }}>
+                                <span style={{ fontSize: '1rem' }}>📚</span>
+                                <h2 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{subName}</h2>
+                                <div style={{ flex: 1, height: '1px', background: 'var(--border)' }}></div>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)' }}>{list.length} julgados</span>
                             </div>
-                            {!isRevealed ? (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setRevealed(prev => ({ ...prev, [p.id]: true })); }}
-                                    style={{ width: '100%', padding: '0.75rem', background: 'var(--surface2)', border: '1px dashed var(--border)', borderRadius: 6, color: 'var(--accent)', fontSize: '0.9em', cursor: 'pointer', fontWeight: 600, marginBottom: '0.5rem' }}
-                                >
-                                    👀 Revelar Tese
-                                </button>
-                            ) : (
-                                <div className="prec-summary" style={{ fontSize: '0.95em', color: 'var(--text-2)', lineHeight: '1.5', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
-                                    {p.summary}
-                                </div>
-                            )}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.75em' }} onClick={e => e.stopPropagation()}>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
-                                    <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
-                                        📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
-                                    </span>
-                                    <span title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'} style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}>
-                                        ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
-                                    </span>
-                                    {proc && <span>📄 {proc}</span>}
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                        📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                    <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
-                                        {isRead ? `✓ ${readData.count}×` : 'Não lido'}
-                                    </span>
-                                    <button
-                                        className="btn-read"
-                                        style={{ padding: '2px 10px', fontWeight: 600, fontSize: '0.65rem' }}
-                                        onClick={() => markRead(p.id)}
-                                        title={isRead ? "Marcar mais uma leitura (+1)" : "Marcar como lido"}
-                                    >
-                                        {isRead ? '+1' : 'Ler'}
-                                    </button>
-                                    {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar leituras">✕</button>}
-                                </div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {list.map(renderPrecedent)}
                             </div>
                         </div>
-                    );
-                })}
+                    ))
+                ) : filtered.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {filtered.map(renderPrecedent)}
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-3)', background: 'var(--surface)', borderRadius: 12, border: '1px dashed var(--border)' }}>
+                        Nenhum julgado encontrado para estes filtros.
+                    </div>
+                )}
             </div>
 
             <style jsx>{`
@@ -363,7 +422,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00026
+                v1.00027
             </div>
         </div>
     );
