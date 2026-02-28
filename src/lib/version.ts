@@ -1,2 +1,2 @@
 // Versão do sistema – atualizar a cada deploy significativo
-export const APP_VERSION = '1.00033';
+export const APP_VERSION = '1.00045';

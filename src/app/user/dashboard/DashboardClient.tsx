@@ -322,8 +322,12 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <div><strong style={{ color: 'var(--text-3)' }}>📰 Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
                                 <div><strong style={{ color: 'var(--text-3)' }}>⚖️ Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
                                 <div><strong style={{ color: 'var(--text-3)' }}>👤 Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
-                                <div><strong style={{ color: 'var(--text-3)' }}>📅 Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '---'}</div>
-                                <div><strong style={{ color: 'var(--text-3)' }}>⚖️ Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</div>
+                                <div title="Data de Publicação: Data em que o acórdão foi publicado no Diário da Justiça (DJEN/DJe)">
+                                    <strong style={{ color: 'var(--text-3)' }}>📅 Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : 'Não informada a existência de publicação na divulgação do informativo'}
+                                </div>
+                                <div title="Data de Julgamento: Data da sessão em que o processo foi julgado pelo tribunal">
+                                    <strong style={{ color: 'var(--text-3)' }}>⚖️ Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                                </div>
                                 {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}>📌 Tema:</strong> {selectedPrecedent.theme}</div>}
                                 {selectedPrecedent.isRG && <div style={{ gridColumn: 'span 2', color: 'var(--accent)', fontWeight: 800 }}>⚖️ Repercussão Geral</div>}
                             </div>
@@ -470,7 +474,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00042</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00044</div>
         </div>
     );
 }
