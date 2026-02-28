@@ -31,7 +31,7 @@ export default function DashboardClient({ userName, track }: Props) {
     // Study Mode & Filters
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
-    const [filterOnlySTF, setFilterOnlySTF] = useState(false);
+    const [courtFilter, setCourtFilter] = useState<'ALL' | 'STF' | 'STJ'>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
     const loadSubjects = useCallback(() => {
@@ -72,7 +72,7 @@ export default function DashboardClient({ userName, track }: Props) {
         });
         const d = await r.json();
         setReadMap(m => ({ ...m, [id]: { count: d.readCount, events: d.readEvents || [] } }));
-        loadSubjects(); // Update category counters
+        loadSubjects();
     }
 
     async function resetRead(id: string) {
@@ -96,17 +96,17 @@ export default function DashboardClient({ userName, track }: Props) {
         return precedents.filter(p => {
             const count = readMap[p.id]?.count ?? p.readCount;
             if (filterHideRead && count > 0) return false;
-            if (filterOnlySTF && p.court !== 'STF') return false;
+            if (courtFilter !== 'ALL' && p.court !== courtFilter) return false;
             if (!q) return true;
             return p.title.toLowerCase().includes(q) ||
                 p.summary.toLowerCase().includes(q) ||
                 (p.theme ?? '').toLowerCase().includes(q);
         });
-    }, [precedents, search, filterHideRead, filterOnlySTF, readMap]);
+    }, [precedents, search, filterHideRead, courtFilter, readMap]);
 
     return (
         <div className="dashboard-container">
-            {/* Header com Progresso Geral (opcional) */}
+            {/* Header */}
             <div className="page-header no-print" style={{ marginBottom: '1rem' }}>
                 <div>
                     <h1 className="page-title" style={{ fontSize: '1.1rem' }}>{TRACK_LABELS[track] ?? track}</h1>
@@ -143,7 +143,24 @@ export default function DashboardClient({ userName, track }: Props) {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', background: 'var(--surface)', padding: '2px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            {(['ALL', 'STF', 'STJ'] as const).map(c => (
+                                <button
+                                    key={c}
+                                    onClick={() => setCourtFilter(c)}
+                                    style={{
+                                        padding: '4px 12px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 600, border: 'none',
+                                        background: courtFilter === c ? 'var(--accent)' : 'transparent',
+                                        color: courtFilter === c ? '#fff' : 'var(--text-3)',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {c === 'ALL' ? 'Todos' : c}
+                                </button>
+                            ))}
+                        </div>
+
                         <button
                             className={`btn-tag ${filterHideRead ? 'active' : ''}`}
                             onClick={() => setFilterHideRead(!filterHideRead)}
@@ -151,23 +168,21 @@ export default function DashboardClient({ userName, track }: Props) {
                         >
                             🚫 Ocultar Lidos
                         </button>
-                        <button
-                            className={`btn-tag ${filterOnlySTF ? 'active' : ''}`}
-                            onClick={() => setFilterOnlySTF(!filterOnlySTF)}
-                            style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)', background: filterOnlySTF ? '#1e3a8a' : 'transparent', color: filterOnlySTF ? '#fff' : 'var(--text-2)' }}
-                        >
-                            🏛 Só STF
-                        </button>
                     </div>
 
-                    {currentSub && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div style={{ width: 100, height: 6, background: 'var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-                                <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
-                            </div>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-2)' }}>{progressPercent}%</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)' }}>
+                            {filtered.length} julgados
                         </div>
-                    )}
+                        {currentSub && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: 100, height: 6, background: 'var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+                                    <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s' }} />
+                                </div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-2)' }}>{progressPercent}%</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -193,7 +208,6 @@ export default function DashboardClient({ userName, track }: Props) {
                                 {p.title}
                             </div>
 
-                            {/* Flashcard Reveal Logic */}
                             {!isRevealed ? (
                                 <button
                                     onClick={() => setRevealed(prev => ({ ...prev, [p.id]: true }))}
@@ -202,7 +216,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                     👀 Revelar Tese
                                 </button>
                             ) : (
-                                <div className="prec-summary" style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: '1.45', marginBottom: '0.6rem', animation: studyMode === 'FLASHCARD' ? 'fadeIn 0.2s ease-out' : 'none' }}>
+                                <div className="prec-summary" style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: '1.45', marginBottom: '0.6rem', animation: 'fadeIn 0.2s ease-out' }}>
                                     {p.summary}
                                 </div>
                             )}
@@ -237,7 +251,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00011 — Estudo Ativo & Performance
+                Juris Concursos v1.00012 🏢
             </div>
         </div>
     );
