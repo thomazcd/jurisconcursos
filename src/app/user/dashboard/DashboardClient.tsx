@@ -51,6 +51,7 @@ export default function DashboardClient({ userName, track }: Props) {
     // User Preferences
     const [fontSize, setFontSize] = useState(14);
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [compactMode, setCompactMode] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [helpStep, setHelpStep] = useState(0);
 
@@ -264,27 +265,15 @@ export default function DashboardClient({ userName, track }: Props) {
                     e.currentTarget.style.boxShadow = isRead ? 'none' : '0 1px 3px rgba(0,0,0,0.04)';
                 }}
             >
-                {/* Estrela de Favoritos no Canto Direito */}
-                <div style={{ position: 'absolute', right: '12px', top: '12px', zIndex: 10 }}>
-                    <button
-                        onClick={(e) => toggleFavorite(p.id, e)}
-                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)', transition: 'transform 0.1s' }}
-                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-                        onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-                        title="Favoritar"
-                    >
-                        {readData.isFavorite ? '★' : '☆'}
-                    </button>
-                </div>
 
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem', paddingRight: '2.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                     {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
                     {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
                     {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
                     {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📖 Lido</span>}
                 </div>
 
-                <div className="prec-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.6rem', lineHeight: '1.4', paddingRight: '1rem' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.6rem', lineHeight: '1.4' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
@@ -301,67 +290,94 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', fontSize: '0.75rem' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                        {proc && (
-                            <span
-                                onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                                style={{ cursor: 'pointer', padding: '3px 8px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)' }}
-                                title="Clique para ver detalhes do julgado"
-                                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                {!compactMode && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', fontSize: '0.75rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
+                            {/* ★ Estrela de Favoritos na linha de meta */}
+                            <button
+                                onClick={(e) => toggleFavorite(p.id, e)}
+                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.1rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)', transition: 'transform 0.1s', padding: 0 }}
+                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                                title={readData.isFavorite ? 'Remover Favorito' : 'Adicionar aos Favoritos'}
                             >
-                                🔍 {proc}
+                                {readData.isFavorite ? '★' : '☆'}
+                            </button>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            {proc && (
+                                <span
+                                    onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
+                                    style={{ cursor: 'pointer', padding: '3px 8px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)' }}
+                                    title="Clique para ver detalhes do julgado"
+                                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                                >
+                                    🔍 {proc}
+                                </span>
+                            )}
+                            {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📅 Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                            <span
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default' }}
+                                title={!p.publicationDate ? "Na publicação do informativo não foi informada data de publicação do julgado." : undefined}
+                            >
+                                📢 Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
                             </span>
-                        )}
-                        {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📅 Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
-                        <span
-                            style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default' }}
-                            title={!p.publicationDate ? "Na publicação do informativo não foi informada data de publicação do julgado." : undefined}
-                        >
-                            📢 Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
-                        </span>
-                        {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
-                    </div>
+                            {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
+                        </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={e => e.stopPropagation()}>
+                            {isRead && (
+                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                    <button
+                                        onClick={(e) => markRead(p.id, e)}
+                                        className="btn-action-hit no-print"
+                                        style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
+                                        title="Lido mais uma vez"
+                                    >+1</button>
+                                    <button
+                                        onClick={(e) => decrementRead(p.id, e)}
+                                        className="btn-action-miss no-print"
+                                        style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
+                                        title="Diminuir uma leitura"
+                                    >-1</button>
+                                    <div
+                                        style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'help' }}
+                                        title={readData.events && readData.events.length > 0
+                                            ? "Histórico de Leituras:\n" + readData.events.map((e: string) => `• ${new Date(e).toLocaleString('pt-BR')}`).join('\n')
+                                            : "Nenhum evento registrado"}
+                                    >
+                                        {readData.count}×
+                                    </div>
+                                    <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
+                                </div>
+                            )}
+                            {!isRead && (
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    style={{ padding: '6px 16px', fontWeight: 800, borderRadius: 10, fontSize: '0.85rem' }}
+                                    onClick={(e) => markRead(p.id, e)}
+                                >
+                                    Marcar como Lido
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+                {compactMode && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }} onClick={e => e.stopPropagation()}>
                         {isRead && (
                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                <button
-                                    onClick={(e) => markRead(p.id, e)}
-                                    className="btn-action-hit no-print"
-                                    style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
-                                    title="Lido mais uma vez"
-                                >+1</button>
-                                <button
-                                    onClick={(e) => decrementRead(p.id, e)}
-                                    className="btn-action-miss no-print"
-                                    style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
-                                    title="Diminuir uma leitura"
-                                >-1</button>
-                                <div
-                                    style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'help' }}
-                                    title={readData.events && readData.events.length > 0
-                                        ? "Histórico de Leituras:\n" + readData.events.map((e: string) => `• ${new Date(e).toLocaleString('pt-BR')}`).join('\n')
-                                        : "Nenhum evento registrado"}
-                                >
-                                    {readData.count}×
-                                </div>
-                                <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
+                                <button onClick={(e) => markRead(p.id, e)} className="btn-action-hit no-print" style={{ border: 'none', background: '#22c55e', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Lido mais uma vez">+1</button>
+                                <button onClick={(e) => decrementRead(p.id, e)} className="btn-action-miss no-print" style={{ border: 'none', background: '#ef4444', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Diminuir uma leitura">-1</button>
+                                <div style={{ background: 'var(--surface2)', padding: '3px 8px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', fontSize: '0.75rem' }}>{readData.count}×</div>
+                                <button onClick={(e) => toggleFavorite(p.id, e)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)' }} title={readData.isFavorite ? 'Remover Favorito' : 'Favoritar'}>{readData.isFavorite ? '★' : '☆'}</button>
                             </div>
                         )}
                         {!isRead && (
-                            <button
-                                className="btn btn-primary btn-sm"
-                                style={{ padding: '6px 16px', fontWeight: 800, borderRadius: 10, fontSize: '0.85rem' }}
-                                onClick={(e) => markRead(p.id, e)}
-                            >
-                                Marcar como Lido
-                            </button>
+                            <button className="btn btn-primary btn-sm" style={{ padding: '5px 14px', fontWeight: 800, borderRadius: 10, fontSize: '0.8rem' }} onClick={(e) => markRead(p.id, e)}>Marcar como Lido</button>
                         )}
                     </div>
-                </div>
+                )}
             </div>
         );
     };
@@ -441,6 +457,13 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                     <button className={`btn btn-sm ${studyMode === 'READ' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('READ')}>📖 Leitura</button>
                     <button className={`btn btn-sm ${studyMode === 'FLASHCARD' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setStudyMode('FLASHCARD')}>🧠 V/F</button>
+                    <button
+                        className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setCompactMode(c => !c)}
+                        title={compactMode ? 'Exibir informações completas dos julgados' : 'Modo compacto: mostrar só título e tese'}
+                    >
+                        {compactMode ? '🗂️ Completo' : '⬛ Compacto'}
+                    </button>
                 </div>
             </div>
 
