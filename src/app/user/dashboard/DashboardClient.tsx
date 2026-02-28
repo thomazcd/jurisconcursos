@@ -6,7 +6,8 @@ type Precedent = {
     id: string; title: string; summary: string; court: string;
     judgmentDate?: string | null; publicationDate?: string | null;
     processClass?: string | null; processNumber?: string | null;
-    informatoryNumber?: string | null; organ?: string | null;
+    informatoryNumber?: string | null; informatoryYear?: number | null;
+    organ?: string | null; rapporteur?: string | null;
     theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
     readCount: number; isRead: boolean; readEvents: string[];
 };
@@ -29,6 +30,8 @@ export default function DashboardClient({ userName, track }: Props) {
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
     const [courtFilter, setCourtFilter] = useState<'ALL' | 'STF' | 'STJ'>('ALL');
+    const [yearFilter, setYearFilter] = useState<string>('ALL');
+    const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
 
     const loadSubjects = useCallback(() => {
@@ -61,6 +64,23 @@ export default function DashboardClient({ userName, track }: Props) {
         if (selectedSubject) loadPrecedents(selectedSubject);
     }, [selectedSubject, loadPrecedents]);
 
+    const availableYears = useMemo(() => {
+        const years = new Set<string>();
+        precedents.forEach(p => {
+            if (p.informatoryYear) years.add(p.informatoryYear.toString());
+            else if (p.judgmentDate) years.add(new Date(p.judgmentDate).getFullYear().toString());
+        });
+        return Array.from(years).sort((a, b) => b.localeCompare(a));
+    }, [precedents]);
+
+    const availableInfs = useMemo(() => {
+        const infs = new Set<string>();
+        precedents.forEach(p => {
+            if (p.informatoryNumber) infs.add(p.informatoryNumber);
+        });
+        return Array.from(infs).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+    }, [precedents]);
+
     async function markRead(id: string) {
         const r = await fetch('/api/user/read', {
             method: 'POST',
@@ -91,15 +111,22 @@ export default function DashboardClient({ userName, track }: Props) {
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
         return precedents.filter(p => {
-            const count = readMap[p.id]?.count ?? p.readCount;
+            const count = (readMap[p.id]?.count ?? p.readCount);
             if (filterHideRead && count > 0) return false;
             if (courtFilter !== 'ALL' && p.court !== courtFilter) return false;
+
+            if (yearFilter !== 'ALL') {
+                const pYear = p.informatoryYear?.toString() || (p.judgmentDate ? new Date(p.judgmentDate).getFullYear().toString() : '');
+                if (pYear !== yearFilter) return false;
+            }
+            if (infFilter !== 'ALL' && p.informatoryNumber !== infFilter) return false;
+
             if (!q) return true;
             return p.title.toLowerCase().includes(q) ||
                 p.summary.toLowerCase().includes(q) ||
                 (p.theme ?? '').toLowerCase().includes(q);
         });
-    }, [precedents, search, filterHideRead, courtFilter, readMap]);
+    }, [precedents, search, filterHideRead, courtFilter, yearFilter, infFilter, readMap]);
 
     return (
         <div className="dashboard-container">
@@ -122,8 +149,8 @@ export default function DashboardClient({ userName, track }: Props) {
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <select
                         value={selectedSubject}
-                        onChange={e => setSelectedSubject(e.target.value)}
-                        style={{ flex: '0 0 240px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
+                        onChange={e => { setSelectedSubject(e.target.value); setYearFilter('ALL'); setInfFilter('ALL'); }}
+                        style={{ flex: '0 0 220px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
                     >
                         {subjects.map(s => (
                             <option key={s.id} value={s.id}>
@@ -131,6 +158,25 @@ export default function DashboardClient({ userName, track }: Props) {
                             </option>
                         ))}
                     </select>
+
+                    <select
+                        value={yearFilter}
+                        onChange={e => setYearFilter(e.target.value)}
+                        style={{ flex: '0 0 100px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
+                    >
+                        <option value="ALL">Ano</option>
+                        {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+
+                    <select
+                        value={infFilter}
+                        onChange={e => setInfFilter(e.target.value)}
+                        style={{ flex: '0 0 120px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }}
+                    >
+                        <option value="ALL">Informativo</option>
+                        {availableInfs.map(inf => <option key={inf} value={inf}>Inf {inf}</option>)}
+                    </select>
+
                     <input
                         type="search" placeholder="Filtrar nesta matéria…"
                         value={search}
@@ -152,7 +198,6 @@ export default function DashboardClient({ userName, track }: Props) {
                             🚫 Ocultar Lidos
                         </button>
                     </div>
-
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-3)', background: 'var(--surface)', padding: '4px 10px', borderRadius: 20, border: '1px solid var(--border)' }}>
                             {filtered.length} julgados
@@ -168,6 +213,8 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 </div>
             </div>
+
+            {loading && <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando precedentes…</p>}
 
             <div className="prec-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {filtered.map((p) => {
@@ -200,21 +247,29 @@ export default function DashboardClient({ userName, track }: Props) {
                             )}
 
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.7rem' }}>
-                                <div style={{ display: 'flex', gap: '0.8rem', color: 'var(--text-3)' }}>
-                                    <span
-                                        title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'}
-                                        style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}
-                                    >
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center' }}>
+                                    <span title={p.publicationDate ? 'Data de Publicação (DJEN/DJe)' : 'Não há informação de publicação quando divulgado o informativo'} style={{ cursor: 'help', opacity: p.publicationDate ? 1 : 0.4 }}>
                                         📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}
                                     </span>
-                                    <span
-                                        title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'}
-                                        style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}
-                                    >
+                                    <span title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'} style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}>
                                         ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                                     </span>
                                     {proc && <span>📄 {proc}</span>}
-                                    {p.informatoryNumber && <span>📰 {p.court} {p.informatoryNumber}</span>}
+
+                                    <span style={{ color: 'var(--accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                        📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
+                                        {p.fullTextOrLink && (
+                                            <a
+                                                href={p.fullTextOrLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title="Link para o informativo original"
+                                                style={{ color: 'var(--accent)', textDecoration: 'none', marginLeft: '2px', padding: '1px 5px', background: 'rgba(58,125,68,0.1)', borderRadius: 4, display: 'flex', alignItems: 'center' }}
+                                            >
+                                                🔗 Ver
+                                            </a>
+                                        )}
+                                    </span>
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -237,7 +292,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                Juris Concursos v1.00014
+                Juris Concursos v1.00016
             </div>
         </div>
     );

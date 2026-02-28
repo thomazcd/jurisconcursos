@@ -103,6 +103,8 @@ model Precedent {
   isRG          Boolean   @default(false) // Repercussão Geral
   rgTheme       Int?      // número do tema de RG
   informatoryNumber String? // número do informativo (ex: "1123")
+  informatoryYear   Int?      // ano do informativo (ex: 2026)
+
   processClass  String?   // ex: RE, ADI, REsp
   processNumber String?   // ex: "593.068/SP"
   organ         String?   // ex: "Plenário", "2ª Turma"
