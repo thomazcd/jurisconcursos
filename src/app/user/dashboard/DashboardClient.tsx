@@ -315,6 +315,8 @@ export default function DashboardClient({ userName, track }: Props) {
                                 🔍 {proc}
                             </span>
                         )}
+                        {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📅 Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                        {p.publicationDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📢 Publ: {new Date(p.publicationDate).toLocaleDateString('pt-BR')}</span>}
                         {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
                     </div>
 
