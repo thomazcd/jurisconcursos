@@ -35,6 +35,24 @@ export default function UserSettingsPage() {
         setSuccess(`Perfil alterado para ${label} com sucesso!`);
     }
 
+    async function resetAllReads() {
+        if (!confirm('Deseja marcar TODOS os julgados como não lidos? Isso zerará o contador de leituras de todo o sistema.')) return;
+        setSaving(true);
+        try {
+            await fetch('/api/user/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk_reset_reads', precedentId: 'ALL' }),
+            });
+            setSuccess('Todas as leituras foram resetadas com sucesso!');
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao resetar leituras');
+        } finally {
+            setSaving(false);
+        }
+    }
+
     const activeTrack = TRACKS.find((t) => t.value === track);
 
     return (
@@ -92,6 +110,33 @@ export default function UserSettingsPage() {
                         {activeTrack.icon} Trilha <strong>{activeTrack.label}</strong> ativa. Você verá matérias e precedentes específicos desta carreira.
                     </p>
                 )}
+
+                <div className="divider" style={{ margin: '1.5rem 0' }} />
+
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#ef4444', marginBottom: '0.5rem' }}>Zona de Perigo</h2>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1rem' }}>
+                    Ações irreversíveis sobre seus dados de estudo.
+                </p>
+
+                <button
+                    onClick={resetAllReads}
+                    disabled={saving}
+                    style={{
+                        padding: '0.6rem 1rem',
+                        borderRadius: '8px',
+                        border: '1px solid #ef4444',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                    Marcar todos os informativos como NÃO LIDOS
+                </button>
             </div>
         </div>
     );

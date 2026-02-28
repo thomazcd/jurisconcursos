@@ -18,11 +18,31 @@ export default function StatsClient() {
     const [data, setData] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const loadStats = () => {
+        setLoading(true);
         fetch('/api/user/stats')
             .then(r => r.json())
             .then(d => { setData(d); setLoading(false); });
+    };
+
+    useEffect(() => {
+        loadStats();
     }, []);
+
+    async function resetAllStats() {
+        if (!confirm('Deseja zerar TODAS as estatísticas de desempenho (V/F)? Esta ação não pode ser desfeita.')) return;
+        try {
+            await fetch('/api/user/read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk_reset_stats', precedentId: 'ALL' }),
+            });
+            loadStats();
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao resetar estatísticas');
+        }
+    }
 
     const timeStats = useMemo(() => {
         if (!data) return null;
@@ -53,9 +73,32 @@ export default function StatsClient() {
 
     return (
         <div className="stats-container" style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, var(--accent), #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>📊 Seu Painel de Performance</h1>
-                <p style={{ color: 'var(--text-3)', fontSize: '0.9rem' }}>Acompanhe sua evolução e identifique pontos de foco nos informativos.</p>
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.5rem', background: 'linear-gradient(90deg, var(--accent), #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>📊 Seu Painel de Performance</h1>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.9rem' }}>Acompanhe sua evolução e identifique pontos de foco nos informativos.</p>
+                </div>
+                <button
+                    onClick={resetAllStats}
+                    style={{
+                        padding: '0.5rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        background: 'var(--surface)',
+                        color: '#ef4444',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface)'; }}
+                >
+                    Zerar Estatísticas
+                </button>
             </div>
 
             {/* Top Summaries */}
