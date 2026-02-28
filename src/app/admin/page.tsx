@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
         recentPrecedents = await prisma.precedent.findMany({
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             take: 5,
-            include: { subject: { select: { name: true } } },
+            include: { subjects: { select: { name: true } } },
         });
     } catch (e: any) {
         dbError = e.message ?? String(e);
@@ -95,7 +95,9 @@ export default async function AdminDashboard() {
                                         </td>
                                         <td style={{ maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</td>
                                         <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
-                                        <td style={{ fontSize: '0.82rem' }}>{p.subject?.name}</td>
+                                        <td style={{ fontSize: '0.82rem' }}>
+                                            {p.subjects?.map((s: any) => s.name).join(', ') || '—'}
+                                        </td>
                                         <td><span className="badge badge-geral">{appLabel(p)}</span></td>
                                     </tr>
                                 ))}
