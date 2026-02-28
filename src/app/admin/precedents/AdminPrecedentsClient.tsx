@@ -149,8 +149,37 @@ export default function AdminPrecedentsClient() {
         fetchData();
     }
 
-    function PrecedentForm({ f, setF }: { f: typeof EMPTY_FORM; setF: (v: any) => void }) {
+
+    function PrecedentForm({ f, setF, subjects }: { f: typeof EMPTY_FORM; setF: (v: any) => void; subjects: Subject[] }) {
         const set = (k: string, v: any) => setF((prev: any) => ({ ...prev, [k]: v }));
+
+        // Auto-suggest subjects based on keywords
+        useEffect(() => {
+            const text = `${f.title} ${f.summary}`.toLowerCase();
+            let newIds = [...f.subjectIds];
+            let changed = false;
+
+            const rules = [
+                { id: 's-trib', keywords: ['tributário', 'imposto', 'refis', 'fiscal', 'contribuinte', 'icms', 'iss', 'irpf', 'irpj', 'iptu', 'itcmd'] },
+                { id: 's-cproc', keywords: ['processual civil', 'cpc', 'honorários', 'recurso', 'agravo', 'apelação', 'competência', 'legitimidade', 'embargos'] },
+                { id: 's-admin', keywords: ['administrativo', 'servidor', 'concurso', 'improbidade', 'licitação', 'poder público', 'estado', 'município'] },
+                { id: 's-civil', keywords: ['civil', 'contrato', 'família', 'sucessões', 'danos morais', 'responsabilidade civil', 'propriedade'] },
+                { id: 's-pen', keywords: ['penal', 'crime', 'delito', 'prisão', 'cpp', 'condenação', 'pena', 'tráfico', 'roubo', 'furto'] },
+                { id: 's-cons', keywords: ['consumidor', 'código de defesa', 'cdc', 'vício', 'produto', 'serviço', 'propaganda'] }
+            ];
+
+            rules.forEach(rule => {
+                const sub = subjects.find(s => s.id === rule.id || s.name.toLowerCase().includes(rule.id.split('-')[1]));
+                const targetId = sub?.id;
+                if (targetId && !newIds.includes(targetId) && rule.keywords.some(k => text.includes(k))) {
+                    newIds.push(targetId);
+                    changed = true;
+                }
+            });
+
+            if (changed) set('subjectIds', newIds);
+        }, [f.title, f.summary, subjects]); // Added subjects to dependency array
+
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -346,7 +375,7 @@ export default function AdminPrecedentsClient() {
 
                         <div style={{ maxHeight: '75vh', overflowY: 'auto', padding: '0.5rem 0' }}>
                             {editing ? (
-                                <PrecedentForm f={form} setF={setForm} />
+                                <PrecedentForm f={form} setF={setForm} subjects={subjects} />
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                     <div>
@@ -392,7 +421,7 @@ export default function AdminPrecedentsClient() {
                         </div>
                         {formError && <div className="alert alert-error" style={{ marginBottom: '0.5rem' }}>{formError}</div>}
                         <div style={{ maxHeight: '70vh', overflowY: 'auto', padding: '0.25rem 0' }}>
-                            <PrecedentForm f={createForm} setF={setCreateForm} />
+                            <PrecedentForm f={createForm} setF={setCreateForm} subjects={subjects} />
                         </div>
                         <div className="modal-actions">
                             <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
