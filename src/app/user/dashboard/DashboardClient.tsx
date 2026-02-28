@@ -56,6 +56,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [helpStep, setHelpStep] = useState(0);
 
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
+    const [historyModal, setHistoryModal] = useState<{ id: string, events: string[] } | null>(null);
 
     const loadSubjects = useCallback(() => {
         fetch('/api/user/subjects')
@@ -403,10 +404,9 @@ export default function DashboardClient({ userName, track }: Props) {
                                         title="Diminuir uma leitura"
                                     >-1</button>
                                     <div
-                                        style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'help' }}
-                                        title={readData.events && readData.events.length > 0
-                                            ? "Histórico de Leituras:\n" + readData.events.map((e: string) => `• ${new Date(e).toLocaleString('pt-BR')}`).join('\n')
-                                            : "Nenhum evento registrado"}
+                                        style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'pointer' }}
+                                        onClick={(e) => { e.stopPropagation(); setHistoryModal({ id: p.id, events: readData.events || [] }); }}
+                                        title="Clique para ver o histórico de leituras"
                                     >
                                         {readData.count}×
                                     </div>
@@ -717,7 +717,7 @@ export default function DashboardClient({ userName, track }: Props) {
                         <p style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.95rem', marginBottom: '2rem', background: 'var(--bg)', borderRadius: 12, padding: '1rem 1.25rem', border: '1px solid var(--border)' }}>
                             {[
                                 'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
-                                'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema.',
+                                'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema. Clique no número de vezes lido para saber a data e hora de cada leitura',
                                 'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
                                 'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
                                 'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.',
@@ -898,6 +898,46 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
+            {historyModal && (
+                <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
+                    <div onClick={e => e.stopPropagation()} style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border-strong)',
+                        borderRadius: 20,
+                        padding: '1.5rem',
+                        maxWidth: '320px',
+                        width: 'calc(100% - 2rem)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+                        animation: 'modalIn 0.2s ease',
+                        position: 'relative'
+                    }}>
+                        <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>📖 Histórico de Leitura</h3>
+                        <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
+                            {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
+                                <div key={idx} style={{
+                                    padding: '8px 12px',
+                                    background: 'var(--surface2)',
+                                    borderRadius: 10,
+                                    fontSize: '0.85rem',
+                                    border: '1px solid var(--border)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
+                                    <span style={{ color: 'var(--text)' }}>
+                                        {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
+                            )) : (
+                                <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
                 v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
             </div>
