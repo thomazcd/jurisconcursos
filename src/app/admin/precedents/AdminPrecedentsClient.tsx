@@ -11,13 +11,13 @@ type Precedent = {
     informatoryNumber?: string | null; processClass?: string | null;
     processNumber?: string | null; organ?: string | null; rapporteur?: string | null;
     theme?: string | null; tags: string[];
-    subject?: { name: string };
+    subjects: { id: string; name: string }[];
 };
 
 const COURTS = ['STF', 'STJ', 'TRF', 'TJ'] as const;
 const EMPTY_FORM = {
     court: 'STJ', title: '', summary: '', fullTextOrLink: '',
-    subjectId: '', forAll: false, forProcurador: false, forJuizFederal: false, forJuizEstadual: false,
+    subjectIds: [] as string[], forAll: false, forProcurador: false, forJuizFederal: false, forJuizEstadual: false,
     judgmentDate: '', isRG: false, rgTheme: '', informatoryNumber: '',
     processClass: '', processNumber: '', organ: '', rapporteur: '', theme: '', tags: '',
 };
@@ -88,7 +88,8 @@ export default function AdminPrecedentsClient() {
         setEditing(false);
         setForm({
             court: p.court, title: p.title, summary: p.summary,
-            fullTextOrLink: p.fullTextOrLink ?? '', subjectId: p.subjectId,
+            fullTextOrLink: p.fullTextOrLink ?? '',
+            subjectIds: p.subjects?.map(s => s.id) ?? [],
             forAll: p.forAll, forProcurador: p.forProcurador,
             forJuizFederal: p.forJuizFederal, forJuizEstadual: p.forJuizEstadual,
             judgmentDate: p.judgmentDate ? p.judgmentDate.substring(0, 10) : '',
@@ -201,12 +202,27 @@ export default function AdminPrecedentsClient() {
                         <label>Tema (ex: Tema 1081)</label>
                         <input value={f.theme} onChange={e => set('theme', e.target.value)} placeholder="Tema 1081 / RG 123" />
                     </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
                     <div className="form-group" style={{ margin: 0 }}>
-                        <label>Matéria</label>
-                        <select value={f.subjectId} onChange={e => set('subjectId', e.target.value)}>
-                            <option value="">— selecione —</option>
-                            {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
+                        <label>Matérias (Selecione múltiplas)</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', background: 'var(--surface2)', padding: '0.75rem', borderRadius: 12, border: '1px solid var(--border)' }}>
+                            {subjects.map(s => (
+                                <label key={s.id} style={{ fontSize: '0.8rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer', padding: '4px 8px', background: f.subjectIds.includes(s.id) ? 'var(--accent-10)' : 'transparent', borderRadius: 6, border: f.subjectIds.includes(s.id) ? '1px solid var(--accent)' : '1px solid var(--border)' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={f.subjectIds.includes(s.id)}
+                                        onChange={e => {
+                                            const next = e.target.checked
+                                                ? [...f.subjectIds, s.id]
+                                                : f.subjectIds.filter(id => id !== s.id);
+                                            set('subjectIds', next);
+                                        }}
+                                    />
+                                    {s.name}
+                                </label>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
@@ -285,7 +301,9 @@ export default function AdminPrecedentsClient() {
                                         <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
                                         <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={12} /> {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
                                         <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
-                                        <td style={{ fontSize: '0.78rem' }}>{p.subject?.name ?? '—'}</td>
+                                        <td style={{ fontSize: '0.78rem' }}>
+                                            {p.subjects?.map(s => s.name).join(', ') || '—'}
+                                        </td>
                                         <td style={{ fontSize: '0.78rem' }}>{visibilityLabel(p)}</td>
                                         <td onClick={e => e.stopPropagation()}>
                                             <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id, p.title)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -324,7 +342,7 @@ export default function AdminPrecedentsClient() {
                             <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>{panel.title}</p>
                             <p style={{ fontSize: '0.83rem', color: 'var(--text-2)', marginBottom: '0.75rem', lineHeight: 1.5 }}>{panel.summary}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                                <DetailRow label="Matéria" value={panel.subject?.name} />
+                                <DetailRow label="Matérias" value={panel.subjects?.map(s => s.name).join(', ')} />
                                 <DetailRow label="Tema" value={panel.theme} />
                                 <DetailRow label="Data de julgamento" value={panel.judgmentDate ? new Date(panel.judgmentDate).toLocaleDateString('pt-BR') : null} />
                                 <DetailRow label="Informativo" value={panel.informatoryNumber} />
@@ -360,7 +378,7 @@ export default function AdminPrecedentsClient() {
                         </div>
                         <div className="modal-actions">
                             <button className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
-                            <button className="btn btn-primary" onClick={handleCreate} disabled={saving || !createForm.title || !createForm.summary || !createForm.subjectId}>
+                            <button className="btn btn-primary" onClick={handleCreate} disabled={saving || !createForm.title || !createForm.summary || createForm.subjectIds.length === 0}>
                                 {saving ? 'Criando…' : 'Criar precedente'}
                             </button>
                         </div>

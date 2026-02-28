@@ -94,8 +94,6 @@ model Precedent {
   forJuizFederal Boolean @default(false)
   forJuizEstadual Boolean @default(false)
 
-  subjectId     String
-
   // Dados ricos para o admin / estudo avançado
   judgmentDate  DateTime? // data do julgamento
   publicationDate DateTime? // data de publicação (DJEN/DJe)
@@ -119,8 +117,9 @@ model Precedent {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  subject Subject         @relation(fields: [subjectId], references: [id], onDelete: Restrict)
-  reads   PrecedentRead[]
+  subjectId     String?
+  subjects      Subject[]
+  reads         PrecedentRead[]
 
   @@index([subjectId])
   @@index([court])

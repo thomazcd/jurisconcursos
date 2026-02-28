@@ -10,7 +10,7 @@ const schema = z.object({
     title: z.string().min(2),
     summary: z.string().min(2),
     fullTextOrLink: z.string().optional().nullable(),
-    subjectId: z.string(),
+    subjectIds: z.array(z.string()),
     forAll: z.boolean().default(false),
     forProcurador: z.boolean().default(false),
     forJuizFederal: z.boolean().default(false),
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('q');
 
     const where: any = {};
-    if (subjectId) where.subjectId = subjectId;
+    if (subjectId) where.subjects = { some: { id: subjectId } };
     if (search) where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         { theme: { contains: search, mode: 'insensitive' } },
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     const precedents = await prisma.precedent.findMany({
         where,
         orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
-        include: { subject: { select: { name: true } } },
+        include: { subjects: { select: { id: true, name: true } } },
         take: 200,
     });
     return NextResponse.json({ precedents });
@@ -60,9 +60,18 @@ export async function POST(req: NextRequest) {
     const parsed = schema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 });
 
-    const { judgmentDate, ...rest } = parsed.data;
+    const { judgmentDate, subjectIds, ...rest } = parsed.data;
     const precedent = await prisma.precedent.create({
-        data: { ...rest, judgmentDate: judgmentDate ? new Date(judgmentDate) : null },
+        data: {
+            ...rest,
+            judgmentDate: judgmentDate ? new Date(judgmentDate) : null,
+            subjects: {
+                connect: subjectIds.map(id => ({ id }))
+            },
+            // Maintain compatibility with legacy field if needed
+            subjectId: subjectIds[0] || null
+        },
+        include: { subjects: true }
     });
     return NextResponse.json({ precedent }, { status: 201 });
 }

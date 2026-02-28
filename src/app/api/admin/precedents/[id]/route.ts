@@ -10,7 +10,7 @@ const schema = z.object({
     title: z.string().min(2).optional(),
     summary: z.string().min(2).optional(),
     fullTextOrLink: z.string().optional().nullable(),
-    subjectId: z.string().optional(),
+    subjectIds: z.array(z.string()).optional(),
     forAll: z.boolean().optional(),
     forProcurador: z.boolean().optional(),
     forJuizFederal: z.boolean().optional(),
@@ -33,12 +33,26 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 });
 
-    const { judgmentDate, ...rest } = parsed.data;
+    const { judgmentDate, subjectIds, ...rest } = parsed.data;
+
+    const updateData: any = {
+        ...rest,
+        ...(judgmentDate !== undefined ? { judgmentDate: judgmentDate ? new Date(judgmentDate) : null } : {}),
+    };
+
+    if (subjectIds !== undefined) {
+        updateData.subjects = {
+            set: subjectIds.map(id => ({ id }))
+        };
+        updateData.subjectId = subjectIds[0] || null;
+    }
+
     const precedent = await prisma.precedent.update({
         where: { id: params.id },
-        data: { ...rest, ...(judgmentDate !== undefined ? { judgmentDate: judgmentDate ? new Date(judgmentDate) : null } : {}) },
+        data: updateData,
+        include: { subjects: true }
     });
     return NextResponse.json({ precedent });
 }

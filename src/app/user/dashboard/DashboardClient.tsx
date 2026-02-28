@@ -13,8 +13,7 @@ type Precedent = {
     organ?: string | null; rapporteur?: string | null;
     theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
     readCount: number; isRead: boolean; readEvents: string[];
-    subjectId: string;
-    subject?: { name: string };
+    subjects: { id: string; name: string }[];
     flashcardQuestion?: string | null;
     flashcardAnswer?: boolean;
     correctCount?: number;
@@ -294,14 +293,19 @@ export default function DashboardClient({ userName, track }: Props) {
         if (selectedSubject !== 'ALL' || search.trim() !== '' || yearFilter !== 'ALL' || infFilter !== 'ALL' || courtFilter !== 'ALL') return null;
         const groups: Record<string, Precedent[]> = {};
         filtered.forEach(p => {
-            const subName = p.subject?.name || 'Geral';
-            if (!groups[subName]) groups[subName] = [];
-            groups[subName].push(p);
+            const subs = p.subjects && p.subjects.length > 0 ? p.subjects : [{ name: 'Geral' }];
+            subs.forEach(s => {
+                const subName = s.name;
+                // Se o usuário selecionou uma matéria específica no filtro global, 
+                // aqui no agrupamento "Tudo" ainda mostramos tudo, mas se quisermos ser precisos:
+                if (!groups[subName]) groups[subName] = [];
+                groups[subName].push(p);
+            });
         });
         return Object.entries(groups).filter(([_, list]) => list.length > 0).sort(([a], [b]) => a.localeCompare(b));
     }, [selectedSubject, filtered, search, yearFilter, infFilter, courtFilter]);
 
-    const renderPrecedent = (p: Precedent) => {
+    const renderPrecedent = (p: Precedent, currentSubjectContext?: string) => {
         const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
         const isRead = readData.count > 0;
         const isRevealed = studyMode === 'READ' || revealed[p.id];
@@ -345,6 +349,11 @@ export default function DashboardClient({ userName, track }: Props) {
                 {!compactMode && (
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
                         {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme}</span>}
+                        {p.subjects?.filter(s => s.name !== currentSubjectContext).map(s => (
+                            <span key={s.id} style={{ fontSize: '0.65em', background: 'rgba(20, 184, 166, 0.1)', color: 'var(--accent)', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <SvgIcons.BookOpen size={10} /> + {s.name}
+                            </span>
+                        ))}
                         {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={10} /> Dominado</span>}
                         {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.X size={10} /> Revisar</span>}
                         {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Book size={10} /> Lido</span>}
@@ -892,9 +901,9 @@ export default function DashboardClient({ userName, track }: Props) {
                             <div className="line" />
                             <span>{list.length}</span>
                         </div>
-                        {list.map(renderPrecedent)}
+                        {list.map(p => renderPrecedent(p, subName as string))}
                     </div>
-                )) : filtered.map(renderPrecedent))}
+                )) : filtered.map(p => renderPrecedent(p)))}
             </div>
 
             {

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         const where: any = { ...appFilter };
 
         if (subjectId && subjectId !== 'ALL') {
-            where.subjectId = subjectId;
+            where.subjects = { some: { id: subjectId } };
         }
         if (q) {
             where.OR = [
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
             where,
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             include: {
-                subject: { select: { name: true } },
+                subjects: { select: { id: true, name: true } },
             },
             distinct: ['processNumber', 'processClass', 'title'],
             take: 500,
