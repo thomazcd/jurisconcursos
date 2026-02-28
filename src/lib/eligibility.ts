@@ -6,13 +6,13 @@ import { Track } from '@prisma/client';
  */
 export function getApplicabilityFilter(track: Track) {
     if (track === 'PROCURADOR') {
-        return { OR: [{ forAll: true }, { forProcurador: true }] };
+        return { OR: [{ forAll: true }, { forProcurador: true }, { forJuizFederal: false, forJuizEstadual: false, forProcurador: false, forAll: false }] };
     }
     if (track === 'JUIZ_FEDERAL') {
-        return { OR: [{ forAll: true }, { forJuizFederal: true }] };
+        return { OR: [{ forAll: true }, { forJuizFederal: true }, { forJuizFederal: false, forJuizEstadual: false, forProcurador: false, forAll: false }] };
     }
     // JUIZ_ESTADUAL
-    return { OR: [{ forAll: true }, { forJuizEstadual: true }] };
+    return { OR: [{ forAll: true }, { forJuizEstadual: true }, { forJuizFederal: false, forJuizEstadual: false, forProcurador: false, forAll: false }] };
 }
 
 /**
