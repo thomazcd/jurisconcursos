@@ -903,7 +903,10 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                         {list.map(p => renderPrecedent(p, subName as string))}
                     </div>
-                )) : filtered.map(p => renderPrecedent(p)))}
+                )) : filtered.map(p => {
+                    const currentSubName = subjects.find(s => s.id === selectedSubject)?.name;
+                    return renderPrecedent(p, currentSubName);
+                }))}
             </div>
 
             {
