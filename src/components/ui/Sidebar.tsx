@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { APP_VERSION } from '@/lib/version';
 
 interface SidebarProps {
     role: string;
@@ -140,7 +141,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                         </div>
                     )}
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginBottom: '0.5rem', opacity: 0.6 }}>
-                        v1.00046
+                        v{APP_VERSION}
                     </div>
                     <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSignOut}>
                         Sair

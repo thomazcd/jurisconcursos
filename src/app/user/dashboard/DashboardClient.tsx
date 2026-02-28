@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { signOut } from 'next-auth/react';
+import { APP_VERSION } from '@/lib/version';
 
 type Subject = { id: string; name: string; total: number; readCount: number; unreadCount: number };
 type Precedent = {
@@ -474,7 +476,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00046</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v{APP_VERSION}</div>
         </div>
     );
 }

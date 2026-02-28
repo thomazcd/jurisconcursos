@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
+import { APP_VERSION } from '@/lib/version';
 
 type SubjectStat = { id: string; name: string; total: number; read: number; hits: number; misses: number; percent: number; hitRate: number };
 type StatsData = {
@@ -175,7 +176,7 @@ export default function StatsClient() {
             <style jsx>{` @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00042
+                v{APP_VERSION}
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { APP_VERSION } from '@/lib/version';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -74,7 +75,7 @@ export default function LoginPage() {
                 </div>
 
                 <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.68rem', color: 'var(--text-3)', opacity: 0.55 }}>
-                    v1.00042
+                    v{APP_VERSION}
                 </div>
             </div>
         </div>

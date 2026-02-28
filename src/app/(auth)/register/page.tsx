@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { APP_VERSION } from '@/lib/version';
 
 const TRACKS = [
     { value: 'JUIZ_ESTADUAL', label: '⚖️ Juiz Estadual' },
@@ -102,7 +103,7 @@ export default function RegisterPage() {
                 </div>
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v1.00042
+                v{APP_VERSION}
             </div>
         </div>
     );
