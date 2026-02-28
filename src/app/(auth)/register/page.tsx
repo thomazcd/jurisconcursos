@@ -112,7 +112,7 @@ export default function RegisterPage() {
                 </div>
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v{APP_VERSION}
+                v{APP_VERSION} · Desenvolvido por Thomaz C. Drumond
             </div>
         </div>
     );

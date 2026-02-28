@@ -746,7 +746,9 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v{APP_VERSION}</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
+                v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
+            </div>
         </div>
     );
 }

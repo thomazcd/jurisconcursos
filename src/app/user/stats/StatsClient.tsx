@@ -176,7 +176,7 @@ export default function StatsClient() {
             <style jsx>{` @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v{APP_VERSION}
+                v{APP_VERSION} · Desenvolvido por Thomaz C. Drumond
             </div>
         </div>
     );

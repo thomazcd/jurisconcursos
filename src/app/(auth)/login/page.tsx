@@ -75,7 +75,7 @@ export default function LoginPage() {
                 </div>
 
                 <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.68rem', color: 'var(--text-3)', opacity: 0.55 }}>
-                    v{APP_VERSION}
+                    v{APP_VERSION} · Desenvolvido por Thomaz C. Drumond
                 </div>
             </div>
         </div>
