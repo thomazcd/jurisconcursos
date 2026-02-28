@@ -45,7 +45,12 @@ export default function LoginPage() {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password">Senha</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label htmlFor="password">Senha</label>
+                            <a href="mailto:admin@jurisconcursos.com" style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                                Esqueceu a senha?
+                            </a>
+                        </div>
                         <input
                             id="password" type="password" placeholder="••••••"
                             value={form.password}
@@ -67,9 +72,10 @@ export default function LoginPage() {
                     Não tem conta?{' '}
                     <Link href="/register">Cadastre-se</Link>
                 </div>
-            </div>
-            <div style={{ marginTop: '0.75rem', fontSize: '0.7rem', color: 'var(--text-3)', textAlign: 'center', opacity: 0.6 }}>
-                v1.00006
+
+                <div style={{ textAlign: 'center', marginTop: '0.75rem', fontSize: '0.68rem', color: 'var(--text-3)', opacity: 0.55 }}>
+                    v1.00007
+                </div>
             </div>
         </div>
     );

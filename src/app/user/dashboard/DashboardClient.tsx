@@ -3,23 +3,12 @@ import { useEffect, useState, useCallback } from 'react';
 
 type Subject = { id: string; name: string };
 type Precedent = {
-    id: string;
-    title: string;
-    summary: string;
-    court: string;
-    judgmentDate?: string | null;
-    processClass?: string | null;
-    processNumber?: string | null;
-    informatoryNumber?: string | null;
-    organ?: string | null;
-    rapporteur?: string | null;
-    theme?: string | null;
-    isRG: boolean;
-    rgTheme?: number | null;
-    fullTextOrLink?: string | null;
-    readCount: number;
-    isRead: boolean;
-    subject?: { name: string };
+    id: string; title: string; summary: string; court: string;
+    judgmentDate?: string | null; processClass?: string | null;
+    processNumber?: string | null; informatoryNumber?: string | null;
+    organ?: string | null; rapporteur?: string | null;
+    theme?: string | null; isRG: boolean; fullTextOrLink?: string | null;
+    readCount: number; isRead: boolean;
 };
 
 interface Props { userName: string; track: string; }
@@ -32,14 +21,13 @@ const TRACK_LABELS: Record<string, string> = {
 
 export default function DashboardClient({ userName, track }: Props) {
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState<string>('');
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [precedents, setPrecedents] = useState<Precedent[]>([]);
     const [loading, setLoading] = useState(false);
     const [readMap, setReadMap] = useState<Record<string, number>>({});
     const [search, setSearch] = useState('');
+    const [expanded, setExpanded] = useState<string | null>(null);
 
-
-    // Load subjects for this track
     useEffect(() => {
         fetch('/api/user/subjects')
             .then(r => r.json())
@@ -50,10 +38,10 @@ export default function DashboardClient({ userName, track }: Props) {
             });
     }, []);
 
-    // Load precedents when subject changes
     const loadPrecedents = useCallback(async (subjectId: string) => {
         if (!subjectId) return;
         setLoading(true);
+        setExpanded(null);
         const r = await fetch(`/api/user/precedents?subjectId=${subjectId}`);
         const d = await r.json();
         const precs: Precedent[] = d.precedents ?? [];
@@ -87,13 +75,7 @@ export default function DashboardClient({ userName, track }: Props) {
         setReadMap(m => ({ ...m, [id]: 0 }));
     }
 
-    function handlePrint() {
-        window.print();
-    }
-
     const selectedSubjectName = subjects.find(s => s.id === selectedSubject)?.name ?? '';
-
-    // Filter precedents client-side (instant, no API call)
     const q = search.trim().toLowerCase();
     const filtered = q
         ? precedents.filter(p =>
@@ -107,37 +89,29 @@ export default function DashboardClient({ userName, track }: Props) {
     return (
         <div>
             {/* Header */}
-            <div className="page-header" style={{ marginBottom: '0.75rem' }}>
-                <div>
-                    <h1 className="page-title" style={{ fontSize: '1rem' }}>
-                        {TRACK_LABELS[track] ?? track}
-                    </h1>
-                </div>
-                <button className="btn btn-secondary btn-sm no-print" onClick={handlePrint} title="Imprimir / Salvar PDF">
+            <div className="page-header no-print" style={{ marginBottom: '0.75rem' }}>
+                <h1 className="page-title" style={{ fontSize: '1rem' }}>{TRACK_LABELS[track] ?? track}</h1>
+                <button className="btn btn-secondary btn-sm" onClick={() => window.print()} title="Imprimir / Salvar PDF">
                     🖨️ Imprimir
                 </button>
             </div>
 
-            {/* Selectors row */}
+            {/* Selectors */}
             <div className="no-print" style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <select
                     value={selectedSubject}
                     onChange={e => { setSelectedSubject(e.target.value); setSearch(''); }}
                     style={{ flex: '0 0 220px', padding: '0.45rem 0.75rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', fontSize: '0.85rem' }}
                 >
-                    {subjects.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
+                    {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <input
-                    type="search"
-                    placeholder="Buscar em todos os precedentes…"
+                    type="search" placeholder="Buscar…"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     style={{ flex: 1, padding: '0.45rem 0.75rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface2)', color: 'var(--text)', fontSize: '0.85rem' }}
                 />
             </div>
-
 
             {/* Print header */}
             <div className="print-only" style={{ marginBottom: '1rem' }}>
@@ -146,7 +120,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 <hr />
             </div>
 
-            {/* Precedent list */}
+            {/* States */}
             {loading && <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', padding: '1rem 0' }}>Carregando…</p>}
             {!loading && filtered.length === 0 && (
                 <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', padding: '1rem 0' }}>
@@ -154,29 +128,69 @@ export default function DashboardClient({ userName, track }: Props) {
                 </p>
             )}
             {!loading && q && filtered.length > 0 && (
-                <p style={{ color: 'var(--text-3)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>{filtered.length} resultado{filtered.length > 1 ? 's' : ''} para "{search}"</p>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.78rem', marginBottom: '0.5rem' }}>
+                    {filtered.length} resultado{filtered.length > 1 ? 's' : ''} para "{search}"
+                </p>
             )}
 
+            {/* Precedent list */}
             <div className="prec-list">
                 {filtered.map((p) => {
                     const count = readMap[p.id] ?? p.readCount;
                     const isRead = count > 0;
+                    const isOpen = expanded === p.id;
+                    const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
+
                     return (
                         <div
                             key={p.id}
                             className="prec-item"
                             style={{ borderLeft: `3px solid ${isRead ? '#86efac' : '#fca5a5'}` }}
                         >
-                            {/* Content lines */}
-                            <div className="prec-title">{p.title}</div>
-                            <div className="prec-summary">{p.summary}</div>
+                            {/* Clickable title row */}
+                            <div
+                                className="prec-title"
+                                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}
+                                onClick={() => setExpanded(isOpen ? null : p.id)}
+                            >
+                                <span>{p.title}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', flexShrink: 0, marginTop: '2px' }}>
+                                    {isOpen ? '▲' : '▼'}
+                                </span>
+                            </div>
 
-                            {/* Read controls — hidden on print */}
+                            {/* Expanded detail */}
+                            {isOpen && (
+                                <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+                                    {p.theme && (
+                                        <div style={{ marginBottom: '0.4rem' }}>
+                                            <span style={{ fontSize: '0.7rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600 }}>
+                                                📌 {p.theme}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="prec-summary" style={{ marginBottom: '0.5rem', fontWeight: 500 }}>
+                                        {p.summary}
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.72rem', color: 'var(--text-3)', marginTop: '0.35rem' }}>
+                                        {proc && <span>📄 {proc}</span>}
+                                        {p.organ && <span>🏛 {p.organ}</span>}
+                                        {p.rapporteur && <span>👤 {p.rapporteur}</span>}
+                                        {p.judgmentDate && <span>📅 {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                                        {p.informatoryNumber && <span>📰 Informativo {p.court} {p.informatoryNumber}</span>}
+                                        {p.fullTextOrLink && (
+                                            <a href={p.fullTextOrLink} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
+                                                🔗 Texto completo
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Read controls */}
                             <div className="prec-actions no-print">
                                 {!isRead ? (
-                                    <button className="btn-read" onClick={() => markRead(p.id)}>
-                                        Marcar lido
-                                    </button>
+                                    <button className="btn-read" onClick={() => markRead(p.id)}>Marcar lido</button>
                                 ) : (
                                     <span className="read-badge">
                                         ✓ Lido {count > 1 ? `(${count}×)` : ''}
