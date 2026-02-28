@@ -279,96 +279,51 @@ export default function DashboardClient({ userName, track }: Props) {
         <div className={`dashboard-container ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
-                    <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '800px' }} onClick={e => e.stopPropagation()}>
+                    <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '700px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <span style={{ fontSize: '1.2rem' }}>📄</span>
-                                <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-3)' }}>Detalhes do Julgado</h2>
-                            </div>
+                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)' }}>🔍 Detalhes do Julgado</h2>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <button onClick={() => setIsFocusMode(!isFocusMode)} className="btn btn-ghost" title="Modo Foco">{isFocusMode ? '🔲' : '🔳'}</button>
                                 <button onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }} className="btn-close">✕</button>
                             </div>
                         </div>
 
-                        <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 4}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
-                            {/* Badges and Categories */}
-                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                                {selectedPrecedent.theme && <span style={{ background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '4px 12px', borderRadius: 20, fontWeight: 800, fontSize: '0.75em' }}>📌 {selectedPrecedent.theme}</span>}
-                                {selectedPrecedent.isRG && <span style={{ background: 'rgba(58,125,68,0.1)', color: 'var(--accent)', padding: '4px 12px', borderRadius: 20, fontWeight: 800, fontSize: '0.75em' }}>⚖️ Repercussão Geral</span>}
-                                {selectedPrecedent.subject?.name && <span style={{ background: 'var(--surface2)', color: 'var(--text-3)', padding: '4px 12px', borderRadius: 20, fontWeight: 800, fontSize: '0.75em' }}>📚 {selectedPrecedent.subject.name}</span>}
+                        <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 3}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <h3 style={{ fontSize: '1.3em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4' }}>{selectedPrecedent.title}</h3>
                             </div>
 
-                            {/* Main Title */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'flex-start', gap: '1rem' }}>
-                                <h3 style={{ fontSize: '1.4em', fontWeight: 900, color: 'var(--text)', flex: 1, lineHeight: '1.3' }}>{selectedPrecedent.title}</h3>
-                                <button onClick={(e) => toggleFavorite(selectedPrecedent.id, e)} style={{ border: 'none', background: 'transparent', fontSize: '2.5rem', cursor: 'pointer', color: readMap[selectedPrecedent.id]?.isFavorite ? 'var(--accent)' : 'var(--border)', transition: 'all 0.2s', marginTop: '-5px' }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                                    {readMap[selectedPrecedent.id]?.isFavorite ? '★' : '☆'}
-                                </button>
-                            </div>
-
-                            {/* The Summary Card */}
-                            <div style={{
-                                padding: '2rem',
-                                background: 'white',
-                                borderRadius: 24,
-                                marginBottom: '2.5rem',
-                                lineHeight: '1.8',
-                                color: 'var(--text-1)',
-                                border: '1px solid var(--border)',
-                                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-                                position: 'relative'
-                            }}>
-                                <div style={{ position: 'absolute', top: -10, left: 20, background: 'var(--accent)', color: 'white', padding: '2px 12px', borderRadius: 8, fontSize: '0.7em', fontWeight: 900 }}>RESUMO DA TESE</div>
+                            <div style={{ marginBottom: '2rem', lineHeight: '1.8', color: 'var(--text-1)' }}>
                                 {selectedPrecedent.summary}
                             </div>
 
-                            {/* Detailed Metadata Grid */}
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                                gap: '1.25rem',
-                                padding: '1.5rem',
+                                gridTemplateColumns: 'minmax(150px, 1fr) 1fr',
+                                gap: '1rem',
+                                padding: '1.25rem',
                                 background: 'var(--surface2)',
-                                borderRadius: 20,
+                                borderRadius: 12,
+                                fontSize: '0.85em',
+                                color: 'var(--text-2)',
                                 border: '1px solid var(--border)'
                             }}>
-                                <div className="detail-item">
-                                    <span className="detail-label">🏛️ Tribunal / Órgão</span>
-                                    <span className="detail-val">{selectedPrecedent.court} {selectedPrecedent.organ ? ` - ${selectedPrecedent.organ}` : ''}</span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">⚖️ Classe e Número</span>
-                                    <span className="detail-val" onClick={(e) => copyToClipboard([selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' '), 'modal', e)} style={{ cursor: 'copy', color: 'var(--accent)', fontWeight: 700 }}>
-                                        {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'} {copying === 'modal' && '✓'}
-                                    </span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">📰 Informativo</span>
-                                    <span className="detail-val">{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">👤 Relator</span>
-                                    <span className="detail-val">{selectedPrecedent.rapporteur || '---'}</span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">📅 Publicação</span>
-                                    <span className="detail-val">{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '---'}</span>
-                                </div>
-                                <div className="detail-item">
-                                    <span className="detail-label">⚖️ Julgamento</span>
-                                    <span className="detail-val">{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
-                                </div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>🏛️ Tribunal:</strong> {selectedPrecedent.court}</div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>📰 Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>⚖️ Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>👤 Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>📅 Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)' }}>⚖️ Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</div>
+                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}>📌 Tema:</strong> {selectedPrecedent.theme}</div>}
+                                {selectedPrecedent.isRG && <div style={{ gridColumn: 'span 2', color: 'var(--accent)', fontWeight: 800 }}>⚖️ Repercussão Geral</div>}
                             </div>
                         </div>
 
-                        <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1.5rem', borderRadius: '0 0 28px 28px' }}>
-                            <div style={{ display: 'flex', gap: '1rem', width: '100%', justifyContent: 'center' }}>
-                                <button onClick={() => window.print()} className="btn btn-secondary" style={{ flex: 1, maxWidth: '200px' }}>🖨️ PDF para Revisão</button>
-                                {selectedPrecedent.fullTextOrLink && (
-                                    <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ flex: 1, maxWidth: '200px' }}>🔗 Inteiro Teor</a>
-                                )}
-                            </div>
+                        <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1.25rem', borderRadius: '0 0 16px 16px', justifyContent: 'center' }}>
+                            {selectedPrecedent.fullTextOrLink && (
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px' }}>🔗 Inteiro Teor</a>
+                            )}
+                            {!selectedPrecedent.fullTextOrLink && <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Sem link disponível</div>}
                         </div>
                     </div>
                 </div>
@@ -505,7 +460,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00038</div>
+            <div className="no-print" style={{ textAlign: 'center', padding: '3rem', opacity: 0.3, fontSize: '0.65rem' }}>v1.00039</div>
         </div>
     );
 }

@@ -102,7 +102,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                         </div>
                     </div>
                     <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginBottom: '0.5rem', opacity: 0.6 }}>
-                        v1.00038
+                        v1.00039
                     </div>
                     <button className="btn btn-ghost btn-sm" style={{ width: '100%', justifyContent: 'center' }} onClick={handleSignOut}>
                         Sair
