@@ -3,7 +3,7 @@
 -- =============================================
 
 -- IMPORTANTE: Para evitar duplicados, apague os do informativo 878 antes de rodar este
--- DELETE FROM "precedents" WHERE "informatoryNumber" = '878';
+DELETE FROM "precedents" WHERE "informatoryNumber" = '878';
 
 -- 1. Remessa necessária (Tema 1081)
 INSERT INTO "precedents" ("id", "court", "title", "summary", "subjectId", "judgmentDate", "publicationDate", "isRG", "informatoryNumber", "informatoryYear", "processClass", "processNumber", "organ", "rapporteur", "theme", "forAll", "forJuizEstadual", "forJuizFederal", "forProcurador", "tags", "createdAt", "updatedAt") VALUES (
@@ -13,7 +13,7 @@ INSERT INTO "precedents" ("id", "court", "title", "summary", "subjectId", "judgm
   FALSE, TRUE, TRUE, TRUE, ARRAY[]::TEXT[], NOW(), NOW()
 );
 
--- 2. Mariana / PID (Caso citado pelo usuário)
+-- 2. Mariana / PID (CC 215.613-MG - CORRIGIDO COM DATAS)
 INSERT INTO "precedents" ("id", "court", "title", "summary", "subjectId", "judgmentDate", "publicationDate", "isRG", "informatoryNumber", "informatoryYear", "processClass", "processNumber", "organ", "rapporteur", "theme", "forAll", "forJuizEstadual", "forJuizFederal", "forProcurador", "tags", "createdAt", "updatedAt") VALUES (
   gen_random_uuid()::text, 'STJ', 'Ação indenizatória individual. Programa indenizatório definitivo - PID. Rompimento da barragem do Fundão em Mariana/MG.', 'Compete à Justiça Federal - Tribunal Regional Federal da 6ª Região - processar e julgar as demandas que tenham como objeto o Programa Indenizatório Definitivo (PID) relativo ao desastre do rompimento da barragem de Fundão, em Mariana/MG, no contexto da repactuação homologada pelo STF.',
   's-admin', '2026-02-05', '2026-02-10', FALSE, '878', 2026,
@@ -41,7 +41,7 @@ INSERT INTO "precedents" ("id", "court", "title", "summary", "subjectId", "judgm
 INSERT INTO "precedents" ("id", "court", "title", "summary", "subjectId", "judgmentDate", "publicationDate", "isRG", "informatoryNumber", "informatoryYear", "processClass", "processNumber", "organ", "rapporteur", "theme", "forAll", "forJuizEstadual", "forJuizFederal", "forProcurador", "tags", "createdAt", "updatedAt") VALUES (
   gen_random_uuid()::text, 'STJ', 'Contribuição previdenciária patronal. Terço constitucional de férias gozadas. Adequação ao Tema 985/STF.', 'Em adequação ao entendimento do Supremo Tribunal Federal, é legítima a incidência de contribuição social, a cargo do empregador, sobre os valores pagos ao empregado a título de terço constitucional de férias gozadas.',
   's-trib', '2026-02-10', '2026-02-13', FALSE, '878', 2026,
-  'REsp', '1.559.926-RS', 'Segunda Turma', 'Maria Thereza de Assis Moura', NULL,
+  'REsp', '1.559.926-RS', 'Second Turma', 'Maria Thereza de Assis Moura', NULL,
   FALSE, TRUE, TRUE, TRUE, ARRAY[]::TEXT[], NOW(), NOW()
 );
 

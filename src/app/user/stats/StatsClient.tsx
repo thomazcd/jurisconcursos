@@ -115,7 +115,7 @@ export default function StatsClient() {
                 </div>
             </div>
             <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00027
+                v1.00028
             </div>
         </div>
     );

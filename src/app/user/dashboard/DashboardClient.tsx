@@ -35,6 +35,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [yearFilter, setYearFilter] = useState<string>('ALL');
     const [infFilter, setInfFilter] = useState<string>('ALL');
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+    const [copying, setCopying] = useState<string | null>(null);
 
     // User Preferences
     const [fontSize, setFontSize] = useState(14); // default base font size in px
@@ -47,7 +48,6 @@ export default function DashboardClient({ userName, track }: Props) {
             .then(d => {
                 const subs: Subject[] = d.subjects ?? [];
                 setSubjects(subs);
-                // No longer auto-select first subject, 'ALL' is default
             });
     }, []);
 
@@ -110,6 +110,12 @@ export default function DashboardClient({ userName, track }: Props) {
         loadSubjects();
     }
 
+    const copyToClipboard = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopying(id);
+        setTimeout(() => setCopying(null), 2000);
+    };
+
     const currentSub = subjects.find(s => s.id === selectedSubject);
     const progressPercent = selectedSubject === 'ALL'
         ? (subjects.reduce((acc, s) => acc + s.total, 0) > 0 ? Math.round((subjects.reduce((acc, s) => acc + s.readCount, 0) / subjects.reduce((acc, s) => acc + s.total, 0)) * 100) : 0)
@@ -146,7 +152,6 @@ export default function DashboardClient({ userName, track }: Props) {
             groups[subName].push(p);
         });
 
-        // Filter out empty groups and sort by priority subjects or alphabetical
         return Object.entries(groups)
             .filter(([_, list]) => list.length > 0)
             .sort(([a], [b]) => a.localeCompare(b));
@@ -197,11 +202,25 @@ export default function DashboardClient({ userName, track }: Props) {
                         <span title={p.judgmentDate ? 'Data do Julgamento' : 'Data de julgamento não disponível'} style={{ cursor: 'help', opacity: p.judgmentDate ? 1 : 0.4 }}>
                             ⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                         </span>
-                        {proc && <span>📄 {proc}</span>}
+                        {proc && (
+                            <span
+                                onClick={(e) => { e.stopPropagation(); copyToClipboard(proc, p.id); }}
+                                style={{
+                                    cursor: 'copy',
+                                    padding: '2px 6px',
+                                    background: copying === p.id ? 'var(--accent)' : 'var(--surface2)',
+                                    color: copying === p.id ? '#fff' : 'inherit',
+                                    borderRadius: 4,
+                                    transition: 'all 0.2s'
+                                }}
+                                title="Clique para copiar"
+                            >
+                                📄 {copying === p.id ? 'Copiado!' : proc}
+                            </span>
+                        )}
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                             📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                         </span>
-                        {selectedSubject === 'ALL' && <span style={{ background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4, fontWeight: 600, color: 'var(--accent)' }}>{p.subject?.name}</span>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <span title={readData.events.length > 0 ? 'Lido em:\n' + readData.events.map(e => new Date(e).toLocaleString('pt-BR')).join('\n') : 'Não lido'} style={{ background: isRead ? '#dcfce7' : '#fee2e2', color: isRead ? '#166534' : '#991b1b', padding: '2px 8px', borderRadius: 4, fontWeight: 700, cursor: 'help' }}>
@@ -215,7 +234,6 @@ export default function DashboardClient({ userName, track }: Props) {
                         >
                             {isRead ? '+1' : 'Ler'}
                         </button>
-                        {isRead && <button onClick={() => resetRead(p.id)} style={{ border: 'none', background: 'transparent', color: '#ef4444', padding: '0 4px', cursor: 'pointer' }} title="Zerar leituras">✕</button>}
                     </div>
                 </div>
             </div>
@@ -258,7 +276,13 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </div>
                                 <div className="detail-item">
                                     <span style={{ color: 'var(--text-3)', display: 'block' }}>Identificador</span>
-                                    <span style={{ fontWeight: 600 }}>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                    <span
+                                        onClick={() => [selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') && copyToClipboard([selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' '), 'modal')}
+                                        style={{ fontWeight: 600, cursor: 'copy', color: copying === 'modal' ? 'var(--accent)' : 'inherit' }}
+                                    >
+                                        {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}
+                                        {copying === 'modal' && <span style={{ fontSize: '0.7em', marginLeft: '0.5rem', color: 'var(--accent)' }}>(Copiado!)</span>}
+                                    </span>
                                 </div>
                                 <div className="detail-item">
                                     <span style={{ color: 'var(--text-3)', display: 'block' }}>Informativo</span>
@@ -422,7 +446,7 @@ export default function DashboardClient({ userName, track }: Props) {
             `}</style>
 
             <div style={{ textAlign: 'center', marginTop: '2rem', padding: '2rem', fontSize: '0.65rem', color: 'var(--text-3)', opacity: 0.5 }}>
-                v1.00027
+                v1.00028
             </div>
         </div>
     );
