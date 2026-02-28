@@ -287,7 +287,7 @@ export default function AdminPrecedentsClient() {
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Data</th><th>Título</th><th>Tema</th><th>Tribunal</th><th>Matéria</th><th>Para</th><th></th>
+                                    <th>Inf.</th><th>Processo</th><th>Título</th><th>Tema</th><th>Tribunal</th><th>Matérias</th><th>Para</th><th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -295,8 +295,11 @@ export default function AdminPrecedentsClient() {
                                 {!loading && precedents.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum precedente.</td></tr>}
                                 {!loading && precedents.map(p => (
                                     <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => openPanel(p)}>
-                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', color: 'var(--text-3)' }}>
-                                            {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '—'}
+                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', fontWeight: 600 }}>
+                                            {p.informatoryNumber ? `STJ ${p.informatoryNumber}` : '—'}
+                                        </td>
+                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', color: 'var(--text-2)' }}>
+                                            {p.processNumber || '—'}
                                         </td>
                                         <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
                                         <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={12} /> {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
