@@ -51,6 +51,8 @@ export default function DashboardClient({ userName, track }: Props) {
     // User Preferences
     const [fontSize, setFontSize] = useState(14);
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
+    const [helpStep, setHelpStep] = useState(0);
 
     const [selectedPrecedent, setSelectedPrecedent] = useState<Precedent | null>(null);
 
@@ -176,6 +178,25 @@ export default function DashboardClient({ userName, track }: Props) {
         setTimeout(() => setCopying(null), 2000);
     };
 
+    const availableInformatories = useMemo(() => {
+        if (courtFilter === 'ALL') return [];
+        const set = new Set<string>();
+        precedents.forEach(p => {
+            if (p.court === courtFilter && p.informatoryNumber) {
+                set.add(p.informatoryNumber);
+            }
+        });
+        return Array.from(set).sort((a, b) => {
+            const na = parseInt(a) || 0;
+            const nb = parseInt(b) || 0;
+            return nb - na;
+        });
+    }, [precedents, courtFilter]);
+
+    useEffect(() => {
+        setInfFilter('ALL');
+    }, [courtFilter]);
+
     const filtered = useMemo(() => {
         return precedents.filter(p => {
             const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false };
@@ -213,73 +234,118 @@ export default function DashboardClient({ userName, track }: Props) {
         return (
             <div
                 key={p.id}
-                className="prec-item"
+                className={`prec-item ${isRead ? 'is-read-card' : ''}`}
                 style={{
-                    borderLeft: `5px solid ${isRead ? '#22c55e' : '#ef4444'}`,
-                    padding: '0.75rem 1.25rem',
-                    borderRadius: '0 12px 12px 0',
-                    background: 'var(--surface)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                    borderLeft: `5px solid ${isRead ? '#22c55e' : '#e2e8f0'}`,
+                    padding: '1rem 1.25rem',
+                    borderRadius: '0 16px 16px 0',
+                    background: isRead ? 'rgba(34, 197, 94, 0.04)' : 'var(--surface)',
+                    boxShadow: isRead ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
                     cursor: 'pointer',
-                    transition: 'all 0.15s',
-                    marginBottom: '0.5rem',
-                    position: 'relative'
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    marginBottom: '0.75rem',
+                    position: 'relative',
+                    border: isRead ? '1px solid rgba(34, 197, 94, 0.1)' : '1px solid var(--border)',
+                    borderLeftWidth: '5px'
                 }}
-                onClick={() => setSelectedPrecedent(p)}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.06)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
+                onClick={() => {
+                    if (!isRead) {
+                        markRead(p.id, { stopPropagation: () => { } } as any);
+                    }
+                }}
+                onMouseEnter={e => {
+                    if (!isRead) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.06)';
+                    }
+                }}
+                onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = isRead ? 'none' : '0 1px 3px rgba(0,0,0,0.04)';
+                }}
             >
                 {/* Estrela de Favoritos no Canto Direito */}
-                <div style={{ position: 'absolute', right: '10px', top: '10px', zIndex: 10 }}>
+                <div style={{ position: 'absolute', right: '12px', top: '12px', zIndex: 10 }}>
                     <button
                         onClick={(e) => toggleFavorite(p.id, e)}
-                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem', color: readData.isFavorite ? 'var(--accent)' : 'var(--border)', transition: 'transform 0.1s' }}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2rem', color: readData.isFavorite ? '#f59e0b' : 'var(--border)', transition: 'transform 0.1s' }}
                         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+                        title="Favoritar"
                     >
                         {readData.isFavorite ? '★' : '☆'}
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem', paddingRight: '2rem' }}>
-                    {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
-                    {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
-                    {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '1px 8px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem', paddingRight: '2.5rem' }}>
+                    {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📌 {p.theme}</span>}
+                    {readData.last === 'HIT' && <span style={{ fontSize: '0.65em', background: '#dcfce7', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>✅ Dominado</span>}
+                    {readData.last === 'MISS' && <span style={{ fontSize: '0.65em', background: '#fee2e2', color: '#991b1b', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>⚠️ Revisar</span>}
+                    {isRead && <span style={{ fontSize: '0.65em', background: 'rgba(34, 197, 94, 0.1)', color: '#166534', padding: '2px 10px', borderRadius: 20, fontWeight: 700 }}>📖 Lido</span>}
                 </div>
 
-                <div className="prec-title" style={{ fontSize: '1.05em', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem', lineHeight: '1.4', paddingRight: '1rem' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.6rem', lineHeight: '1.4', paddingRight: '1rem' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
-                    <div style={{ background: 'var(--surface2)', padding: '1rem', borderRadius: 12, border: '1px solid var(--border)', marginBottom: '0.5rem' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ fontSize: '1em', color: 'var(--text)', fontWeight: 600, marginBottom: '0.75rem', lineHeight: '1.5' }}>{p.flashcardQuestion || p.summary}</div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, true); }} className="btn btn-sm" style={{ flex: 1, background: '#dcfce7', color: '#166534', fontWeight: 800, height: '36px' }}>VERDADEIRO</button>
-                            <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, false); }} className="btn btn-sm" style={{ flex: 1, background: '#fee2e2', color: '#991b1b', fontWeight: 800, height: '36px' }}>FALSO</button>
+                    <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '1rem', color: 'var(--text)', fontWeight: 600, marginBottom: '1rem', lineHeight: '1.5' }}>{p.flashcardQuestion || p.summary}</div>
+                        <div style={{ display: 'flex', gap: '0.6rem' }}>
+                            <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, true); }} className="btn btn-sm" style={{ flex: 1, background: '#10b981', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>VERDADEIRO</button>
+                            <button onClick={(e) => { e.stopPropagation(); handleFlashcard(p, false); }} className="btn btn-sm" style={{ flex: 1, background: '#ef4444', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>FALSO</button>
                         </div>
                     </div>
                 ) : (
-                    <div style={{ marginBottom: '0.6rem' }}>
-                        {flashResult && <div style={{ padding: '0.4rem 0.75rem', marginBottom: '0.4rem', borderRadius: 6, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8em' }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
-                        <div style={{ fontSize: '0.9em', color: 'var(--text-2)', lineHeight: '1.5', opacity: 0.9 }}>{p.summary}</div>
+                    <div style={{ marginBottom: '0.75rem' }}>
+                        {flashResult && <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8rem', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
+                        <div style={{ fontSize: '0.92rem', color: 'var(--text-2)', lineHeight: '1.6', opacity: 0.9 }}>{p.summary}</div>
                     </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.6rem', fontSize: '0.72em' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent)' }}>📰 {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                        <span title="Data de Publicação">📢 {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '---'}</span>
-                        <span title="Data de Julgamento">⚖️ {p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
-                        {proc && <span onClick={(e) => copyToClipboard(proc, p.id, e)} style={{ cursor: 'copy', padding: '2px 6px', background: copying === p.id ? 'var(--accent)' : 'var(--surface2)', color: copying === p.id ? '#fff' : 'inherit', borderRadius: 4 }} title="Copiar número do processo">{copying === p.id ? 'Copiado!' : proc}</span>}
-                        {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.7 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', fontSize: '0.75rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', color: 'var(--text-3)', alignItems: 'center', fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)' }}>🏛️ {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                        {proc && (
+                            <span
+                                onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
+                                style={{ cursor: 'pointer', padding: '3px 8px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)' }}
+                                title="Clique para ver detalhes do julgado"
+                                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+                                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                            >
+                                🔍 {proc}
+                            </span>
+                        )}
+                        {(readData.correct > 0 || readData.wrong > 0) && <span style={{ color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 6px', borderRadius: 4 }}>📊 {readData.correct}V | {readData.wrong}F</span>}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', alignItems: 'center', background: isRead ? '#dcfce7' : '#fee2e2', borderRadius: 6, overflow: 'hidden' }}>
-                            <span style={{ padding: '2px 8px', color: isRead ? '#166534' : '#991b1b', fontWeight: 800 }}>{isRead ? `${readData.count}×` : 'Não lido'}</span>
-                            {isRead && <button onClick={(e) => decrementRead(p.id, e)} style={{ border: 'none', background: 'rgba(0,0,0,0.03)', color: 'inherit', padding: '2px 8px', cursor: 'pointer', fontWeight: 900, borderLeft: '1px solid rgba(0,0,0,0.1)' }}>-1</button>}
-                        </div>
-                        {studyMode === 'READ' && <button className="btn-read" style={{ padding: '4px 10px', fontWeight: 800, borderRadius: 6, fontSize: '0.88em' }} onClick={(e) => markRead(p.id, e)}>{isRead ? '+1' : 'Ler'}</button>}
-                        {isRead && <button onClick={(e) => resetRead(p.id, e)} style={{ border: 'none', background: 'transparent', padding: '0 4px', opacity: 0.3, cursor: 'pointer' }}>🗑️</button>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={e => e.stopPropagation()}>
+                        {isRead && (
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                <button
+                                    onClick={(e) => markRead(p.id, e)}
+                                    className="btn-action-hit"
+                                    style={{ border: 'none', background: '#22c55e', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(34,197,94,0.2)' }}
+                                    title="Marcar como lido (+1)"
+                                >+1</button>
+                                <button
+                                    onClick={(e) => decrementRead(p.id, e)}
+                                    className="btn-action-miss"
+                                    style={{ border: 'none', background: '#ef4444', color: '#fff', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', fontWeight: 900, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(239,68,68,0.2)' }}
+                                    title="Remover uma leitura (-1)"
+                                >-1</button>
+                                <div style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)' }}>{readData.count}×</div>
+                                <button onClick={(e) => resetRead(p.id, e)} style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', fontSize: '1rem' }} title="Marcar como Não Lido">♻️</button>
+                            </div>
+                        )}
+                        {!isRead && (
+                            <button
+                                className="btn btn-primary btn-sm"
+                                style={{ padding: '6px 16px', fontWeight: 800, borderRadius: 10, fontSize: '0.85rem' }}
+                                onClick={(e) => markRead(p.id, e)}
+                            >
+                                Marcar como Lido
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -353,6 +419,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     <div><h1 style={{ fontSize: '1.1rem', fontWeight: 900 }}>{TRACK_LABELS[track] ?? track}</h1><div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Olá, {userName}</div></div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setShowHelp(true)} title="Tutorial do Sistema">❓ Ajuda</button>
                     <button className="btn btn-secondary btn-sm" onClick={() => window.print()} title="Gerar PDF completo da lista filtrada">🖨️ PDF Completo</button>
                     <div style={{ display: 'flex', background: 'var(--surface2)', borderRadius: 10, padding: '2px', margin: '0 0.5rem' }}>
                         <button className="btn btn-ghost btn-xs" onClick={() => setFontSize(f => Math.max(10, f - 1))}>A-</button>
@@ -371,11 +438,28 @@ export default function DashboardClient({ userName, track }: Props) {
                     </select>
                     <input type="search" placeholder="🔍 Buscar em tudo..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', background: 'var(--surface2)', padding: '2px', borderRadius: 8 }}>
-                            {(['ALL', 'STF', 'STJ'] as const).map(c => <button key={c} onClick={() => setCourtFilter(c)} style={{ padding: '4px 12px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 800, border: 'none', background: courtFilter === c ? 'var(--accent)' : 'transparent', color: courtFilter === c ? '#fff' : 'var(--text-3)', cursor: 'pointer' }}>{c === 'ALL' ? 'Todos' : c}</button>)}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', background: 'var(--surface2)', padding: '2px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            {(['ALL', 'STF', 'STJ'] as const).map(c => <button key={c} onClick={() => setCourtFilter(c)} style={{ padding: '6px 14px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 800, border: 'none', background: courtFilter === c ? 'var(--accent)' : 'transparent', color: courtFilter === c ? '#fff' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.1s' }}>{c === 'ALL' ? 'Todos' : c}</button>)}
                         </div>
+
+                        {courtFilter !== 'ALL' && availableInformatories.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', animation: 'fadeIn 0.2s' }}>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-3)' }}>INF:</span>
+                                <select
+                                    value={infFilter}
+                                    onChange={e => setInfFilter(e.target.value)}
+                                    style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.75rem', fontWeight: 700 }}
+                                >
+                                    <option value="ALL">Todos os Nos</option>
+                                    {availableInformatories.map(n => <option key={n} value={n}>{n}</option>)}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                         <button className={`btn-tag ${filterOnlyFavorites ? 'active' : ''}`} onClick={() => { setFilterOnlyFavorites(!filterOnlyFavorites); setFilterHideRead(false); setFilterOnlyErrors(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyFavorites ? 'var(--accent)' : 'transparent', color: filterOnlyFavorites ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>★ Favoritos</button>
                         <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>❌ Erros</button>
                     </div>
@@ -391,6 +475,38 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                     )) : filtered.map(renderPrecedent))}
             </div>
+
+            {showHelp && (
+                <div className="modal-overlay" style={{ zIndex: 20000, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setShowHelp(false)}>
+                    <div className="modal-content" style={{ maxWidth: '500px', padding: '2.5rem', borderRadius: 24, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{['👋', '📖', '🔍', '🧠', '✨'][helpStep]}</div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1rem' }}>
+                            {[
+                                'Bem-vindo ao Juris!',
+                                'Marque seu progresso',
+                                'Veja os detalhes',
+                                'Modo V/F',
+                                'Filtros Dinâmicos'
+                            ][helpStep]}
+                        </h2>
+                        <p style={{ color: 'var(--text-2)', lineHeight: '1.6', marginBottom: '2rem' }}>
+                            {[
+                                'Aqui você estuda a jurisprudência de forma otimizada. Vamos conhecer os comandos rápidos?',
+                                'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar quantas vezes você revisou aquele tema.',
+                                'O clique no card marca leitura. Para ver o relator, data exata e link do inteiro teor, clique no número do processo (ex: 🔍 RE 1.234).',
+                                'Gosta de Flashcards? Mude para o modo V/F no topo. O sistema esconderá a tese e você deverá julgar se a afirmação é verdadeira ou falsa.',
+                                'Ao filtrar por STF ou STJ, um novo campo aparecerá para você escolher o número específico do informativo que deseja focar.'
+                            ][helpStep]}
+                        </p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                            {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>Voltar</button>}
+                            <button className="btn btn-primary" onClick={() => helpStep < 4 ? setHelpStep(helpStep + 1) : setShowHelp(false)}>
+                                {helpStep < 4 ? 'Próximo' : 'Entendi!'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {isFocusMode && (
                 <div className="focus-exit no-print">
