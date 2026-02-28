@@ -29,19 +29,23 @@ function visibilityLabel(p: Precedent) {
     if (p.forJuizFederal) t.push(<span key="jf" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={14} /> J.Fed</span>);
     if (p.forProcurador) t.push(<span key="pg" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Briefcase size={14} /> PGE</span>);
 
+    if (t.length === 0) return '—';
+
     return (
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {t.length > 0 ? t : '—'}
+            {t}
         </div>
     );
 }
 
-function DetailRow({ label, value }: { label: string; value?: string | null | boolean }) {
+function DetailRow({ label, value }: { label: string; value?: any }) {
     if (value === null || value === undefined || value === '' || value === false) return null;
     return (
-        <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', padding: '0.2rem 0', borderBottom: '1px solid var(--border)' }}>
-            <span style={{ color: 'var(--text-3)', minWidth: 130 }}>{label}</span>
-            <span style={{ color: 'var(--text)', fontWeight: 500 }}>{value === true ? 'Sim' : String(value)}</span>
+        <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.82rem', padding: '0.4rem 0', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ color: 'var(--text-3)', minWidth: 130, flexShrink: 0 }}>{label}</span>
+            <div style={{ color: 'var(--text)', fontWeight: 500, flex: 1 }}>
+                {value === true ? 'Sim' : value}
+            </div>
         </div>
     );
 }
