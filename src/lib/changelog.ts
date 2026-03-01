@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.015',
+        date: '01/03/2026',
+        description: 'Melhoria na exibição de julgados e modal compacto',
+        changes: [
+            'Filtro de duplicidade: Precedentes em múltiplas matérias aparecem apenas uma vez na visão "Todas as Matérias".',
+            'Modal Detalhado: Layout centralizado e compacto com texto do Inteiro Teor justificado.',
+            'Ações discretas: Botão de marcar como lido e ícone de reset mais sutis para não poluir o visual.',
+            'Carga teste: Inserção do primeiro julgado do Informativo 875 na v1.1.015.',
+        ]
+    },
+    {
         version: '1.1.014',
         date: '01/03/2026',
         description: 'Refatoração da exibição e carga do Inf. 875',
