@@ -290,6 +290,11 @@ export default function DashboardClient({ userName, track }: Props) {
     }, [precedents, filterHideRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter, readMap]);
 
     const groupedPrecedents = useMemo(() => {
+        // Desativamos o agrupamento para evitar duplicados na visualização "Todas as Matérias"
+        // como solicitado pelo usuário. O agrupamento agora só acontece se não houver busca 
+        // mas vamos desligar por padrão se o usuário preferir a lista única.
+        return null;
+
         if (selectedSubject !== 'ALL' || search.trim() !== '' || yearFilter !== 'ALL' || infFilter !== 'ALL' || courtFilter !== 'ALL') return null;
         const groups: Record<string, Precedent[]> = {};
         filtered.forEach(p => {
@@ -626,19 +631,23 @@ export default function DashboardClient({ userName, track }: Props) {
 
                         <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.75rem', fontSize: '0.9rem' }}>
                             <div style={{ marginBottom: '1.25rem' }}>
-                                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>TEMA-ASSUNTO:</div>
-                                <h3 style={{ fontSize: '1.15em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}>{selectedPrecedent.title}</h3>
-
-                                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>TESE / DESTAQUE:</div>
-                                <div style={{
-                                    fontSize: '0.95em',
-                                    fontWeight: 700,
+                                <h3 style={{
+                                    fontSize: '0.9rem',
+                                    fontWeight: 900,
                                     color: 'var(--text)',
-                                    background: 'rgba(20, 184, 166, 0.05)',
-                                    padding: '1rem',
-                                    borderRadius: '10px',
-                                    borderLeft: '4px solid var(--accent)',
-                                    marginBottom: '1rem',
+                                    lineHeight: '1.4',
+                                    marginBottom: '0.75rem',
+                                    letterSpacing: '-0.01em',
+                                    display: 'block',
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word'
+                                }}>{selectedPrecedent.title}</h3>
+
+                                <div style={{
+                                    fontSize: '0.9em',
+                                    fontWeight: 700,
+                                    color: 'var(--text-2)',
+                                    marginBottom: '1.25rem',
                                     lineHeight: '1.5'
                                 }}>
                                     {selectedPrecedent.summary}
