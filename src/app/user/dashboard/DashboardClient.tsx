@@ -365,7 +365,7 @@ export default function DashboardClient({ userName, track }: Props) {
                     </div>
                 )}
 
-                <div className="prec-title" style={{ fontSize: compactMode ? '0.9em' : '1.05em', fontWeight: 800, color: 'var(--text)', marginBottom: compactMode ? '0.25em' : '0.6em', lineHeight: '1.4' }}>{p.title}</div>
+                <div className="prec-title" style={{ fontSize: compactMode ? '0.9em' : '1.1em', fontWeight: 900, color: 'var(--text)', marginBottom: compactMode ? '0.25em' : '0.75em', lineHeight: '1.4', letterSpacing: '-0.01em' }}>{p.title}</div>
 
                 {!isRevealed && studyMode === 'FLASHCARD' ? (
                     <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
@@ -376,9 +376,23 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
                     </div>
                 ) : (
-                    <div style={{ marginBottom: compactMode ? '0' : '0.75rem' }}>
+                    <div style={{ marginBottom: compactMode ? '0.5rem' : '1rem' }}>
                         {flashResult && <div style={{ padding: '0.5em 0.75em', marginBottom: '0.5em', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8em', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
-                        <div style={{ fontSize: compactMode ? '0.83em' : '0.92em', color: 'var(--text-2)', lineHeight: compactMode ? '1.4' : '1.6', opacity: 0.9 }}>{p.summary}</div>
+
+                        <div className="tese-label" style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em', display: compactMode ? 'none' : 'block' }}>TESE / DESTAQUE:</div>
+                        <div className="tese-text" style={{
+                            fontSize: compactMode ? '0.85em' : '0.98em',
+                            color: 'var(--text)',
+                            lineHeight: compactMode ? '1.4' : '1.5',
+                            fontWeight: 600,
+                            paddingLeft: compactMode ? '0' : '0.75rem',
+                            borderLeft: compactMode ? 'none' : '3px solid var(--accent)',
+                            background: compactMode ? 'transparent' : 'rgba(20, 184, 166, 0.03)',
+                            padding: compactMode ? '0' : '10px 15px',
+                            borderRadius: compactMode ? '0' : '0 8px 8px 0',
+                        }}>
+                            {p.summary}
+                        </div>
                     </div>
                 )}
 
@@ -447,7 +461,39 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <SvgIcons.MessageSquare size={16} />
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 12px', borderRadius: '6px' }}><SvgIcons.Landmark size={12} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 12px', borderRadius: '6px', whiteSpace: 'nowrap' }}><SvgIcons.Landmark size={12} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', background: 'var(--surface2)', padding: '2px 12px', borderRadius: '6px', whiteSpace: 'nowrap' }}><SvgIcons.User size={12} /> {p.rapporteur?.split(' ').slice(-1)[0] || '---'}</span>
+
+                            {p.fullTextOrLink && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
+                                    style={{
+                                        border: '1px solid var(--accent)',
+                                        background: 'rgba(20, 184, 166, 0.05)',
+                                        color: 'var(--accent)',
+                                        padding: '2px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.2s',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.background = 'var(--accent)';
+                                        e.currentTarget.style.color = '#fff';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.05)';
+                                        e.currentTarget.style.color = 'var(--accent)';
+                                    }}
+                                >
+                                    <SvgIcons.FileText size={12} /> Inteiro Teor
+                                </button>
+                            )}
                             {proc && (
                                 <span
                                     onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
@@ -598,12 +644,47 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
 
                         <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 3}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
-                            <div style={{ marginBottom: '1.25rem' }}>
-                                <h3 style={{ fontSize: '1.3em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4' }}>{selectedPrecedent.title}</h3>
-                            </div>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>TEMA-ASSUNTO:</div>
+                                <h3 style={{ fontSize: '1.25em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4', marginBottom: '1rem' }}>{selectedPrecedent.title}</h3>
 
-                            <div style={{ marginBottom: '2rem', lineHeight: '1.8', color: 'var(--text-1)' }}>
-                                {selectedPrecedent.summary}
+                                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>TESE / DESTAQUE:</div>
+                                <div style={{
+                                    fontSize: '1.05em',
+                                    fontWeight: 700,
+                                    color: 'var(--text)',
+                                    background: 'rgba(20, 184, 166, 0.05)',
+                                    padding: '1.25rem',
+                                    borderRadius: '12px',
+                                    borderLeft: '4px solid var(--accent)',
+                                    marginBottom: '1.5rem',
+                                    lineHeight: '1.5'
+                                }}>
+                                    {selectedPrecedent.summary}
+                                </div>
+
+                                {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
+                                    <>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <SvgIcons.FileText size={14} /> INFORMAÇÕES DO INTEIRO TEOR:
+                                        </div>
+                                        <div style={{
+                                            fontSize: '0.95em',
+                                            color: 'var(--text-2)',
+                                            lineHeight: '1.8',
+                                            background: 'var(--surface2)',
+                                            padding: '1.5rem',
+                                            borderRadius: '12px',
+                                            maxHeight: '400px',
+                                            overflowY: 'auto',
+                                            border: '1px solid var(--border)'
+                                        }}>
+                                            {selectedPrecedent.fullTextOrLink.split('\n').map((line, i) => (
+                                                <p key={i} style={{ marginBottom: line.trim() ? '1em' : '0' }}>{line}</p>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div style={{
@@ -633,10 +714,13 @@ export default function DashboardClient({ userName, track }: Props) {
                         </div>
 
                         <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1.25rem', borderRadius: '0 0 16px 16px', justifyContent: 'center' }}>
-                            {selectedPrecedent.fullTextOrLink && (
-                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={18} /> Inteiro Teor</a>
+                            {selectedPrecedent.fullTextOrLink && selectedPrecedent.fullTextOrLink.startsWith('http') && (
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={18} /> Inteiro Teor (Link)</a>
                             )}
-                            {!selectedPrecedent.fullTextOrLink && <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Sem link disponível</div>}
+                            {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 600 }}>Texto do Inteiro Teor carregado acima</div>
+                            )}
+                            {!selectedPrecedent.fullTextOrLink && <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Sem detalhes adicionais</div>}
                         </div>
                     </div>
                 </div>
