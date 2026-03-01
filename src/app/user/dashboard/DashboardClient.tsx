@@ -663,7 +663,6 @@ export default function DashboardClient({ userName, track }: Props) {
                                             color: 'var(--text-2)',
                                             lineHeight: '1.7',
                                             background: 'var(--surface2)',
-                                            padding: '1.25rem',
                                             borderRadius: '10px',
                                             border: '1px solid var(--border)',
                                             textAlign: 'justify',
