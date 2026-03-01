@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.023',
+        date: '01/03/2026',
+        description: 'Reorganização do Modal e Título Completo',
+        changes: [
+            'Título Jurídico Completo: O topo do modal agora exibe o "Tema-Assunto" integral extraído do PDF.',
+            'Inversão de Ordem: O card de metadados (Tribunal, Relator, etc.) agora aparece no topo, seguido pela Tese e pelo Inteiro Teor.',
+            'Fidelidade Máxima: O campo "Tema" agora armazena a descrição completa do julgado para fins de consulta rápida.',
+        ]
+    },
+    {
         version: '1.1.022',
         date: '01/03/2026',
         description: 'Adição de Órgão Julgador e Melhorias de Detalhes',

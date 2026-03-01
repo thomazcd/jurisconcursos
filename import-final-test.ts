@@ -3,10 +3,10 @@ import { PrismaClient, Court } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// O "Título Original" (Tema do Informativo)
-const ORIGINAL_TITLE = 'Tema 1317 STJ - Possibilidade de condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.';
+// TEMA-ASSUNTO COMPLETO (Extraído do PDF)
+const TEMA_ASSUNTO_FULL = 'Tema 1317 STJ - Possibilidade de condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.';
 
-// O "Título Reduzido" para o Dashboard
+// TÍTULO REDUZIDO (Para o Dashboard)
 const REDUCED_TITLE = 'Honorários em Embargos à Execução Fiscal por Adesão ao REFIS Tema 1317';
 
 const JULGADO_1_FULL_TEXT = `A questão submetida a julgamento sob o rito dos recursos repetitivos, nos termos do art. 1.036 do Código de Processo Civil, para formação de precedente vinculante previsto no art. 927, III, do Código de Processo Civil, é a seguinte: "definir se, à luz do CPC, é cabível a condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.".
@@ -31,7 +31,7 @@ async function main() {
     console.log('--- RESETTING DATABASE PRECEDENTS ---');
     await prisma.precedent.deleteMany();
 
-    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (v1.1.020) ---');
+    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (v1.1.023) ---');
 
     await prisma.precedent.create({
         data: {
@@ -42,13 +42,13 @@ async function main() {
             informatoryNumber: '875',
             informatoryYear: 2026,
             processClass: 'REsp',
-            processNumber: '2.158.358/MG', // Apenas um número para evitar confusão
+            processNumber: '2.158.358/MG',
             rapporteur: 'Ministro Gurgel de Faria',
             organ: 'Primeira Seção',
             judgmentDate: new Date('2025-11-12'),
             publicationDate: new Date('2025-12-24'),
             forAll: true,
-            theme: 'Tema 1317', // Back to simple theme number
+            theme: TEMA_ASSUNTO_FULL, // TEMA-ASSUNTO COMPLETO como solicitado
             subjectId: 's-cproc',
             subjects: {
                 connect: [
@@ -59,7 +59,7 @@ async function main() {
         }
     });
 
-    console.log('--- v1.1.020 TEST IMPORT COMPLETED! ---');
+    console.log('--- v1.1.023 TEST IMPORT COMPLETED! ---');
 }
 
 main()
