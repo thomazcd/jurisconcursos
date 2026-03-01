@@ -461,58 +461,28 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <SvgIcons.MessageSquare size={16} />
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 12px', borderRadius: '6px', whiteSpace: 'nowrap' }}><SvgIcons.Landmark size={12} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', background: 'var(--surface2)', padding: '2px 12px', borderRadius: '6px', whiteSpace: 'nowrap' }}><SvgIcons.User size={12} /> {p.rapporteur?.split(' ').slice(-1)[0] || '---'}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 10px', borderRadius: '6px', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', background: 'var(--surface2)', padding: '2px 10px', borderRadius: '6px', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.User size={11} /> {p.rapporteur?.split(' ').slice(-1)[0] || '---'}</span>
 
-                            {p.fullTextOrLink && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                                    style={{
-                                        border: '1px solid var(--accent)',
-                                        background: 'rgba(20, 184, 166, 0.05)',
-                                        color: 'var(--accent)',
-                                        padding: '2px 12px',
-                                        borderRadius: '6px',
-                                        fontSize: '0.75rem',
-                                        fontWeight: 800,
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        transition: 'all 0.2s',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.background = 'var(--accent)';
-                                        e.currentTarget.style.color = '#fff';
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.05)';
-                                        e.currentTarget.style.color = 'var(--accent)';
-                                    }}
-                                >
-                                    <SvgIcons.FileText size={12} /> Inteiro Teor
-                                </button>
-                            )}
                             {proc && (
                                 <span
                                     onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                                    style={{ cursor: 'pointer', padding: '3px 8px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)' }}
-                                    title="Clique para ver detalhes do julgado"
+                                    style={{ cursor: 'pointer', padding: '2px 10px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)', fontSize: '0.7rem' }}
+                                    title="Clique para ver detalhes e inteiro teor"
                                     onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
                                     onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
                                 >
-                                    <SvgIcons.Search size={12} /> {proc}
+                                    <SvgIcons.Search size={11} /> {proc}
                                 </span>
                             )}
-                            {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> Julgado: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
+                            {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}><SvgIcons.Calendar size={11} /> Jul: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
                             <span
-                                style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default' }}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default', fontSize: '0.7rem' }}
                                 title={!p.publicationDate ? "Na publicação do informativo não foi informada data de publicação do julgado." : undefined}
                             >
-                                <SvgIcons.FileText size={12} /> Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
+                                <SvgIcons.FileText size={11} /> Publ: {p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}
                             </span>
-                            {(readData.correct > 0 || readData.wrong > 0) && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 8px', borderRadius: 4 }}><SvgIcons.Chart size={12} /> {readData.correct}V | {readData.wrong}F</span>}
+                            {(readData.correct > 0 || readData.wrong > 0) && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', opacity: 0.8, background: 'var(--surface2)', padding: '2px 8px', borderRadius: 4, fontSize: '0.7rem' }}><SvgIcons.Chart size={11} /> {readData.correct}V | {readData.wrong}F</span>}
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }} onClick={e => e.stopPropagation()}>
@@ -529,22 +499,33 @@ export default function DashboardClient({ userName, track }: Props) {
                                         title="Diminuir uma leitura"
                                     >-1</button>
                                     <div
-                                        style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'pointer' }}
+                                        style={{ marginLeft: '4px', background: 'var(--surface2)', padding: '4px 10px', borderRadius: 8, fontWeight: 800, color: 'var(--text-2)', cursor: 'pointer', fontSize: '0.75rem' }}
                                         onClick={(e) => { e.stopPropagation(); setHistoryModal({ id: p.id, events: readData.events || [] }); }}
                                         title="Clique para ver o histórico de leituras"
                                     >
                                         {readData.count}×
                                     </div>
-                                    <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', display: 'flex', alignItems: 'center' }} title="Marcar como Não Lido"><SvgIcons.RefreshCw size={14} /></button>
+                                    <button onClick={(e) => resetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-4)', opacity: 0.5 }} title="Marcar como Não Lido"><SvgIcons.RefreshCw size={12} /></button>
                                 </div>
                             )}
                             {!isRead && (
                                 <button
-                                    className="btn btn-primary btn-sm"
-                                    style={{ padding: '6px 16px', fontWeight: 800, borderRadius: 10, fontSize: '0.85rem' }}
+                                    className="btn no-print"
+                                    style={{
+                                        padding: '4px 12px',
+                                        fontWeight: 800,
+                                        borderRadius: 8,
+                                        fontSize: '0.75rem',
+                                        background: 'var(--surface2)',
+                                        border: '1px solid var(--border)',
+                                        color: 'var(--text-3)',
+                                        transition: 'all 0.2s'
+                                    }}
                                     onClick={(e) => markRead(p.id, e)}
+                                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-3)'; }}
                                 >
-                                    Marcar como Lido
+                                    Marcar Lido
                                 </button>
                             )}
                         </div>
@@ -633,31 +614,31 @@ export default function DashboardClient({ userName, track }: Props) {
             )}
             {selectedPrecedent && (
                 <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
-                    <div className={`modal-content ${isFocusMode ? 'modal-fullscreen' : ''}`} style={{ maxWidth: '700px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header" style={{ position: 'relative', justifyContent: 'center' }}>
-                            <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-3)', textAlign: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.Search size={16} /> Detalhes do Julgado</h2>
+                    <div className="modal-content" style={{ maxWidth: '650px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header" style={{ position: 'relative', justifyContent: 'center', padding: '1rem', borderBottom: '1px solid var(--border)' }}>
+                            <h2 style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-3)', textAlign: 'center', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}><SvgIcons.Search size={14} /> Detalhes do Julgado</h2>
                             <button
                                 onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}
                                 className="btn-close"
-                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', padding: 4 }}
-                            ><SvgIcons.X size={18} /></button>
+                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', padding: 8, background: 'var(--surface2)', borderRadius: '50%' }}
+                            ><SvgIcons.X size={16} /></button>
                         </div>
 
-                        <div className="modal-body" style={{ fontSize: isFocusMode ? `${fontSize + 3}px` : `${fontSize}px`, padding: '1.5rem 2rem' }}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>TEMA-ASSUNTO:</div>
-                                <h3 style={{ fontSize: '1.25em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4', marginBottom: '1rem' }}>{selectedPrecedent.title}</h3>
+                        <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.75rem', fontSize: '0.9rem' }}>
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>TEMA-ASSUNTO:</div>
+                                <h3 style={{ fontSize: '1.15em', fontWeight: 900, color: 'var(--text)', lineHeight: '1.4', marginBottom: '0.75rem', letterSpacing: '-0.01em' }}>{selectedPrecedent.title}</h3>
 
-                                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>TESE / DESTAQUE:</div>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>TESE / DESTAQUE:</div>
                                 <div style={{
-                                    fontSize: '1.05em',
+                                    fontSize: '0.95em',
                                     fontWeight: 700,
                                     color: 'var(--text)',
                                     background: 'rgba(20, 184, 166, 0.05)',
-                                    padding: '1.25rem',
-                                    borderRadius: '12px',
+                                    padding: '1rem',
+                                    borderRadius: '10px',
                                     borderLeft: '4px solid var(--accent)',
-                                    marginBottom: '1.5rem',
+                                    marginBottom: '1rem',
                                     lineHeight: '1.5'
                                 }}>
                                     {selectedPrecedent.summary}
@@ -665,22 +646,22 @@ export default function DashboardClient({ userName, track }: Props) {
 
                                 {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
                                     <>
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <SvgIcons.FileText size={14} /> INFORMAÇÕES DO INTEIRO TEOR:
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <SvgIcons.FileText size={12} /> INFORMAÇÕES DO INTEIRO TEOR:
                                         </div>
                                         <div style={{
-                                            fontSize: '0.95em',
+                                            fontSize: '0.85em',
                                             color: 'var(--text-2)',
-                                            lineHeight: '1.8',
+                                            lineHeight: '1.7',
                                             background: 'var(--surface2)',
-                                            padding: '1.5rem',
-                                            borderRadius: '12px',
-                                            maxHeight: '400px',
-                                            overflowY: 'auto',
-                                            border: '1px solid var(--border)'
+                                            padding: '1.25rem',
+                                            borderRadius: '10px',
+                                            border: '1px solid var(--border)',
+                                            textAlign: 'justify',
+                                            hyphens: 'auto'
                                         }}>
                                             {selectedPrecedent.fullTextOrLink.split('\n').map((line, i) => (
-                                                <p key={i} style={{ marginBottom: line.trim() ? '1em' : '0' }}>{line}</p>
+                                                <p key={i} style={{ marginBottom: line.trim() ? '0.8em' : '0' }}>{line}</p>
                                             ))}
                                         </div>
                                     </>
@@ -689,38 +670,36 @@ export default function DashboardClient({ userName, track }: Props) {
 
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'minmax(150px, 1fr) 1fr',
-                                gap: '1rem',
-                                padding: '1.25rem',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '0.75rem',
+                                padding: '1rem',
                                 background: 'var(--surface2)',
                                 borderRadius: 12,
-                                fontSize: '0.85em',
+                                fontSize: '0.8em',
                                 color: 'var(--text-2)',
                                 border: '1px solid var(--border)'
                             }}>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={14} /> Tribunal:</strong> {selectedPrecedent.court}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.FileText size={14} /> Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.User size={14} /> Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
-                                <div title="Data de Publicação: Data em que o acórdão foi publicado no Diário da Justiça (DJEN/DJe)">
-                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={14} /> Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : 'Não informada a existência de publicação na divulgação do informativo'}
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={12} /> Tribunal:</strong> {selectedPrecedent.court}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.FileText size={12} /> Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.User size={12} /> Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
+                                <div>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}
                                 </div>
-                                <div title="Data de Julgamento: Data da sessão em que o processo foi julgado pelo tribunal">
-                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                                <div>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
                                 </div>
-                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}><SvgIcons.Pin size={12} style={{ display: 'inline', marginRight: 4 }} /> Tema:</strong> {selectedPrecedent.theme}</div>}
-                                {selectedPrecedent.isRG && <div style={{ gridColumn: 'span 2', color: 'var(--accent)', fontWeight: 800 }}><SvgIcons.Scale size={14} style={{ display: 'inline', marginRight: 4 }} /> Repercussão Geral</div>}
+                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}><SvgIcons.Pin size={10} style={{ display: 'inline', marginRight: 4 }} /> Tema:</strong> {selectedPrecedent.theme}</div>}
                             </div>
                         </div>
 
-                        <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1.25rem', borderRadius: '0 0 16px 16px', justifyContent: 'center' }}>
+                        <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1rem', borderRadius: '0 0 24px 24px', justifyContent: 'center' }}>
                             {selectedPrecedent.fullTextOrLink && selectedPrecedent.fullTextOrLink.startsWith('http') && (
-                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ minWidth: '200px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={18} /> Inteiro Teor (Link)</a>
+                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ minWidth: '150px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={16} /> Ver Inteiro Teor Online</a>
                             )}
-                            {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 600 }}>Texto do Inteiro Teor carregado acima</div>
+                            {(!selectedPrecedent.fullTextOrLink || !selectedPrecedent.fullTextOrLink.startsWith('http')) && (
+                                <button onClick={() => setSelectedPrecedent(null)} className="btn btn-ghost" style={{ fontSize: '0.8rem', fontWeight: 800 }}>Fechar Detalhes</button>
                             )}
-                            {!selectedPrecedent.fullTextOrLink && <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Sem detalhes adicionais</div>}
                         </div>
                     </div>
                 </div>

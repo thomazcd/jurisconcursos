@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
             include: {
                 subjects: { select: { id: true, name: true } },
             },
-            distinct: ['processNumber', 'processClass', 'title'],
+            distinct: subjectId === 'ALL' ? ['title'] : undefined,
             take: 500,
         });
 
