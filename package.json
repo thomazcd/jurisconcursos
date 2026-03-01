@@ -1,6 +1,6 @@
 {
     "name": "juris-concursos",
-    "version": "1.1.021",
+    "version": "1.1.022",
     "private": true,
     "scripts": {
         "dev": "next dev",

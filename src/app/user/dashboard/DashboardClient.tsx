@@ -720,6 +720,12 @@ export default function DashboardClient({ userName, track }: Props) {
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.Gavel size={12} /> Órgão:
+                                    </strong>
+                                    <span>{selectedPrecedent.organ || '---'}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                         <SvgIcons.Calendar size={12} /> Publicação:
                                     </strong>
                                     <span>{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}</span>

@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.022',
+        date: '01/03/2026',
+        description: 'Adição de Órgão Julgador e Melhorias de Detalhes',
+        changes: [
+            'Órgão Julgador: Agora o campo "Órgão" é exibido no card de detalhes do modal.',
+            'Refinamento Visual: Ajustes finos no alinhamento dos ícones e textos informativos.',
+        ]
+    },
+    {
         version: '1.1.021',
         date: '01/03/2026',
         description: 'Reversão de Tema e Título do Modal',
