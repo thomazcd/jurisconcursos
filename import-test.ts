@@ -11,7 +11,7 @@ const DATA = [
         organ: 'Primeira Seção',
         subjects: ['Direito Processual Civil', 'Direito Tributário'],
         subjectIds: ['s-cproc', 's-trib'],
-        title: 'Honorários em Embargos por Adesão ao REFIS Tema 1317',
+        title: 'Honorários em Embargos à Execução Fiscal por Adesão ao REFIS Tema 1317',
         summary: 'A extinção dos embargos à execução fiscal em face da desistência ou da renúncia do direito manifestada para fins de adesão a programa de recuperação fiscal em que já inserida a verba honorária pela cobrança da dívida pública não enseja nova condenação em honorários advocatícios.',
         full: `A questão submetida a julgamento sob o rito dos recursos repetitivos, nos termos do art. 1.036 do Código de Processo Civil, para formação de precedente vinculante previsto no art. 927, III, do Código de Processo Civil, é a seguinte: "definir se, à luz do CPC, é cabível a condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.". 
 

@@ -314,7 +314,10 @@ export default function DashboardClient({ userName, track }: Props) {
         const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
         const isRead = readData.count > 0;
         const isRevealed = studyMode === 'READ' || revealed[p.id];
-        const proc = [p.processClass, p.processNumber].filter(Boolean).join(' ');
+
+        // Handle multiple process numbers: show only the first in the list
+        const firstProcNumber = p.processNumber ? p.processNumber.split(',')[0].trim() : '';
+        const procList = [p.processClass, firstProcNumber].filter(Boolean).join(' ');
         const flashResult = flashcardResults[p.id];
 
         return (
@@ -464,17 +467,15 @@ export default function DashboardClient({ userName, track }: Props) {
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.User size={11} /> {p.rapporteur || '---'}</span>
 
-                            {proc && (
-                                <span
-                                    onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                                    style={{ cursor: 'pointer', padding: '2px 0', color: 'var(--text-3)', fontSize: '0.7rem' }}
-                                    title="Clique para ver detalhes e inteiro teor"
-                                    onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
-                                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
-                                >
-                                    <SvgIcons.Search size={11} /> {proc}
-                                </span>
-                            )}
+                            <span
+                                onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
+                                style={{ cursor: 'pointer', padding: '2px 0', color: 'var(--text-3)', fontSize: '0.7rem' }}
+                                title="Clique para ver detalhes e inteiro teor"
+                                onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+                                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
+                            >
+                                <SvgIcons.Search size={11} /> {procList}
+                            </span>
                             {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}><SvgIcons.Calendar size={11} /> Jul: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
                             <span
                                 style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default', fontSize: '0.7rem' }}
@@ -685,7 +686,7 @@ export default function DashboardClient({ userName, track }: Props) {
                             }}>
                                 <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={12} /> Tribunal:</strong> {selectedPrecedent.court}</div>
                                 <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.FileText size={12} /> Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Processo:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
+                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Processos:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
                                 <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.User size={12} /> Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
                                 <div>
                                     <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}
