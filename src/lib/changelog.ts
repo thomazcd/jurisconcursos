@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.020',
+        date: '01/03/2026',
+        description: 'Aprimoramento do Modal de Detalhes e Fidelidade de Título',
+        changes: [
+            'Título Fiel no Modal: O modal agora exibe o título jurídico completo (original do informativo).',
+            'Rótulo DESTAQUE: Restaurado o rótulo "DESTAQUE:" antes da tese dentro do modal.',
+            'Alinhamento de Metadados: Corrigido o alinhamento visual dos ícones e informações no card de detalhes.',
+            'Processo Único: Limitação a apenas um número de processo por julgado para maior clareza.',
+        ]
+    },
+    {
         version: '1.1.019',
         date: '01/03/2026',
         description: 'Refinamento de Dados e Visualização de Processos Múltiplos',

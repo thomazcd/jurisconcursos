@@ -628,22 +628,32 @@ export default function DashboardClient({ userName, track }: Props) {
                         <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.75rem', fontSize: '0.9rem' }}>
                             <div style={{ marginBottom: '1.25rem' }}>
                                 <h3 style={{
-                                    fontSize: '0.9rem',
+                                    fontSize: '1.2rem',
                                     fontWeight: 900,
                                     color: 'var(--text)',
-                                    lineHeight: '1.4',
                                     marginBottom: '0.75rem',
+                                    lineHeight: '1.3',
                                     letterSpacing: '-0.01em',
                                     display: 'block',
                                     wordWrap: 'break-word',
                                     overflowWrap: 'break-word'
-                                }}>{selectedPrecedent.title}</h3>
+                                }}>{selectedPrecedent.theme || selectedPrecedent.title}</h3>
 
                                 <div style={{
-                                    fontSize: '0.9em',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 900,
+                                    color: 'var(--text-3)',
+                                    textTransform: 'uppercase',
+                                    marginBottom: '4px',
+                                    letterSpacing: '0.05em'
+                                }}>
+                                    DESTAQUE:
+                                </div>
+                                <div style={{
+                                    fontSize: '0.92em',
                                     fontWeight: 700,
                                     color: 'var(--text-2)',
-                                    marginBottom: '1.25rem',
+                                    marginBottom: '1.5rem',
                                     lineHeight: '1.5'
                                 }}>
                                     {selectedPrecedent.summary}
@@ -675,26 +685,59 @@ export default function DashboardClient({ userName, track }: Props) {
 
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                gap: '0.75rem',
-                                padding: '1rem',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                                gap: '1rem',
+                                padding: '1.25rem',
                                 background: 'var(--surface2)',
                                 borderRadius: 12,
-                                fontSize: '0.8em',
+                                fontSize: '0.8rem',
                                 color: 'var(--text-2)',
                                 border: '1px solid var(--border)'
                             }}>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={12} /> Tribunal:</strong> {selectedPrecedent.court}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.FileText size={12} /> Informativo:</strong> {selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Processos:</strong> {[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</div>
-                                <div><strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.User size={12} /> Relator:</strong> {selectedPrecedent.rapporteur || '---'}</div>
-                                <div>
-                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Calendar size={12} /> Publicação:</strong> {selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.Landmark size={12} /> Tribunal:
+                                    </strong>
+                                    <span>{selectedPrecedent.court}</span>
                                 </div>
-                                <div>
-                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={12} /> Julgamento:</strong> {selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.FileText size={12} /> Informativo:
+                                    </strong>
+                                    <span>{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</span>
                                 </div>
-                                {selectedPrecedent.theme && <div style={{ gridColumn: 'span 2' }}><strong style={{ color: 'var(--text-3)' }}><SvgIcons.Pin size={10} style={{ display: 'inline', marginRight: 4 }} /> Tema:</strong> {selectedPrecedent.theme}</div>}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.Scale size={12} /> Processo:
+                                    </strong>
+                                    <span>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.User size={12} /> Relator:
+                                    </strong>
+                                    <span>{selectedPrecedent.rapporteur || '---'}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.Calendar size={12} /> Publicação:
+                                    </strong>
+                                    <span>{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
+                                        <SvgIcons.Scale size={12} /> Julgamento:
+                                    </strong>
+                                    <span>{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
+                                </div>
+                                {selectedPrecedent.theme && (
+                                    <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px', marginTop: '2px' }}>
+                                            <SvgIcons.Pin size={10} /> Tema:
+                                        </strong>
+                                        <span>{selectedPrecedent.theme}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

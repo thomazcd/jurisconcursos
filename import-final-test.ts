@@ -3,6 +3,12 @@ import { PrismaClient, Court } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// O "Título Original" (Tema do Informativo)
+const ORIGINAL_TITLE = 'Tema 1317 STJ - Possibilidade de condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.';
+
+// O "Título Reduzido" para o Dashboard
+const REDUCED_TITLE = 'Honorários em Embargos à Execução Fiscal por Adesão ao REFIS Tema 1317';
+
 const JULGADO_1_FULL_TEXT = `A questão submetida a julgamento sob o rito dos recursos repetitivos, nos termos do art. 1.036 do Código de Processo Civil, para formação de precedente vinculante previsto no art. 927, III, do Código de Processo Civil, é a seguinte: "definir se, à luz do CPC, é cabível a condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.".
 
 A jurisprudência que o Superior Tribunal de Justiça sedimentou na vigência do Código de Processo Civil de 1973 foi no sentido de haver autonomia, ainda que relativa, entre a execução fiscal e os embargos, de modo a admitir a condenação em honorários advocatícios em ambos os processos, mas com a limitação de que a soma dos valores arbitrados não superasse o percentual máximo de 20% então previsto no art. 20, § 3º, do CPC/1973, reconhecida a faculdade de o magistrado proceder a esse arbitramento cumulativo numa única decisão.
@@ -25,25 +31,24 @@ async function main() {
     console.log('--- RESETTING DATABASE PRECEDENTS ---');
     await prisma.precedent.deleteMany();
 
-    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (INF. 875) WITH MULTIPLE PROCESSES ---');
+    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (v1.1.020) ---');
 
     await prisma.precedent.create({
         data: {
             court: Court.STJ,
-            title: 'Honorários em Embargos à Execução Fiscal por Adesão ao REFIS Tema 1317',
+            title: REDUCED_TITLE,
             summary: 'A extinção dos embargos à execução fiscal em face da desistência ou da renúncia do direito manifestada para fins de adesão a programa de recuperação fiscal em que já inserida a verba honorária pela cobrança da dívida pública não enseja nova condenação em honorários advocatícios.',
             fullTextOrLink: JULGADO_1_FULL_TEXT,
             informatoryNumber: '875',
             informatoryYear: 2026,
             processClass: 'REsp',
-            // Simulating multiple process numbers separated by comma
-            processNumber: '2.158.358/MG, REsp 2.158.359/MG',
+            processNumber: '2.158.358/MG', // Apenas um número para evitar confusão
             rapporteur: 'Ministro Gurgel de Faria',
             organ: 'Primeira Seção',
             judgmentDate: new Date('2025-11-12'),
             publicationDate: new Date('2025-12-24'),
             forAll: true,
-            theme: 'Tema 1317', // Back to the specific field
+            theme: ORIGINAL_TITLE, // Usamos theme para o título completo original
             subjectId: 's-cproc',
             subjects: {
                 connect: [
@@ -54,7 +59,7 @@ async function main() {
         }
     });
 
-    console.log('--- FINAL TEST IMPORT WITH TEMA AND MULTIPLE PROCESSES COMPLETED! ---');
+    console.log('--- v1.1.020 TEST IMPORT COMPLETED! ---');
 }
 
 main()
