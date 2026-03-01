@@ -384,17 +384,12 @@ export default function DashboardClient({ userName, track }: Props) {
                     <div style={{ marginBottom: compactMode ? '0.5rem' : '1rem' }}>
                         {flashResult && <div style={{ padding: '0.5em 0.75em', marginBottom: '0.5em', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8em', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
 
-                        <div className="tese-label" style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em', display: compactMode ? 'none' : 'block' }}>TESE / DESTAQUE:</div>
                         <div className="tese-text" style={{
                             fontSize: compactMode ? '0.85em' : '0.98em',
-                            color: 'var(--text)',
+                            color: 'var(--text-2)',
                             lineHeight: compactMode ? '1.4' : '1.5',
                             fontWeight: 600,
-                            paddingLeft: compactMode ? '0' : '0.75rem',
-                            borderLeft: compactMode ? 'none' : '3px solid var(--accent)',
-                            background: compactMode ? 'transparent' : 'rgba(20, 184, 166, 0.03)',
-                            padding: compactMode ? '0' : '10px 15px',
-                            borderRadius: compactMode ? '0' : '0 8px 8px 0',
+                            padding: compactMode ? '0' : '2px 0',
                         }}>
                             {p.summary}
                         </div>
@@ -466,16 +461,16 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <SvgIcons.MessageSquare size={16} />
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent)', background: 'rgba(20, 184, 166, 0.08)', padding: '2px 10px', borderRadius: '6px', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', background: 'var(--surface2)', padding: '2px 10px', borderRadius: '6px', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.User size={11} /> {p.rapporteur?.split(' ').slice(-1)[0] || '---'}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.User size={11} /> {p.rapporteur || '---'}</span>
 
                             {proc && (
                                 <span
                                     onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                                    style={{ cursor: 'pointer', padding: '2px 10px', background: 'var(--surface2)', color: 'var(--accent)', borderRadius: 6, fontWeight: 800, border: '1px solid var(--border)', fontSize: '0.7rem' }}
+                                    style={{ cursor: 'pointer', padding: '2px 0', color: 'var(--text-3)', fontSize: '0.7rem' }}
                                     title="Clique para ver detalhes e inteiro teor"
-                                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                                    onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
+                                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
                                 >
                                     <SvgIcons.Search size={11} /> {proc}
                                 </span>
@@ -663,6 +658,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                             color: 'var(--text-2)',
                                             lineHeight: '1.7',
                                             background: 'var(--surface2)',
+                                            padding: '1.5rem',
                                             borderRadius: '10px',
                                             border: '1px solid var(--border)',
                                             textAlign: 'justify',
