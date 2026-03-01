@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.021',
+        date: '01/03/2026',
+        description: 'Reversão de Tema e Título do Modal',
+        changes: [
+            'Tema Simplificado: O campo tema voltou a exibir apenas o número (ex: Tema 1317).',
+            'Título do Modal: Retornou ao formato reduzido e objetivo do dashboard.',
+            'Manutenção: Mantidos os alinhamentos de grade e o rótulo "DESTAQUE:" no modal.',
+        ]
+    },
+    {
         version: '1.1.020',
         date: '01/03/2026',
         description: 'Aprimoramento do Modal de Detalhes e Fidelidade de Título',

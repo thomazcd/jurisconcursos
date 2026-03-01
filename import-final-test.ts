@@ -48,7 +48,7 @@ async function main() {
             judgmentDate: new Date('2025-11-12'),
             publicationDate: new Date('2025-12-24'),
             forAll: true,
-            theme: ORIGINAL_TITLE, // Usamos theme para o título completo original
+            theme: 'Tema 1317', // Back to simple theme number
             subjectId: 's-cproc',
             subjects: {
                 connect: [

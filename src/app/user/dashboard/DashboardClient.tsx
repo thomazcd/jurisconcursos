@@ -637,7 +637,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                     display: 'block',
                                     wordWrap: 'break-word',
                                     overflowWrap: 'break-word'
-                                }}>{selectedPrecedent.theme || selectedPrecedent.title}</h3>
+                                }}>{selectedPrecedent.title}</h3>
 
                                 <div style={{
                                     fontSize: '0.65rem',
