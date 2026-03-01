@@ -51,14 +51,6 @@ export default async function AdminChangelogPage() {
                     ))}
                 </div>
             </main>
-
-            <style jsx>{`
-                ul li::marker {
-                    color: var(--accent);
-                    content: "• ";
-                    font-weight: bold;
-                }
-            `}</style>
         </div>
     );
 }
