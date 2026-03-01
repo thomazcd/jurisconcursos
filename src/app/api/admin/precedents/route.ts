@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         { title: { contains: search, mode: 'insensitive' } },
         { theme: { contains: search, mode: 'insensitive' } },
         { processNumber: { contains: search, mode: 'insensitive' } },
+        { informatoryNumber: { contains: search, mode: 'insensitive' } },
     ];
 
     const precedents = await prisma.precedent.findMany({

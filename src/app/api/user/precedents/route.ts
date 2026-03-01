@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
                 { title: { contains: q, mode: 'insensitive' } },
                 { summary: { contains: q, mode: 'insensitive' } },
                 { theme: { contains: q, mode: 'insensitive' } },
-                { processNumber: { contains: q, mode: 'insensitive' } }
+                { processNumber: { contains: q, mode: 'insensitive' } },
+                { informatoryNumber: { contains: q, mode: 'insensitive' } }
             ];
         }
 
