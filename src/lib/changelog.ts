@@ -8,6 +8,24 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: "1.1.013",
+        date: "01/03/2026",
+        description: "Sincronização do Log de Versões.",
+        changes: [
+            "Atualização do histórico para refletir o estado atual do projeto (v1.1.013).",
+            "Garantia de que o Log Admin esteja sempre emparelhado com a versão do sistema."
+        ]
+    },
+    {
+        version: "1.1.012",
+        date: "01/03/2026",
+        description: "Fix: Correção de erro crítico no build da Vercel.",
+        changes: [
+            "Resolução de conflito entre Server Components e styled-jsx.",
+            "Migração de estilos específicos do Changelog para o CSS Global."
+        ]
+    },
+    {
         version: "1.1.011",
         date: "01/03/2026",
         description: "Adição do Log de Versões (Changelog) para administradores.",
