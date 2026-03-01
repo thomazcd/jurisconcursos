@@ -8,6 +8,47 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.019',
+        date: '01/03/2026',
+        description: 'Refinamento de Dados e Visualização de Processos Múltiplos',
+        changes: [
+            'Processos Múltiplos: Dashboard mostra apenas o 1º número, enquanto o Modal detalha todos os processos vinculados.',
+            'Tema (Info): O badge do Tema (ex: Tema 1317) voltou a ser exibido no card e no modal.',
+            'Resumo de Títulos: Removido o uso de dois pontos (:) nos títulos resumidos para um visual mais limpo.',
+            'Fidelidade Legal: Termos como "Embargos à Execução Fiscal" agora são mantidos por extenso para evitar ambiguidades técnicos.',
+        ]
+    },
+    {
+        version: '1.1.018',
+        date: '01/03/2026',
+        description: 'Limpeza Visual Extrema e Fidelidade do Inteiro Teor',
+        changes: [
+            'Remoção de Rótulos: Retirado o texto "TESE / DESTAQUE" e as barras/fundos verdes do resumo.',
+            'Inteiro Teor Integral: Importação 100% fiel ao texto do usuário, com parágrafos e sem cortes.',
+            'Metadados Clean: Removidos fundos coloridos nos badges de informativo, processo e julgado.',
+            'Relator por Extenso: Agora exibe o nome completo do Ministro/Relator.',
+        ]
+    },
+    {
+        version: '1.1.017',
+        date: '01/03/2026',
+        description: 'Bulk Import e Títulos com IA',
+        changes: [
+            'Carga Completa: Importação dos 25 julgados do Informativo 875.',
+            'IA Títulos: Redução inteligente dos títulos para melhor escaneabilidade.',
+            'Modal Detalhado: Melhoria no scroll e padding do informativo.',
+        ]
+    },
+    {
+        version: '1.1.016',
+        date: '01/03/2026',
+        description: 'Ajustes no Dashboard e Agrupamento',
+        changes: [
+            'Desativado agrupamento na visão "Todas as Matérias" para evitar confusão visual.',
+            'Correção na importação do APP_VERSION.',
+        ]
+    },
+    {
         version: '1.1.015',
         date: '01/03/2026',
         description: 'Melhoria na exibição de julgados e modal compacto',
