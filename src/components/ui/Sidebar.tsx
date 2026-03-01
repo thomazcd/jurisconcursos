@@ -161,10 +161,11 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                         <>
                             <p style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-3)', padding: '0 0.5rem 0.6rem', marginBottom: '0.2rem' }}>Gestão</p>
                             <NavLink href="/admin" icon={<SvgIcons.Home size={18} />} label="Dashboard"
-                                active={pathname === '/admin' || (pathname.startsWith('/admin') && !pathname.startsWith('/admin/subjects') && !pathname.startsWith('/admin/precedents'))}
+                                active={pathname === '/admin' || (pathname.startsWith('/admin') && !pathname.startsWith('/admin/subjects') && !pathname.startsWith('/admin/precedents') && !pathname.startsWith('/admin/changelog'))}
                             />
                             <NavLink href="/admin/subjects" icon={<SvgIcons.Subjects size={18} />} label="Matérias" />
                             <NavLink href="/admin/precedents" icon={<SvgIcons.Gavel size={18} />} label="Precedentes" />
+                            <NavLink href="/admin/changelog" icon={<SvgIcons.History size={18} />} label="Log de Versões" />
                         </>
                     ) : (
                         <>
