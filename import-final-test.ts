@@ -4,10 +4,13 @@ import { PrismaClient, Court } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // TEMA-ASSUNTO COMPLETO (Extraído do PDF)
-const TEMA_ASSUNTO_FULL = 'Tema 1317 STJ - Possibilidade de condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.';
+const TEMA_ASSUNTO_FULL = 'Embargos à execução fiscal. Desistência ou renúncia para fins de adesão a programa de recuperação fiscal. Ajuste que inclui honorários advocatícios. Nova condenação em verba honorária na extinção dos embargos. Descabimento. Modulação de efeitos. Tema 1317.';
 
 // TÍTULO REDUZIDO (Para o Dashboard)
 const REDUCED_TITLE = 'Honorários em Embargos à Execução Fiscal por Adesão ao REFIS Tema 1317';
+
+// TEMA CURTO (Para o Badge)
+const TEMA_NUMERO = 'Tema 1317';
 
 const JULGADO_1_FULL_TEXT = `A questão submetida a julgamento sob o rito dos recursos repetitivos, nos termos do art. 1.036 do Código de Processo Civil, para formação de precedente vinculante previsto no art. 927, III, do Código de Processo Civil, é a seguinte: "definir se, à luz do CPC, é cabível a condenação do contribuinte em honorários advocatícios sucumbenciais em embargos à execução fiscal extintos com fundamento na desistência ou na renúncia de direito manifestada para fins de adesão a programa de recuperação fiscal, em que já está inserida a cobrança de verba honorária no âmbito administrativo.".
 
@@ -31,7 +34,7 @@ async function main() {
     console.log('--- RESETTING DATABASE PRECEDENTS ---');
     await prisma.precedent.deleteMany();
 
-    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (v1.1.023) ---');
+    console.log('--- IMPORTING FINAL VERSION OF JULGADO 1 (v1.1.024 - Pipe Trick) ---');
 
     await prisma.precedent.create({
         data: {
@@ -48,7 +51,8 @@ async function main() {
             judgmentDate: new Date('2025-11-12'),
             publicationDate: new Date('2025-12-24'),
             forAll: true,
-            theme: TEMA_ASSUNTO_FULL, // TEMA-ASSUNTO COMPLETO como solicitado
+            // "Pipe Trick": Badge | ModalTitle
+            theme: `${TEMA_NUMERO} | ${TEMA_ASSUNTO_FULL}`,
             subjectId: 's-cproc',
             subjects: {
                 connect: [
@@ -59,7 +63,7 @@ async function main() {
         }
     });
 
-    console.log('--- v1.1.023 TEST IMPORT COMPLETED! ---');
+    console.log('--- v1.1.024 TEST IMPORT COMPLETED! ---');
 }
 
 main()

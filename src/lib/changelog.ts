@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.024',
+        date: '01/03/2026',
+        description: 'Diferenciação entre Tema-Número e Tema-Assunto',
+        changes: [
+            'Badge Minimalista: No Dashboard, o badge do Tema agora exibe apenas o número (ex: Tema 1317).',
+            'Título Fiel no Modal: Ao abrir os detalhes, o título exibido é o "TEMA-ASSUNTO" integral, sem resumos.',
+            'Metadados Refinados: No quadro de informações do modal, o Tema também aparece de forma simplificada.',
+        ]
+    },
+    {
         version: '1.1.023',
         date: '01/03/2026',
         description: 'Reorganização do Modal e Título Completo',
