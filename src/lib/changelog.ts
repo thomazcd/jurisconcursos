@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.014',
+        date: '01/03/2026',
+        description: 'Refatoração da exibição e carga do Inf. 875',
+        changes: [
+            'Refatoração UI: Tema-Assunto como título principal do card.',
+            'Destaque visual da Tese (Destaque) abaixo do título.',
+            'Criação de modal específico para "Inteiro Teor" (Long Text).',
+            'Carga bem sucedida: Inserção do Julgado 1 do Informativo 875 com nova estrutura.',
+        ]
+    },
+    {
         version: "1.1.013",
         date: "01/03/2026",
         description: "Sincronização do Log de Versões.",
