@@ -14,6 +14,9 @@ export default function AdminImportClient() {
     const [infYear, setInfYear] = useState(new Date().getFullYear().toString());
     const [pubDate, setPubDate] = useState('');
 
+    const [pdfLoading, setPdfLoading] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
     // Precedente sendo editado
     const [title, setTitle] = useState('');
     const [summary, setSummary] = useState('');
@@ -102,6 +105,59 @@ export default function AdminImportClient() {
         }
     }
 
+    async function handlePDFUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setPdfLoading(true);
+        const formData = new FormData();
+        formData.append('pdf', file);
+
+        try {
+            const res = await fetch('/api/admin/gemini-pdf', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Erro Gemini PDF');
+
+            if (data.precedents && Array.isArray(data.precedents)) {
+                const aiDrafts = data.precedents.map((p: any) => ({
+                    id: Date.now().toString() + Math.random().toString(36).substring(7),
+                    title: p.title || '',
+                    summary: p.summary || '',
+                    fullTextOrLink: p.fullText || '', // Gemini may return it without exact formatting, but we dump it
+                    processClass: p.processClass || '',
+                    processNumber: '', // usually merged in processClass by IA
+                    organ: p.organ || '',
+                    rapporteur: p.rapporteur || '',
+                    judgmentDate: p.judgmentDate || null,
+                    theme: p.theme || '',
+                    flashcardQuestion: p.flashcardQuestion || '',
+                    flashcardAnswer: p.flashcardAnswer !== undefined ? p.flashcardAnswer : true,
+                    forAll: true,
+                    forProcurador: false,
+                    forJuizFederal: false,
+                    forJuizEstadual: false,
+                }));
+
+                // Add to the top of the queue
+                setPrecedentsDrafts(prev => [...aiDrafts, ...prev]);
+                alert(`✨ Leitura concluída! ${aiDrafts.length} teses extraídas e adicionadas à fila para revisão.`);
+            } else {
+                alert('Nenhuma tese compreensível foi extraída. Verifique se o PDF tem formato de texto pesquisável.');
+            }
+
+        } catch (err: any) {
+            console.error(err);
+            alert(`Falha ao ler o PDF: ${err.message}`);
+        } finally {
+            setPdfLoading(false);
+            if (fileInputRef.current) fileInputRef.current.value = ''; // reset file
+        }
+    }
+
     async function handleGeminiFill() {
         if (!fullText) return alert("Cole o 'Inteiro Teor' ou pedaço do Acórdão na caixa primeiro para a IA ler.");
         setAiLoading(true);
@@ -172,6 +228,21 @@ export default function AdminImportClient() {
                     <div>
                         <label className="form-label">Data Pub. Info (Opcional)</label>
                         <input className="form-input" type="date" value={pubDate} onChange={e => setPubDate(e.target.value)} />
+                    </div>
+                </div>
+
+                {/* BOTÃO MÁGICO DO PDF */}
+                <div style={{ marginTop: '1.5rem', background: 'rgba(201, 138, 0, 0.05)', border: '1px dashed #c98a00', padding: '1rem', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <div style={{ fontWeight: 800, color: '#a06e00', fontSize: '0.9rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Brain size={16} /> Auto-Preencher com PDF</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>O Google Gemini vai ler o arquivo do Informativo inteiro e quebrar as teses em rascunhos aqui em baixo. O processo demora uns 15 segundos.</div>
+                    </div>
+                    <div>
+                        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pdfLoading} className="btn" style={{ background: '#a06e00', color: '#fff', fontSize: '0.8rem', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.FileText size={14} />}
+                            {pdfLoading ? 'Lendo o PDF gigantesco...' : 'Carregar PDF do Informativo'}
+                        </button>
+                        <input type="file" accept="application/pdf" ref={fileInputRef} onChange={handlePDFUpload} style={{ display: 'none' }} />
                     </div>
                 </div>
             </div>
