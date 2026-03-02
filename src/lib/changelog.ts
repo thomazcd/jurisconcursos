@@ -8,6 +8,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '2.0.8',
+        date: '2026-03-02',
+        description: 'V2.0: Performance, Segurança e Auditoria Criptográfica',
+        changes: [
+            'Otimização Extrema (O(N)): Rota de estatísticas reescrita para resolver os painéis com apenas 2 idas ao banco de dados (antes 7+)',
+            'Segurança Total (Guards): Centralização da Polícia de Autenticação. Todas as rotas críticas (Leitura, Exportação IA, Admin) agora usam a guarita unificada.',
+            'Barreira Zod: O Endpoint que recebe os Informativos salvos pela IA agora detém e destrói payloads corrompidos usando o validador Zod.',
+            'Auditoria Limpa: Remoção preventiva e cautelosa de 16 documentos confidenciais (scripts SQL, logs de debug) que habitavam a raiz do servidor em produção.'
+        ]
+    },
+    {
+        version: '2.0.6',
+        date: '2026-03-02',
+        description: 'V2.0: AI Multi-Task e Magic Importer Flex',
+        changes: [
+            'Magic Importer Flexível: Interface de importação ganhou o modo "Via Texto Copiado" para lidar com quantidades monstruosas de texto, driblando sem esforço o limite de 60s da Vercel.',
+            'Gemini V2: Remoção do obsoleto `pdf-parse`. Modelos Vision da IA do Google leem o arquivo na velocidade da luz diretamente em Base64.',
+            'Variáveis de Ambiente Dinâmicas: Forçamento do flag `force-dynamic` para garantir que as chaves da IA na Vercel respirem em tempo real.'
+        ]
+    },
+    {
         version: '2.0.0-beta.1',
         date: '2026-03-02',
         description: 'V2.0: SWR Reactivity & Informatory Relational Entity',
