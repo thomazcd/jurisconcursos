@@ -787,6 +787,7 @@ tbody td:first-child {
     font-size: 1.6rem;
     background: var(--accent-g);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -1713,9 +1714,89 @@ tbody td:first-child {
             rgba(255, 255, 255, 0.1) 60%,
             rgba(255, 255, 255, 0));
 }
+
 /* ── Changelog Specific ─────────────────────────────────────────────── */
-.main-content ul li::marker {
+
+/* ── Subject Headers (Grouping) ───────────────────────────────────────── */
+.subject-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0 0.75rem;
+    margin-top: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to bottom, var(--bg) 80%, transparent);
+}
+
+.subject-header:first-child {
+    margin-top: 0.5rem;
+}
+
+.subject-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--accent);
-    content: "• ";
-    font-weight: bold;
+    box-shadow: var(--shadow-sm);
+}
+
+.subject-header h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text);
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+}
+
+.subject-header .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border-strong), transparent);
+}
+
+.subject-header span {
+    font-size: 0.75rem;
+    font-weight: 800;
+    background: var(--surface2);
+    color: var(--text-3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.dark-theme .subject-header {
+    background: linear-gradient(to bottom, var(--bg) 80%, transparent);
+}
+
+.dark-theme .subject-icon {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+/* ── Custom Scrollbar for Premium Look ────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 20px;
+    border: 3px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-3);
 }

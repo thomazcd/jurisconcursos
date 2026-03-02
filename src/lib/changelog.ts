@@ -8,6 +8,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.027',
+        date: '2026-03-02',
+        description: 'Finalização do Informativo 875 e Refinamento do Dashboard',
+        changes: [
+            'Sumarização inteligente dos títulos para melhor legibilidade no Dashboard.',
+            'Restauração da visualização agrupada por matérias no filtro "Todas as Matérias".',
+            'Correção do PIN badge: agora só aparece em julgados com número de tema oficial.',
+            'Ajuste na extração de datas de julgamento e publicação do Informativo 875.',
+            'Novo estilo "moderno" para divisores de matérias com contador de julgados.',
+            'Tutorial atualizado com todas as novas funções (Notas, Filtros, Foco).'
+        ]
+    },
+    {
         version: '1.1.026',
         date: '2026-03-01',
         description: 'Informativo 875 Completo',

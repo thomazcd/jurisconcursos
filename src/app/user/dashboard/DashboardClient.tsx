@@ -290,25 +290,28 @@ export default function DashboardClient({ userName, track }: Props) {
     }, [precedents, filterHideRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter, readMap]);
 
     const groupedPrecedents = useMemo(() => {
-        // Desativamos o agrupamento para evitar duplicados na visualização "Todas as Matérias"
-        // como solicitado pelo usuário. O agrupamento agora só acontece se não houver busca 
-        // mas vamos desligar por padrão se o usuário preferir a lista única.
-        return null;
+        if (selectedSubject !== 'ALL') return null;
 
-        if (selectedSubject !== 'ALL' || search.trim() !== '' || yearFilter !== 'ALL' || infFilter !== 'ALL' || courtFilter !== 'ALL') return null;
         const groups: Record<string, Precedent[]> = {};
         filtered.forEach(p => {
-            const subs = p.subjects && p.subjects.length > 0 ? p.subjects : [{ name: 'Geral' }];
+            const subs = p.subjects && p.subjects.length > 0 ? p.subjects : [{ name: 'Geral', id: 'geral' }];
             subs.forEach(s => {
                 const subName = s.name;
-                // Se o usuário selecionou uma matéria específica no filtro global, 
-                // aqui no agrupamento "Tudo" ainda mostramos tudo, mas se quisermos ser precisos:
                 if (!groups[subName]) groups[subName] = [];
+                // Evitar o mesmo precedente no mesmo grupo por engano, mas permitir em grupos diferentes
                 groups[subName].push(p);
             });
         });
-        return Object.entries(groups).filter(([_, list]) => list.length > 0).sort(([a], [b]) => a.localeCompare(b));
-    }, [selectedSubject, filtered, search, yearFilter, infFilter, courtFilter]);
+
+        // Ordenar grupos alfabeticamente, mas colocar 'Geral' por último se existir
+        return Object.entries(groups)
+            .filter(([_, list]) => list.length > 0)
+            .sort(([a], [b]) => {
+                if (a === 'Geral') return 1;
+                if (b === 'Geral') return -1;
+                return a.localeCompare(b);
+            });
+    }, [selectedSubject, filtered]);
 
     const renderPrecedent = (p: Precedent, currentSubjectContext?: string) => {
         const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
@@ -322,7 +325,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
         return (
             <div
-                key={p.id}
+                key={`${p.id}-${currentSubjectContext || 'all'}`}
                 className={`prec-item ${isRead ? 'is-read-card' : 'is-unread-card'}`}
                 style={{
                     borderLeft: `5px solid ${isRead ? '#22c55e' : '#fecaca'}`,
@@ -356,7 +359,11 @@ export default function DashboardClient({ userName, track }: Props) {
 
                 {!compactMode && (
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        {p.theme && p.theme.includes('|') && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme.split('|')[0].trim()}</span>}
+                        {p.theme && p.theme.includes('|') && p.theme.split('|')[0].trim() !== '' && (
+                            <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <SvgIcons.Pin size={10} /> {p.theme.split('|')[0].trim()}
+                            </span>
+                        )}
                         {p.subjects?.filter(s => {
                             if (!currentSubjectContext) return true;
                             const s1 = s.name.trim().toLowerCase();
@@ -1061,22 +1068,22 @@ export default function DashboardClient({ userName, track }: Props) {
                                 {[
                                     'Bem-vindo ao Novo Juris!',
                                     'Controle de Leitura',
-                                    'Detalhes e Favoritos',
+                                    'Notas e Favoritos',
                                     'Flashcards (V/F)',
                                     'Foco e Visualização',
-                                    'Busca e Ações Globais'
+                                    'Filtros e Matérias'
                                 ][helpStep]}
                             </h2>
 
                             {/* Descrição */}
                             <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                                 {[
-                                    'Sua plataforma de jurisprudência evoluiu. Preparamos uma interface premium, ultra-rápida e focada no que importa: seu desempenho. Vamos conhecer os novos comandos?',
-                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões verde (+1) e vermelho (-1) para registrar revisões. Clique no número de leituras para ver seu histórico detalhado com data e hora.',
-                                    'Clique na lupa ou no número do processo (ex: RE 1.234) para abrir os detalhes completos: relator, órgão e link do inteiro teor. Use a estrela para salvar teses em sua lista de favoritos.',
-                                    'Pronto para um estudo ativo? Mude para o modo Flashcard no topo. Escondemos a tese e você deve julgar se a afirmação é verdadeira ou falsa. O sistema gera estatísticas automáticas do seu acerto.',
-                                    'Ative o MODO FOCO (ícone de alvo) para remover todas as distrações. Você também pode ativar o "Modo Compacto" para listas densas e ajustar o tamanho da fonte (A+/A-) na barra de ferramentas.',
-                                    'Use a barra de busca para encontrar qualquer termo nas teses. Na barra superior, você também alterna entre Modo Escuro/Claro. Abaixo, você encontra ferramentas para gerenciar seu histórico.'
+                                    'Sua plataforma de jurisprudência evoluiu. Preparamos uma interface premium, ultra-rápida e focada no que importa: seu desempenho. Vamos conhecer os novos comandos!',
+                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões (+1/-1) para registrar revisões e o ícone de seta para zerar. Clique no número de leituras para ver seu histórico detalhado.',
+                                    'Use a estrela para favoritar e o ícone de balão para adicionar anotações pessoais. Elas ficam salvas para você revisar pontos críticos de cada julgado no futuro.',
+                                    'Pronto para um estudo ativo? Mude para o modo Flashcard no topo. Escondemos a tese e você julga se é verdadeira ou falsa. O sistema gera estatísticas completas de acerto.',
+                                    'Ative o MODO FOCO (alvo) para remover distrações. Use o "Modo Compacto" para listas densas e ajuste o tamanho da fonte (A+/A-) para o seu conforto visual.',
+                                    'Filtre por Matéria (ex: Civil, Penal) ou veja "Todas as Matérias" agrupadas. Use os chips para ver apenas Favoritos ou Erros em flashcards. Busque por qualquer termo na barra de pesquisa.'
                                 ][helpStep]}
                             </div>
 
