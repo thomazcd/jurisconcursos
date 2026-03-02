@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.036',
+        date: '2026-03-02',
+        description: 'Refinamento de Onboarding e Usabilidade',
+        changes: [
+            'Tutorial Instrucional: Adicionada orientação explícita sobre o clique no número do processo para abrir o Inteiro Teor.',
+            'Clareza na Navegação: Pequenos ajustes nos textos de ajuda para melhorar a compreensão das novas funcionalidades.',
+            'Deploy: Build v1.1.036 enviado para produção.'
+        ]
+    },
+    {
         version: '1.1.035',
         date: '2026-03-02',
         description: 'Tutorial Renovado e Onboarding',
