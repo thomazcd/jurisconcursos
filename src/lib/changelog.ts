@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.037',
+        date: '2026-03-02',
+        description: 'Estabilização de Build (Vercel)',
+        changes: [
+            'Correção de Build: Resolvido o erro "Dynamic server usage" nas rotas de precedentes e estatísticas.',
+            'Otimização de Renderização: Garantia de que dados dinâmicos do usuário sejam processados corretamente no servidor.',
+            'Deploy: Build v1.1.037 enviado para estabilizar a produção.'
+        ]
+    },
+    {
         version: '1.1.036',
         date: '2026-03-02',
         description: 'Refinamento de Onboarding e Usabilidade',

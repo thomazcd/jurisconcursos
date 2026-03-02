@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { getApplicabilityFilter } from '@/lib/eligibility';
 import { TrackScope } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
