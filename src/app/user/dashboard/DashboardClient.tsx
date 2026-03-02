@@ -689,7 +689,35 @@ export default function DashboardClient({ userName, track }: Props) {
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                             <SvgIcons.Scale size={12} /> Processo:
                                         </strong>
-                                        <span>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                            {selectedPrecedent.processNumber && (
+                                                <button
+                                                    onClick={(e) => copyToClipboard(selectedPrecedent.processNumber || '', 'modal-' + selectedPrecedent.id, e)}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        border: '1px solid var(--border)',
+                                                        background: 'var(--surface2)',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '6px',
+                                                        color: copying === 'modal-' + selectedPrecedent.id ? 'var(--accent)' : 'var(--text-3)',
+                                                        fontSize: '0.65rem',
+                                                        fontWeight: 900,
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    title="Copiar número do processo"
+                                                >
+                                                    {copying === 'modal-' + selectedPrecedent.id ? (
+                                                        <><SvgIcons.Check size={10} /> número do processo copiado</>
+                                                    ) : (
+                                                        <><SvgIcons.Copy size={10} /> Copiar</>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>

@@ -142,7 +142,10 @@ async function main() {
         const teorMatch = block.match(/INFORMAÇÕES DO INTEIRO TEOR ([\s\S]+?) (?:INFORMAÇÕES ADICIONAIS|ÁUDIO DO TEXTO|PROCESSO|PRECEDENTES QUALIFICADOS|LEGISLAÇÃO)/);
         let inteiroTeor = teorMatch ? teorMatch[1].trim() : '';
         inteiroTeor = inteiroTeor.replace(/Informativo de Jurisprudência n\. 875 3 de fevereiro de 2026\. processo\.stj\.jus.br\/jurisprudencia\/externo\/informativo\/ \d+\/47/g, '');
-        inteiroTeor = inteiroTeor.replace(/\s+/g, ' ').trim();
+        // Preserve newlines but normalize spaces/tabs
+        inteiroTeor = inteiroTeor.replace(/[ \t]+/g, ' ').trim();
+        // Normalize multiple newlines
+        inteiroTeor = inteiroTeor.replace(/\n\s*\n/g, '\n\n');
 
         const finalTheme = themeNumber ? `${themeNumber} | ${temaAssunto}` : `| ${temaAssunto}`;
 

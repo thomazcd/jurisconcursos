@@ -8,6 +8,28 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.033',
+        date: '2026-03-02',
+        description: 'Fidelidade de Texto e Agilidade no Copiar',
+        changes: [
+            'Preservação de Parágrafos: O texto do Inteiro Teor agora mantém a estrutura original do informativo.',
+            'Botão Copiar Processo: Disponível dentro do card com mensagem de confirmação instantânea.',
+            'Refinamento de Importação: Script otimizado para não remover quebras de linha essenciais.',
+            'Deploy: Atualização enviada para produção Vercel.'
+        ]
+    },
+    {
+        version: '1.1.032',
+        date: '2026-03-02',
+        description: 'Funcionalidade de Cópia e Ícones',
+        changes: [
+            'Cópia de Processo: Adicionado botão no modal para copiar o número do processo com feedback visual.',
+            'Biblioteca de Ícones: Inclusão dos ícones "Copy" e "Check" para suporte a interações de clipboard.',
+            'Refinamento UI: Botão de cópia minimalista integrado ao layout de metadados do card.',
+            'Deploy: Atualização enviada para produção.'
+        ]
+    },
+    {
         version: '1.1.031',
         date: '2026-03-02',
         description: 'Ajuste de Fluxo de Leitura (Metadata)',
