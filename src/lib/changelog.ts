@@ -8,6 +8,31 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.029',
+        date: '2026-03-02',
+        description: 'Fidelidade de Órgãos e Relatores (STJ)',
+        changes: [
+            'Refinamento de Órgão: Agora distingue corretamente Turmas, Seções e Corte Especial no STJ.',
+            'Relator p/ Acórdão: Exibição dual quando houver relator original e relator vencedor.',
+            'Dashboard Aprimorado: O órgão julgador agora aparece diretamente no card do julgado.',
+            'Whitelist de Órgãos: Impede que relatores sejam confundidos com o órgão julgador.',
+            'Correção "Min.": Garantia de prefixo respeitoso em todos os nomes de magistrados.'
+        ]
+    },
+    {
+        version: '1.1.028',
+        date: '2026-03-02',
+        description: 'Qualidade de Dados e Refinamento do Informativo 875',
+        changes: [
+            'Correção integral dos títulos e súmulas do Informativo 875 (ex: MS 31.562-DF).',
+            'Padronização respeitosa: Adicionado prefixo "Min." a todos os nomes de julgadores.',
+            'Interface Premium: Novo design para cabeçalhos de matérias com badges de contagem.',
+            'Tutorial 2.0: Guia interativo atualizado com as novas funcionalidades e dicas de estudo.',
+            'Correção do Modal: O campo de Tema agora oculta badges vazios quando não há afetação numerada.',
+            'Otimização de Importação: Bloqueio automático de recursos de afetação (ProAfR) para limpeza do banco.'
+        ]
+    },
+    {
         version: '1.1.027',
         date: '2026-03-02',
         description: 'Finalização do Informativo 875 e Refinamento do Dashboard',

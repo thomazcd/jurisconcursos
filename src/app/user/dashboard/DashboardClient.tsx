@@ -483,6 +483,7 @@ export default function DashboardClient({ userName, track }: Props) {
                             >
                                 <SvgIcons.Search size={11} /> {procList}
                             </span>
+                            {p.organ && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem', fontWeight: 800 }}><SvgIcons.Gavel size={11} /> {p.organ}</span>}
                             {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}><SvgIcons.Calendar size={11} /> Jul: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
                             <span
                                 style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default', fontSize: '0.7rem' }}
@@ -662,7 +663,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                             <SvgIcons.Pin size={12} /> Tema:
                                         </strong>
-                                        <span>{selectedPrecedent.theme?.includes('|') ? selectedPrecedent.theme.split('|')[0].trim() : '---'}</span>
+                                        <span>{(selectedPrecedent.theme?.includes('|') && selectedPrecedent.theme.split('|')[0].trim()) || 'Não afetado'}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
@@ -1078,12 +1079,12 @@ export default function DashboardClient({ userName, track }: Props) {
                             {/* Descrição */}
                             <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                                 {[
-                                    'Sua plataforma de jurisprudência evoluiu. Preparamos uma interface premium, ultra-rápida e focada no que importa: seu desempenho. Vamos conhecer os novos comandos!',
-                                    'Clique em qualquer card para marcá-lo como "Lido". Use os botões (+1/-1) para registrar revisões e o ícone de seta para zerar. Clique no número de leituras para ver seu histórico detalhado.',
-                                    'Use a estrela para favoritar e o ícone de balão para adicionar anotações pessoais. Elas ficam salvas para você revisar pontos críticos de cada julgado no futuro.',
-                                    'Pronto para um estudo ativo? Mude para o modo Flashcard no topo. Escondemos a tese e você julga se é verdadeira ou falsa. O sistema gera estatísticas completas de acerto.',
-                                    'Ative o MODO FOCO (alvo) para remover distrações. Use o "Modo Compacto" para listas densas e ajuste o tamanho da fonte (A+/A-) para o seu conforto visual.',
-                                    'Filtre por Matéria (ex: Civil, Penal) ou veja "Todas as Matérias" agrupadas. Use os chips para ver apenas Favoritos ou Erros em flashcards. Busque por qualquer termo na barra de pesquisa.'
+                                    'A interface do Juris foi otimizada para sua aprovação. Desenvolvemos uma experiência fluida, premium e focada no alto rendimento. Vamos explorar as ferramentas fundamentais para sua jornada!',
+                                    'Toque em qualquer card para registrar sua leitura. Os botões (+1/-1) permitem gerenciar suas revisões periódicas. O histórico detalhado por data agora está integrado para você acompanhar sua evolução.',
+                                    'O poder dos mnemônicos está aqui. Use o ícone de estrela para julgados críticos e o balão para suas anotações pessoais. Suas notas são exclusivas e fundamentais para a revisão de véspera.',
+                                    'Estudo ativo é a chave. No topo, mude para "V/F" e teste seus conhecimentos. O sistema oculta a tese, permitindo que você julgue o item. Estatísticas em tempo real mostram seus pontos fortes e fracos.',
+                                    'Elimine distrações com o MODO FOCO. Se preferir uma visão ampla, o "Modo Compacto" permite visualizar dezenas de teses simultaneamente. Ajuste o tamanho da fonte para o conforto total dos olhos.',
+                                    'Agrupamos julgados por matéria automaticamente. Use a barra de pesquisa para encontrar palavras-chave. Filtre por Tribunal ou Informativo específico para nichar seu estudo de forma estratégica.'
                                 ][helpStep]}
                             </div>
 
@@ -1142,36 +1143,50 @@ export default function DashboardClient({ userName, track }: Props) {
                     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
                     border: 1px solid var(--border);
                 }
-                .subject-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; margin-top: 0.5rem; }
+                .subject-header { 
+                    display: flex; 
+                    align-items: center; 
+                    gap: 0.8rem; 
+                    margin: 1.5rem 0 1rem;
+                    padding: 0.5rem 0;
+                }
                 .subject-icon { 
                     display: flex; 
                     align-items: center; 
                     justify-content: center; 
-                    width: 40px; 
-                    height: 40px; 
-                    border-radius: 12px; 
-                    background: var(--surface2); 
+                    width: 44px; 
+                    height: 44px; 
+                    border-radius: 14px; 
+                    background: linear-gradient(135deg, var(--surface2), var(--surface3));
                     color: var(--accent); 
                     border: 1px solid var(--border);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
                 }
                 .subject-header h3 { 
-                    font-size: 1.15rem; 
-                    font-weight: 800; 
+                    font-size: 1.25rem; 
+                    font-weight: 950; 
                     color: var(--text); 
-                    letter-spacing: -0.03em; 
+                    letter-spacing: -0.04em; 
                     white-space: nowrap; 
-                    margin: 0; 
+                    margin: 0;
+                    text-transform: capitalize;
                 }
-                .subject-header .line { flex: 1; height: 1.5px; background: linear-gradient(to right, var(--border-strong), transparent); opacity: 0.3; }
+                .subject-header .line { 
+                    flex: 1; 
+                    height: 2px; 
+                    background: linear-gradient(to right, var(--accent), transparent); 
+                    opacity: 0.15; 
+                    border-radius: 2px;
+                }
                 .subject-header span { 
                     font-size: 0.8rem; 
-                    font-weight: 700; 
-                    color: var(--text-2); 
-                    background: var(--surface); 
-                    padding: 4px 14px; 
-                    border-radius: 50px;
-                    border: 1px solid var(--border);
+                    font-weight: 900; 
+                    color: var(--accent); 
+                    background: rgba(20, 184, 166, 0.1); 
+                    padding: 4px 12px; 
+                    border-radius: 10px;
+                    border: 1px solid rgba(20, 184, 166, 0.2);
+                    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.05);
                 }
                 
                 .btn-activity {
