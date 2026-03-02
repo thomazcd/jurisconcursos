@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { GoogleGenAI } from '@google/genai';
 
+export const maxDuration = 60; // Max execution time for Vercel
+
 const apiKey = process.env.GEMINI_API_KEY;
 
 // Initialize the Gemini SDK if the key is present

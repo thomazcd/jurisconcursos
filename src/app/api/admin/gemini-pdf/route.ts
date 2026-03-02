@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { GoogleGenAI } from '@google/genai';
 import * as pdfCore from 'pdf-parse';
+
+export const maxDuration = 60; // Configures Vercel to allow up to 60 seconds of execution
+
 const pdfParse = (pdfCore as any).default || pdfCore;
 
 const apiKey = process.env.GEMINI_API_KEY;

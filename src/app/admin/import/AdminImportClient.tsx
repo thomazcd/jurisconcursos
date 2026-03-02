@@ -119,8 +119,16 @@ export default function AdminImportClient() {
                 body: formData
             });
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Erro Gemini PDF');
+            const rawText = await res.text();
+            let data: any;
+            try {
+                data = JSON.parse(rawText);
+            } catch (e) {
+                console.error('Resposta não-JSON recebida:', rawText);
+                throw new Error('O servidor demorou muito a responder ou retornou um formato inválido (timeout da Vercel).');
+            }
+
+            if (!res.ok) throw new Error(data?.error || 'Erro Gemini PDF');
 
             if (data.precedents && Array.isArray(data.precedents)) {
                 const aiDrafts = data.precedents.map((p: any) => ({
@@ -167,9 +175,16 @@ export default function AdminImportClient() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: fullText }),
             });
-            const data = await res.json();
+            const rawText = await res.text();
+            let data: any;
+            try {
+                data = JSON.parse(rawText);
+            } catch (e) {
+                console.error('Resposta não-JSON recebida:', rawText);
+                throw new Error('O servidor demorou muito a responder ou retornou um formato inválido (timeout da Vercel).');
+            }
 
-            if (!res.ok) throw new Error(data.error || 'Erro Gemini');
+            if (!res.ok) throw new Error(data?.error || 'Erro Gemini');
 
             const sug = data.suggestion;
             if (sug.title) setTitle(sug.title);
