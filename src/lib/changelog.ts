@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.042',
+        date: '2026-03-02',
+        description: 'Vercel Cache Invalidation',
+        changes: [
+            'Cache Reset: Modificado o script de build (`rm -rf .next`) para forçar a Vercel a invalidar o cache de traces corrompidos.',
+            'Vercel Ignore: Adicionado arquivo `.vercelignore` para barrar a importação acidental de assets pesados (SQLs/TXTs) pelo roteador.',
+            'Deploy: Build v1.1.042 enviado para contornar o Internal Error.'
+        ]
+    },
+    {
         version: '1.1.041',
         date: '2026-03-02',
         description: 'Vercel Lambda Optimization',

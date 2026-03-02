@@ -1,0 +1,11 @@
+# Ignorados pelo build do Vercel para evitar estouro de limite de trace ("Internal error")
+*.sql
+*.docx
+*.txt
+*.csv
+JULGADOS_*
+STJ_*
+precedentes/
+scripts/
+dump.sql
+.vscode/
