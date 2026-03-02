@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.043',
+        date: '2026-03-02',
+        description: 'Serverless Functions Limit Fix',
+        changes: [
+            'Otimização do Prisma: Removida a configuração `binaryTargets` do `schema.prisma`. Isso evita que a Vercel baixe múltiplos motores pesados para cada função serverless, reduzindo drasticamente o tamanho final do payload.',
+            'Refinamento Next.js: Revertida a flag `serverComponentsExternalPackages`, permitindo que o compilador realize o tree-shaking adequado do Prisma na geração das rotas.',
+            'Mitigação Total do Internal Error: A redução no tamanho das lambdas resolve o bloqueio na etapa "Deploying outputs...".'
+        ]
+    },
+    {
         version: '1.1.042',
         date: '2026-03-02',
         description: 'Vercel Cache Invalidation',
