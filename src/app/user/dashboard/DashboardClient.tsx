@@ -1119,7 +1119,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                 {[
                                     'A interface do Juris foi otimizada para sua aprovação. Desenvolvemos uma experiência fluida, premium e focada no alto rendimento. Vamos explorar as ferramentas fundamentais para sua jornada!',
                                     'Implementamos precisão total para o STJ. Agora você visualiza o Órgão Julgador (Turmas/Seções) e a distinção clara entre Relator original e para Acórdão, garantindo que você estude com os dados exatos do informativo.',
-                                    'Clique no número do processo ou no ícone de busca para abrir o card completo com o Inteiro Teor. Reconstruímos os parágrafos, eliminando quebras de linha fragmentadas e preservando a estrutura jurídica original.',
+                                    'Acesse detalhes completos clicando diretamente no Número do Processo ou no ícone de busca. Isso abrirá o card com o Inteiro Teor estruturado e todas as informações acessoriais do julgado.',
                                     'Facilitamos sua vida acadêmica. Ao abrir um card, você encontrará um botão para copiar o número do processo com um clique. Ideal para buscas rápidas ou citações em petições e resumos.',
                                     'Estudo ativo é a chave. No topo, mude para "V/F" e teste seus conhecimentos. O sistema oculta a tese, permitindo que você julgue o item. Estatísticas em tempo real mostram seus pontos fortes e fracos.',
                                     'Elimine distrações com o MODO FOCO. Se preferir uma visão ampla, o "Modo Compacto" permite visualizar dezenas de teses simultaneamente. Ajuste o tamanho da fonte para o conforto total dos olhos.',

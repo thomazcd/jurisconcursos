@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.039',
+        date: '2026-03-02',
+        description: 'Refinamento de Tutorial e Estabilidade',
+        changes: [
+            'Foco no Inteiro Teor: Tutorial agora ensina explicitamente que clicar no número do processo revela o texto completo.',
+            'Otimização de Deploy: Simplificação de scripts internos para estabilizar a publicação na Vercel.',
+            'Deploy: Build v1.1.039 enviado para produção.'
+        ]
+    },
+    {
         version: '1.1.038',
         date: '2026-03-02',
         description: 'Limpeza e Estabilização de API',
