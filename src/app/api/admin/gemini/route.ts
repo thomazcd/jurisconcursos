@@ -5,11 +5,6 @@ import { GoogleGenAI } from '@google/genai';
 
 export const maxDuration = 60; // Max execution time for Vercel
 
-const apiKey = process.env.GEMINI_API_KEY;
-
-// Initialize the Gemini SDK if the key is present
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -21,9 +16,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Proibido' }, { status: 403 });
     }
 
-    if (!ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
         return NextResponse.json({ error: 'GEMINI_API_KEY não configurada no servidor (.env).' }, { status: 500 });
     }
+    const ai = new GoogleGenAI({ apiKey });
 
     try {
         const body = await req.json();
