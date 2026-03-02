@@ -1092,11 +1092,12 @@ export default function DashboardClient({ userName, track }: Props) {
                             <div style={{ width: 72, height: 72, borderRadius: '22px', background: 'linear-gradient(135deg, var(--accent), #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', margin: '0 auto 1.25rem', boxShadow: '0 10px 25px rgba(20,184,166,0.3)', transform: 'rotate(-5deg)' }}>
                                 {[
                                     <SvgIcons.Sparkles size={36} key="s0" />,
-                                    <SvgIcons.BookOpen size={36} key="s1" />,
-                                    <SvgIcons.Search size={36} key="s2" />,
-                                    <SvgIcons.Brain size={36} key="s3" />,
-                                    <SvgIcons.Target size={36} key="s4" />,
-                                    <SvgIcons.RotateCw size={36} key="s5" />
+                                    <SvgIcons.Gavel size={36} key="s1" />,
+                                    <SvgIcons.Layout size={36} key="s2" />,
+                                    <SvgIcons.Copy size={36} key="s3" />,
+                                    <SvgIcons.Brain size={36} key="s4" />,
+                                    <SvgIcons.Target size={36} key="s5" />,
+                                    <SvgIcons.RotateCw size={36} key="s6" />
                                 ][helpStep]}
                             </div>
 
@@ -1104,8 +1105,9 @@ export default function DashboardClient({ userName, track }: Props) {
                             <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
                                 {[
                                     'Bem-vindo ao Novo Juris!',
-                                    'Controle de Leitura',
-                                    'Notas e Favoritos',
+                                    'Fidelidade Jurisdicional',
+                                    'Inteiro Teor Premium',
+                                    'Agilidade no Estudo',
                                     'Flashcards (V/F)',
                                     'Foco e Visualização',
                                     'Filtros e Matérias'
@@ -1116,15 +1118,16 @@ export default function DashboardClient({ userName, track }: Props) {
                             <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                                 {[
                                     'A interface do Juris foi otimizada para sua aprovação. Desenvolvemos uma experiência fluida, premium e focada no alto rendimento. Vamos explorar as ferramentas fundamentais para sua jornada!',
-                                    'Toque em qualquer card para registrar sua leitura. Os botões (+1/-1) permitem gerenciar suas revisões periódicas. O histórico detalhado por data agora está integrado para você acompanhar sua evolução.',
-                                    'O poder dos mnemônicos está aqui. Use o ícone de estrela para julgados críticos e o balão para suas anotações pessoais. Suas notas são exclusivas e fundamentais para a revisão de véspera.',
+                                    'Implementamos precisão total para o STJ. Agora você visualiza o Órgão Julgador (Turmas/Seções) e a distinção clara entre Relator original e para Acórdão, garantindo que você estude com os dados exatos do informativo.',
+                                    'A leitura do informativo nunca foi tão agradável. Reconstruímos os parágrafos do Inteiro Teor, eliminando quebras de linha fragmentadas e preservando a estrutura jurídica original para um estudo sem esforço.',
+                                    'Facilitamos sua vida acadêmica. Ao abrir um card, você encontrará um botão para copiar o número do processo com um clique. Ideal para buscas rápidas ou citações em petições e resumos.',
                                     'Estudo ativo é a chave. No topo, mude para "V/F" e teste seus conhecimentos. O sistema oculta a tese, permitindo que você julgue o item. Estatísticas em tempo real mostram seus pontos fortes e fracos.',
                                     'Elimine distrações com o MODO FOCO. Se preferir uma visão ampla, o "Modo Compacto" permite visualizar dezenas de teses simultaneamente. Ajuste o tamanho da fonte para o conforto total dos olhos.',
                                     'Agrupamos julgados por matéria automaticamente. Use a barra de pesquisa para encontrar palavras-chave. Filtre por Tribunal ou Informativo específico para nichar seu estudo de forma estratégica.'
                                 ][helpStep]}
                             </div>
 
-                            {helpStep === 5 && (
+                            {helpStep === 6 && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: 16, border: '1px solid var(--border)' }}>
                                     <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
                                         <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Zona de Gerenciamento</h4>
@@ -1143,7 +1146,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
                             {/* Pontos de progresso */}
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                                {[0, 1, 2, 3, 4, 5].map(i => (
+                                {[0, 1, 2, 3, 4, 5, 6].map(i => (
                                     <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
                                 ))}
                             </div>
@@ -1151,8 +1154,8 @@ export default function DashboardClient({ userName, track }: Props) {
                             {/* Botões */}
                             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                                 {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                                <button className="btn btn-primary" onClick={() => helpStep < 5 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {helpStep < 5 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Entendi!</>}
+                                <button className="btn btn-primary" onClick={() => helpStep < 6 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {helpStep < 6 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Entendi!</>}
                                 </button>
                             </div>
                         </div>

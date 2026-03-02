@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.035',
+        date: '2026-03-02',
+        description: 'Tutorial Renovado e Onboarding',
+        changes: [
+            'Guia de Novidades: Tutorial expandido para 7 passos, introduzindo o botão de cópia, novo Inteiro Teor e órgãos do STJ.',
+            'Experiência do Usuário: Onboarding reescrito para destacar as ferramentas de alta performance e fidelidade jurídica.',
+            'Deploy: Build v1.1.035 enviado para produção.'
+        ]
+    },
+    {
         version: '1.1.034',
         date: '2026-03-02',
         description: 'Reconstrução de Parágrafos e Dados Jurídicos',
