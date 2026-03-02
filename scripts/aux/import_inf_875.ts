@@ -67,6 +67,13 @@ async function main() {
     const blocks = normalized.split(/(?=PROCESSO )/);
 
     console.log(`Found ${blocks.length} blocks candidate.`);
+
+    // Clear previous imports for this informatory to allow fresh re-import with fixed formatting
+    await prisma.precedent.deleteMany({
+        where: { informatoryNumber: '875' }
+    });
+    console.log("Cleared existing Informativo 875 precedents.");
+
     const processed = new Set<string>();
 
     for (let block of blocks) {
@@ -140,12 +147,35 @@ async function main() {
         const destaque = destaqueMatch ? destaqueMatch[1].trim() : '';
 
         const teorMatch = block.match(/INFORMAÇÕES DO INTEIRO TEOR ([\s\S]+?) (?:INFORMAÇÕES ADICIONAIS|ÁUDIO DO TEXTO|PROCESSO|PRECEDENTES QUALIFICADOS|LEGISLAÇÃO)/);
-        let inteiroTeor = teorMatch ? teorMatch[1].trim() : '';
-        inteiroTeor = inteiroTeor.replace(/Informativo de Jurisprudência n\. 875 3 de fevereiro de 2026\. processo\.stj\.jus.br\/jurisprudencia\/externo\/informativo\/ \d+\/47/g, '');
-        // Preserve newlines but normalize spaces/tabs
-        inteiroTeor = inteiroTeor.replace(/[ \t]+/g, ' ').trim();
-        // Normalize multiple newlines
-        inteiroTeor = inteiroTeor.replace(/\n\s*\n/g, '\n\n');
+
+        // SMARTER PARAGRAPH RECONSTRUCTION
+        let cleanedTeor = teorMatch ? teorMatch[1] : '';
+        // Remove known footers/headers found inside blocks
+        cleanedTeor = cleanedTeor.replace(/Informativo de Jurisprudência n\. 875[\s\S]+?\/47/g, '');
+
+        const teorLines = cleanedTeor.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0);
+        let rebuiltTeor = "";
+
+        for (let i = 0; i < teorLines.length; i++) {
+            const line = teorLines[i];
+            const next = teorLines[i + 1];
+
+            rebuiltTeor += line;
+
+            if (next) {
+                const lastChar = line[line.length - 1];
+                const endsInPunct = /[.!?:]/.test(lastChar);
+                const nextIsCapital = /^[A-ZÀ-Ú]/.test(next);
+
+                // Heuristic: Period + Capital = New Paragraph
+                if (endsInPunct && nextIsCapital) {
+                    rebuiltTeor += "\n\n";
+                } else {
+                    rebuiltTeor += " ";
+                }
+            }
+        }
+        let inteiroTeor = rebuiltTeor.replace(/[ \t]+/g, ' ').trim();
 
         const finalTheme = themeNumber ? `${themeNumber} | ${temaAssunto}` : `| ${temaAssunto}`;
 

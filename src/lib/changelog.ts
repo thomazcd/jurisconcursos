@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.034',
+        date: '2026-03-02',
+        description: 'Reconstrução de Parágrafos e Dados Jurídicos',
+        changes: [
+            'Heurística de Parágrafos: Reconstrução inteligente de parágrafos no Inteiro Teor, eliminando as quebras de linha fragmentadas do PDF.',
+            'Reimportação Total: Todos os julgados do Informativo 875 foram reprocessados para garantir a nova formatação.',
+            'Limpeza de Rodapé: Melhoria na remoção de cabeçalhos/rodapés repetitivos dentro do texto jurídico.',
+            'Deploy: build v1.1.034 disparado para produção.'
+        ]
+    },
+    {
         version: '1.1.033',
         date: '2026-03-02',
         description: 'Fidelidade de Texto e Agilidade no Copiar',
