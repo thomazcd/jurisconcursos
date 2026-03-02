@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getApplicabilityFilter } from '@/lib/eligibility';
-
+import { PrecedentService } from '@/services/PrecedentService';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,57 +17,18 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
-        const q = searchParams.get('q'); // Search query
+        const q = searchParams.get('q');
 
-        // Core Filters
-        const appFilter = getApplicabilityFilter(track);
-        const where: any = { ...appFilter };
-
-        if (subjectId && subjectId !== 'ALL') {
-            where.subjects = { some: { id: subjectId } };
-        }
-        if (q) {
-            where.OR = [
-                { title: { contains: q, mode: 'insensitive' } },
-                { summary: { contains: q, mode: 'insensitive' } },
-                { theme: { contains: q, mode: 'insensitive' } },
-                { processNumber: { contains: q, mode: 'insensitive' } },
-                { informatoryNumber: { contains: q, mode: 'insensitive' } }
-            ];
-        }
-
-        const precedents = await prisma.precedent.findMany({
-            where,
-            orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
-            include: {
-                subjects: { select: { id: true, name: true } },
-            },
-            distinct: subjectId === 'ALL' ? ['title'] : undefined,
-            take: 500,
+        // Centralizado! O Serviço puxa do Banco (incluindo o pai Informatory) e amarra estatísticas
+        const precedents = await PrecedentService.getForUser({
+            track,
+            userId,
+            subjectId,
+            q,
+            limit: 500
         });
 
-        // Fetch User's Specific Data separately (PrecedentRead)
-        const reads = await prisma.precedentRead.findMany({
-            where: { userId, precedent: appFilter }
-        });
-        const readMap = new Map<string, any>(reads.map((r: any) => [r.precedentId, r]));
-
-        const result = precedents.map((p: any) => {
-            const r = readMap.get(p.id);
-            return {
-                ...p,
-                readCount: r?.readCount ?? 0,
-                isRead: (r?.readCount ?? 0) > 0,
-                readEvents: r?.readEvents ?? [],
-                correctCount: r?.correctCount ?? 0,
-                wrongCount: r?.wrongCount ?? 0,
-                lastResult: r?.lastResult ?? null,
-                isFavorite: r?.isFavorite ?? false,
-                notes: r?.notes ?? null,
-            };
-        });
-
-        return NextResponse.json({ precedents: result });
+        return NextResponse.json({ precedents });
     } catch (err: any) {
         console.error('ERROR in GET /api/user/precedents:', err);
         return NextResponse.json({

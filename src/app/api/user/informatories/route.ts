@@ -2,67 +2,44 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { InformatoryService } from '@/services/InformatoryService';
+import { Track } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session?.user) {
         return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    const activeTrack = (session.user as any).activeTrack as Track;
+
     try {
-        // Busca os informativos únicos no banco
-        const informatories = await prisma.precedent.findMany({
-            where: {
-                informatoryNumber: { not: null }
-            },
-            select: {
-                court: true,
-                informatoryNumber: true,
-                informatoryYear: true,
-                updatedAt: true,
-            },
-            orderBy: [
-                { informatoryYear: 'desc' },
-                { informatoryNumber: 'desc' }
-            ]
-        });
+        // Usa o serviço centralizado para buscar apenas os informativos da trilha do aluno
+        const informatoriesDb = await InformatoryService.getPublishedForTrack(activeTrack);
 
-        // Agrupa por Tribunal e Número/Ano
-        const map = new Map<string, { court: string, number: string, year: number | null, lastUpdate: Date }>();
-        let globalLastUpdate = new Date(0);
+        // O front-end ainda espera o formato: { court: string, number: string, year: number | null }
+        // Para compatibilidade, traduziremos rápido
+        const list = informatoriesDb.map(inf => ({
+            court: inf.court,
+            number: inf.number,
+            year: inf.year,
+        }));
 
-        informatories.forEach(inf => {
-            const key = `${inf.court}-${inf.informatoryNumber}-${inf.informatoryYear}`;
-            if (inf.updatedAt > globalLastUpdate) globalLastUpdate = inf.updatedAt;
-
-            if (!map.has(key)) {
-                map.set(key, {
-                    court: inf.court,
-                    number: inf.informatoryNumber!,
-                    year: inf.informatoryYear,
-                    lastUpdate: inf.updatedAt
-                });
-            } else {
-                const existing = map.get(key)!;
-                if (inf.updatedAt > existing.lastUpdate) {
-                    existing.lastUpdate = inf.updatedAt;
-                }
-            }
-        });
-
-        const list = Array.from(map.values()).sort((a, b) => {
-            if (b.year !== a.year) return (b.year || 0) - (a.year || 0);
-            return parseInt(b.number) - parseInt(a.number);
+        // Adiciona um lastUpdate global (pega o registro mais recente em Precedentes gerais pra trigger de notificação, se existir)
+        const lastPrecedent = await prisma.precedent.findFirst({
+            where: { status: 'PUBLISHED' },
+            orderBy: { updatedAt: 'desc' },
+            select: { updatedAt: true }
         });
 
         return NextResponse.json({
             informatories: list,
-            lastUpdate: globalLastUpdate
+            lastUpdate: lastPrecedent?.updatedAt || new Date(0)
         });
     } catch (error) {
         console.error('Erro ao buscar novidades:', error);
-        return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro interno no Serviço de Informativos' }, { status: 500 });
     }
 }
