@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.030',
+        date: '2026-03-02',
+        description: 'Refinamento de Usabilidade e Dashboard',
+        changes: [
+            'Rapporteur Inteligente: No dashboard, exibe apenas o Relator p/ acórdão (vencedor) se existir, reduzindo texto.',
+            'Fidelidade Total no Modal: Detalhes completos com relator original e vencedor continuam disponíveis no card.',
+            'STJ Jurisdicional: Órgãos (Turmas/Seções) agora exibidos com destaque no dashboard.',
+            'Deploy Automatizado: Atualização de build para Vercel refletindo novas lógicas de importação.'
+        ]
+    },
+    {
         version: '1.1.029',
         date: '2026-03-02',
         description: 'Fidelidade de Órgãos e Relatores (STJ)',

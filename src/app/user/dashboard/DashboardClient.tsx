@@ -472,7 +472,10 @@ export default function DashboardClient({ userName, track }: Props) {
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.User size={11} /> {p.rapporteur || '---'}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}>
+                                <SvgIcons.User size={11} />
+                                {p.rapporteur?.includes('Rel. p/ acórdão') ? p.rapporteur.split(',').find(s => s.includes('Rel. p/ acórdão'))?.trim() : (p.rapporteur || '---')}
+                            </span>
 
                             <span
                                 onClick={(e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
