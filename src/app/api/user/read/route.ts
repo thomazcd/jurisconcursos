@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/guards';
 import { prisma } from '@/lib/prisma';
 
 // POST /api/user/read – handles reads and flashcard results
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    const userId = (session.user as any).id;
+    const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
+    if (error) return error;
+    const userId = (session!.user as any).id;
 
     const { precedentId, action, isCorrect, notes } = await req.json();
     if (!precedentId) return NextResponse.json({ error: 'precedentId required' }, { status: 400 });

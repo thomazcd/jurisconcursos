@@ -1,20 +1,12 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/guards';
 import { GoogleGenAI } from '@google/genai';
 
 export const maxDuration = 60; // Max execution time for Vercel
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const val = session.user as any;
-    if (val.role !== 'GESTOR' && val.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Proibido' }, { status: 403 });
-    }
+    const { error } = await requireAuth(['ADMIN', 'GESTOR']);
+    if (error) return error;
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -92,6 +84,9 @@ ${text}
         const rawText = response.text || '';
         const jsonData = JSON.parse(rawText);
 
+        if (isBulk) {
+            return NextResponse.json({ precedents: jsonData });
+        }
         return NextResponse.json({ suggestion: jsonData });
     } catch (error: any) {
         console.error('Erro no processamento do Gemini:', error);

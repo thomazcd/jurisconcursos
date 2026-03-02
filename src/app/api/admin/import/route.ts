@@ -1,27 +1,48 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/guards';
 import { PublishStatus, Court } from '@prisma/client';
+import { z } from 'zod';
+
+const importSchema = z.object({
+    informatory: z.object({
+        court: z.enum(['STF', 'STJ', 'TRF', 'TJ']),
+        number: z.string(),
+        year: z.number().int().optional().nullable(),
+        publicationDate: z.string().optional().nullable(),
+    }),
+    precedents: z.array(z.object({
+        title: z.string().min(2),
+        summary: z.string().min(2),
+        fullTextOrLink: z.string().optional().nullable(),
+        processClass: z.string().optional().nullable(),
+        processNumber: z.string().optional().nullable(),
+        organ: z.string().optional().nullable(),
+        rapporteur: z.string().optional().nullable(),
+        theme: z.string().optional().nullable(),
+        judgmentDate: z.string().optional().nullable(),
+        flashcardQuestion: z.string().optional().nullable(),
+        flashcardAnswer: z.boolean().default(true),
+        forAll: z.boolean().default(false),
+        forProcurador: z.boolean().default(false),
+        forJuizFederal: z.boolean().default(false),
+        forJuizEstadual: z.boolean().default(false),
+    })).min(1),
+});
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const val = session.user as any;
-    if (val.role !== 'GESTOR' && val.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Proibido' }, { status: 403 });
-    }
+    const { error } = await requireAuth(['ADMIN', 'GESTOR']);
+    if (error) return error;
 
     try {
         const body = await req.json();
-        const { informatory, precedents } = body;
+        const parsed = importSchema.safeParse(body);
 
-        if (!informatory || !precedents || !Array.isArray(precedents) || precedents.length === 0) {
-            return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
+        if (!parsed.success) {
+            return NextResponse.json({ error: 'Dados inválidos', details: parsed.error.flatten() }, { status: 400 });
         }
+
+        const { informatory, precedents } = parsed.data;
 
         // Criar ou atualizar o Informativo
         const inf = await prisma.informatory.upsert({
