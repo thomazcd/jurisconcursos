@@ -32,8 +32,7 @@ export async function GET(req: NextRequest) {
     } catch (err: any) {
         console.error('ERROR in GET /api/user/precedents:', err);
         return NextResponse.json({
-            error: err.message,
-            stack: err.stack
+            error: 'Erro interno ao carregar precedentes.'
         }, { status: 500 });
     }
 }
