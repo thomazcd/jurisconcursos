@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.026',
+        date: '2026-03-01',
+        description: 'Informativo 875 Completo',
+        changes: [
+            'Importação de todos os 25 julgados do Informativo 875/STJ.',
+            'Ajuste na exibição de temas: badges agora aparecem apenas para temas numerados (Pipe Trick).',
+            'Melhoria na detecção automática de Ramos do Direito e Órgãos Julgadores.',
+            'Inclusão automática de "Destaque" e "Inteiro Teor" nos detalhes do julgado.',
+        ],
+    },
+    {
         version: '1.1.025',
         date: '01/03/2026',
         description: 'Sincronização de Trilha e Limpeza de Matérias',

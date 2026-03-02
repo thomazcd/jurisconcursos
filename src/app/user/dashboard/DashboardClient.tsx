@@ -356,7 +356,7 @@ export default function DashboardClient({ userName, track }: Props) {
 
                 {!compactMode && (
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                        {p.theme && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme.split('|')[0].trim()}</span>}
+                        {p.theme && p.theme.includes('|') && <span style={{ fontSize: '0.65em', background: 'rgba(201,138,0,0.1)', color: '#a06e00', padding: '2px 10px', borderRadius: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={10} /> {p.theme.split('|')[0].trim()}</span>}
                         {p.subjects?.filter(s => {
                             if (!currentSubjectContext) return true;
                             const s1 = s.name.trim().toLowerCase();
@@ -655,7 +655,7 @@ export default function DashboardClient({ userName, track }: Props) {
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                             <SvgIcons.Pin size={12} /> Tema:
                                         </strong>
-                                        <span>{selectedPrecedent.theme?.split('|')[0]?.trim() || '---'}</span>
+                                        <span>{selectedPrecedent.theme?.includes('|') ? selectedPrecedent.theme.split('|')[0].trim() : '---'}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
