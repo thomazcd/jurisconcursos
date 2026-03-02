@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.044',
+        date: '2026-03-02',
+        description: 'Vercel Deployment Hard-Fix',
+        changes: [
+            'Next.js Stable Version: Downgrade (Pinning) do Next.js de 14.2.35 para 14.2.5 para resolver um bug crônico no Node File Trace (NFT) da Vercel que inflava pacotes serverless com o Prisma.',
+            'Refatoração da Árvore de Dependências: Recriação completa do `package-lock.json` para forçar o limpador de cache da nuvem da Vercel.',
+            'Deploy: Build v1.1.044 focado exclusivamente em estourar o `Internal Error` da plataforma.'
+        ]
+    },
+    {
         version: '1.1.043',
         date: '2026-03-02',
         description: 'Serverless Functions Limit Fix',
