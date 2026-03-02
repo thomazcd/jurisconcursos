@@ -1,8 +1,11 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { signOut } from 'next-auth/react';
+import useSWR from 'swr';
 import { APP_VERSION } from '@/lib/version';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 type Subject = { id: string; name: string; total: number; readCount: number; unreadCount: number };
 type Precedent = {
@@ -32,12 +35,10 @@ const TRACK_LABELS: Record<string, React.ReactNode> = {
 };
 
 export default function DashboardClient({ userName, track }: Props) {
-    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [selectedSubject, setSelectedSubject] = useState('ALL');
-    const [precedents, setPrecedents] = useState<Precedent[]>([]);
-    const [loading, setLoading] = useState(false);
     const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean, notes: string | null }>>({});
     const [search, setSearch] = useState('');
+    const [isMutating, setIsMutating] = useState(false);
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
     const [filterOnlyErrors, setFilterOnlyErrors] = useState(false);
@@ -78,40 +79,25 @@ export default function DashboardClient({ userName, track }: Props) {
     const [notesModal, setNotesModal] = useState<{ id: string, notes: string | null } | null>(null);
     const [showHints, setShowHints] = useState<Record<string, boolean>>({});
 
-    const loadSubjects = useCallback(() => {
-        fetch('/api/user/subjects')
-            .then(r => r.json())
-            .then(d => setSubjects(d.subjects ?? []));
-    }, [track]);
+    const { data: subData, mutate: mutateSubjects } = useSWR('/api/user/subjects', fetcher);
+    const subjects: Subject[] = subData?.subjects ?? [];
 
-    useEffect(() => { loadSubjects(); }, [loadSubjects]);
+    const precUrl = selectedSubject === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${selectedSubject}`;
+    const searchParam = search ? (precUrl.includes('?') ? `&q=${encodeURIComponent(search)}` : `?q=${encodeURIComponent(search)}`) : '';
+    const finalUrl = `${precUrl}${searchParam}`;
 
+    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR(finalUrl, fetcher, {
+        keepPreviousData: true,
+        revalidateOnFocus: false,
+    });
+
+    const precedents: Precedent[] = precData?.precedents ?? [];
+
+    // Sync SWR Data with Local Optimistic Map whenever new data arrives from server
     useEffect(() => {
-        if (isFocusMode) {
-            document.body.classList.add('is-focus-mode');
-        } else {
-            document.body.classList.remove('is-focus-mode');
-        }
-        return () => document.body.classList.remove('is-focus-mode');
-    }, [isFocusMode]);
-
-    const loadPrecedents = useCallback(async (subjectId: string, query?: string) => {
-        setLoading(true);
-        setRevealed({});
-        setFlashcardResults({});
-        setShowHints({}); // Reset hints when loading new precedents
-
-        let url = subjectId === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${subjectId}`;
-        if (query) {
-            url += (url.includes('?') ? '&' : '?') + `q=${encodeURIComponent(query)}`;
-        }
-
-        const r = await fetch(url);
-        const d = await r.json();
-        const precs: Precedent[] = d.precedents ?? [];
-        setPrecedents(precs);
+        if (!precData?.precedents) return;
         const map: Record<string, any> = {};
-        precs.forEach((p: Precedent) => {
+        precData.precedents.forEach((p: Precedent) => {
             map[p.id] = {
                 count: p.readCount,
                 events: p.readEvents,
@@ -123,15 +109,29 @@ export default function DashboardClient({ userName, track }: Props) {
             };
         });
         setReadMap(map);
-        setLoading(false);
-    }, [track]);
+        // Reset local hint reveals when new data sweeps in
+        setRevealed({});
+        setFlashcardResults({});
+        setShowHints({});
+    }, [precData]);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            loadPrecedents(selectedSubject, search);
-        }, search ? 500 : 0);
-        return () => clearTimeout(timeoutId);
-    }, [selectedSubject, search, loadPrecedents, track]);
+        if (isFocusMode) {
+            document.body.classList.add('is-focus-mode');
+        } else {
+            document.body.classList.remove('is-focus-mode');
+        }
+        return () => document.body.classList.remove('is-focus-mode');
+    }, [isFocusMode]);
+
+    const loadSubjects = useCallback(() => {
+        mutateSubjects();
+    }, [mutateSubjects]);
+
+    const loadPrecedents = useCallback(async () => {
+        await mutatePrecedents();
+    }, [mutatePrecedents]);
+
 
     async function saveNote(id: string, notes: string) {
         setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));
@@ -195,14 +195,14 @@ export default function DashboardClient({ userName, track }: Props) {
 
     async function resetAllReads() {
         if (!confirm('Deseja marcar TODOS os julgados como não lidos? Isso zerará o contador de leituras de todo o sistema.')) return;
-        setLoading(true);
+        setIsMutating(true);
         try {
             await fetch('/api/user/read', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'bulk_reset_reads', precedentId: 'ALL' }),
             });
-            await loadPrecedents(selectedSubject, search);
+            await loadPrecedents();
             loadSubjects();
             setShowHelp(false);
             setHelpStep(0);
@@ -210,20 +210,20 @@ export default function DashboardClient({ userName, track }: Props) {
             console.error(err);
             alert('Erro ao resetar leituras');
         } finally {
-            setLoading(false);
+            setIsMutating(false);
         }
     }
 
     async function resetAllStats() {
         if (!confirm('Deseja zerar TODAS as estatísticas de desempenho (V/F)?')) return;
-        setLoading(true);
+        setIsMutating(true);
         try {
             await fetch('/api/user/read', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'bulk_reset_stats', precedentId: 'ALL' }),
             });
-            await loadPrecedents(selectedSubject, search);
+            await loadPrecedents();
             loadSubjects();
             setShowHelp(false);
             setHelpStep(0);
@@ -231,7 +231,7 @@ export default function DashboardClient({ userName, track }: Props) {
             console.error(err);
             alert('Erro ao resetar estatísticas');
         } finally {
-            setLoading(false);
+            setIsMutating(false);
         }
     }
 

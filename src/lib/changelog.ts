@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '2.0.0-beta.1',
+        date: '2026-03-02',
+        description: 'V2.0: SWR Reactivity & Informatory Relational Entity',
+        changes: [
+            'Otimização do Prisma: Criação do modelo genérico de `Informatory` (Pai) e vinculação dos Precedentes.',
+            'Refinamento Next.js: Fim do loading com `SWR` no Dashboard. Mutação Otimista em Background substitui o useEffect.',
+            'Serviços Dedicados: Os acessos ao banco agora concentram-se em `PrecedentService` e `InformatoryService`.'
+        ]
+    },
+    {
         version: '1.1.044',
         date: '2026-03-02',
         description: 'Vercel Deployment Hard-Fix',
