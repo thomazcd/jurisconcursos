@@ -36,6 +36,11 @@ enum Court {
   TJ
 }
 
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
 // Applicability agora é multi-trilha: campos booleanos no Precedent
 // Mantemos um campo GERAL + 3 booleanos de trilha
 
@@ -83,6 +88,13 @@ model Subject {
 
 model Precedent {
   id            String   @id @default(cuid())
+  
+  // Relação com Informativo (Novo padrão)
+  informatoryId String?
+  informatory   Informatory? @relation(fields: [informatoryId], references: [id], onDelete: SetNull)
+
+  status        PublishStatus @default(PUBLISHED)
+
   court         Court
   title         String
   summary       String   @db.Text
@@ -122,10 +134,27 @@ model Precedent {
   reads         PrecedentRead[]
 
   @@index([subjectId])
+  @@index([informatoryId])
   @@index([court])
   @@index([judgmentDate])
   @@index([forAll])
   @@map("precedents")
+}
+
+model Informatory {
+  id              String        @id @default(cuid())
+  court           Court
+  number          String
+  year            Int?
+  publicationDate DateTime?
+  status          PublishStatus @default(DRAFT)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  precedents      Precedent[]
+
+  @@unique([court, number])
+  @@map("informatories")
 }
 
 model PrecedentRead {
