@@ -1,6 +1,6 @@
 {
     "name": "juris-concursos",
-    "version": "1.1.039",
+    "version": "1.1.040",
     "private": true,
     "scripts": {
         "dev": "next dev",
@@ -8,7 +8,11 @@
         "start": "next start",
         "lint": "next lint",
         "prisma:generate": "prisma generate",
+        "prisma:push": "prisma db push",
+        "db:migrate": "prisma migrate dev",
         "db:seed": "ts-node --project tsconfig.seed.json prisma/seed.ts",
+        "db:studio": "prisma studio",
+        "setup": "npm install && prisma generate && prisma db push && npm run db:seed",
         "postinstall": "prisma generate"
     },
     "dependencies": {

@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.040',
+        date: '2026-03-02',
+        description: 'Manutenção de Infraestrutura',
+        changes: [
+            'Estabilização de Build: Restauração de scripts auxiliares para garantir compatibilidade com o ambiente de CI/CD.',
+            'Tutorial: Refinamento contínuo das instruções de onboarding para máxima clareza na navegação.',
+            'Deploy: Build v1.1.040 enviado para produção.'
+        ]
+    },
+    {
         version: '1.1.039',
         date: '2026-03-02',
         description: 'Refinamento de Tutorial e Estabilidade',
