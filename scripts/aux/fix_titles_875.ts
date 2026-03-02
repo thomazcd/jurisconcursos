@@ -1,4 +1,4 @@
-import { prisma } from './src/lib/prisma';
+import { prisma } from '../../src/lib/prisma';
 
 const SUMMARIES: Record<string, string> = {
     '2.158.358-MG': 'Honorários em execução fiscal após adesão ao REFIS: vedado bis in idem',
