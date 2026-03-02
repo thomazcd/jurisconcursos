@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 const TRACKS = [
@@ -11,6 +12,7 @@ const TRACKS = [
 
 export default function UserSettingsPage() {
     const { data: session } = useSession();
+    const router = useRouter();
     const [track, setTrack] = useState('JUIZ_ESTADUAL');
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
@@ -32,6 +34,7 @@ export default function UserSettingsPage() {
         });
         setTrack(newTrack);
         setSaving(false);
+        router.refresh();
         const label = TRACKS.find((t) => t.value === newTrack)?.label ?? newTrack;
         setSuccess(`Perfil alterado para ${label} com sucesso!`);
     }

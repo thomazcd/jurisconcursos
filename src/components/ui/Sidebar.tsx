@@ -34,7 +34,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                 setProgress({ total, read });
             })
             .catch(() => { });
-    }, []);
+    }, [track]);
 
     const toggleTheme = () => {
         const next = !isDark;

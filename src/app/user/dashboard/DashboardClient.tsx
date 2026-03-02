@@ -82,7 +82,7 @@ export default function DashboardClient({ userName, track }: Props) {
         fetch('/api/user/subjects')
             .then(r => r.json())
             .then(d => setSubjects(d.subjects ?? []));
-    }, []);
+    }, [track]);
 
     useEffect(() => { loadSubjects(); }, [loadSubjects]);
 
@@ -124,14 +124,14 @@ export default function DashboardClient({ userName, track }: Props) {
         });
         setReadMap(map);
         setLoading(false);
-    }, []);
+    }, [track]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             loadPrecedents(selectedSubject, search);
         }, search ? 500 : 0);
         return () => clearTimeout(timeoutId);
-    }, [selectedSubject, search, loadPrecedents]);
+    }, [selectedSubject, search, loadPrecedents, track]);
 
     async function saveNote(id: string, notes: string) {
         setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));

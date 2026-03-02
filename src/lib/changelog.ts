@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.025',
+        date: '01/03/2026',
+        description: 'Sincronização de Trilha e Limpeza de Matérias',
+        changes: [
+            'Sincronização Imediata: A troca de trilha (concurso) agora atualiza a barra lateral e o progresso instantaneamente, sem necessidade de recarregar a página.',
+            'Otimização de Matérias: Removidas matérias não utilizadas (Saúde, Digital, Licitações), mantendo apenas o foco nas carreiras selecionadas.',
+            'Informativo 875 - Part 1: Importação oficial dos Julgados 1 e 2 com formatação de Inteiro Teor limpa.',
+            'Refinamento de Títulos: Consolidação do "Pipe Trick" para exibir simultaneamente o número do tema no badge e a descrição completa no modal.',
+        ]
+    },
+    {
         version: '1.1.024',
         date: '01/03/2026',
         description: 'Diferenciação entre Tema-Número e Tema-Assunto',
