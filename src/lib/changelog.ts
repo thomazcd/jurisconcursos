@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.031',
+        date: '2026-03-02',
+        description: 'Ajuste de Fluxo de Leitura (Metadata)',
+        changes: [
+            'Reordenação Lógica: Metadados do dashboard agora seguem o fluxo Informativo -> Processo -> Órgão -> Ministro.',
+            'Otimização de Escaneabilidade: Datas de julgamento e publicação movidas para o final da linha de metadados.',
+            'Consistência Visual: Mantido o destaque em negrito para o Órgão Julgador.',
+            'Deploy: Versão estável enviada para produção.'
+        ]
+    },
+    {
         version: '1.1.030',
         date: '2026-03-02',
         description: 'Refinamento de Usabilidade e Dashboard',

@@ -471,10 +471,8 @@ export default function DashboardClient({ userName, track }: Props) {
                                 <SvgIcons.MessageSquare size={16} />
                                 {readData.notes && <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'var(--accent)', borderRadius: '50%', border: '2px solid var(--surface1)' }} />}
                             </button>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}><SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}>
-                                <SvgIcons.User size={11} />
-                                {p.rapporteur?.includes('Rel. p/ acórdão') ? p.rapporteur.split(',').find(s => s.includes('Rel. p/ acórdão'))?.trim() : (p.rapporteur || '---')}
+                                <SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                             </span>
 
                             <span
@@ -486,7 +484,14 @@ export default function DashboardClient({ userName, track }: Props) {
                             >
                                 <SvgIcons.Search size={11} /> {procList}
                             </span>
+
                             {p.organ && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem', fontWeight: 800 }}><SvgIcons.Gavel size={11} /> {p.organ}</span>}
+
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}>
+                                <SvgIcons.User size={11} />
+                                {p.rapporteur?.includes('Rel. p/ acórdão') ? p.rapporteur.split(',').find(s => s.includes('Rel. p/ acórdão'))?.trim() : (p.rapporteur || '---')}
+                            </span>
+
                             {p.judgmentDate && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}><SvgIcons.Calendar size={11} /> Jul: {new Date(p.judgmentDate).toLocaleDateString('pt-BR')}</span>}
                             <span
                                 style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: !p.publicationDate ? 'help' : 'default', fontSize: '0.7rem' }}
