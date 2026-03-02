@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { GoogleGenAI } from '@google/genai';
 
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
