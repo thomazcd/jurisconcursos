@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 export default function AdminImportClient() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
 
     // Estrutura do Informativo Pai
     const [infCourt, setInfCourt] = useState('STJ');
@@ -101,6 +102,39 @@ export default function AdminImportClient() {
         }
     }
 
+    async function handleGeminiFill() {
+        if (!fullText) return alert("Cole o 'Inteiro Teor' ou pedaço do Acórdão na caixa primeiro para a IA ler.");
+        setAiLoading(true);
+        try {
+            const res = await fetch('/api/admin/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: fullText }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Erro Gemini');
+
+            const sug = data.suggestion;
+            if (sug.title) setTitle(sug.title);
+            if (sug.summary) setSummary(sug.summary);
+            if (sug.flashcardQuestion) setFlashcardQuestion(sug.flashcardQuestion);
+            if (sug.flashcardAnswer !== undefined) setFlashcardAnswer(sug.flashcardAnswer);
+            if (sug.processClass) setProcessClass(sug.processClass);
+            if (sug.organ) setOrgan(sug.organ);
+            if (sug.rapporteur) setRapporteur(sug.rapporteur);
+            if (sug.judgmentDate && sug.judgmentDate !== 'null') setJudgmentDate(sug.judgmentDate);
+            if (sug.theme && sug.theme !== 'null') setTheme(sug.theme);
+
+            alert('✨ IA preencheu os campos com sucesso! Revise antes de adicionar.');
+        } catch (error: any) {
+            console.error(error);
+            alert(`Falha ao contactar Gemini: ${error.message}`);
+        } finally {
+            setAiLoading(false);
+        }
+    }
+
     return (
         <div style={{ paddingBottom: '3rem' }}>
             <div className="page-header" style={{ marginBottom: '1.5rem' }}>
@@ -163,12 +197,19 @@ export default function AdminImportClient() {
                         </div>
 
                         {/* O Coração da Proteção do Inteiro Teor */}
-                        <div>
-                            <label className="form-label" style={{ color: 'var(--accent)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <SvgIcons.FileText size={16} /> Inteiro Teor Protegido *
-                            </label>
-                            <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginBottom: '6px' }}>Cole o texto corrido do tribunal aqui. Os parágrafos (Espaces) serão preservados exatamente como você vê abaixo para os alunos.</p>
-                            <textarea className="form-input" required rows={10} style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '0.85rem' }} value={fullText} onChange={e => setFullText(e.target.value)} placeholder="Cole o Inteiro Teor aqui..." />
+                        <div style={{ padding: '4px', border: '1px solid var(--accent)', borderRadius: '12px', background: 'rgba(20, 184, 166, 0.03)' }}>
+                            <div style={{ padding: '12px' }}>
+                                <label className="form-label" style={{ color: 'var(--accent)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.FileText size={16} /> 1. Cole aqui o Texto do Tribunal</span>
+
+                                    <button type="button" onClick={handleGeminiFill} disabled={aiLoading || !fullText} className="btn" style={{ background: 'var(--accent)', color: '#fff', fontSize: '0.8rem', fontWeight: 800, padding: '4px 12px', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', opacity: (aiLoading || !fullText) ? 0.6 : 1, cursor: (aiLoading || !fullText) ? 'not-allowed' : 'pointer' }}>
+                                        {aiLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.Brain size={14} />}
+                                        {aiLoading ? 'Pensando...' : '2. Extrair p/ Flashcard com IA'}
+                                    </button>
+                                </label>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginBottom: '8px', lineHeight: '1.4' }}>Os parágrafos (\n) que você colar aqui serão integralmente preservados para leitura do Aluno.</p>
+                                <textarea className="form-input" required rows={7} style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '0.85rem' }} value={fullText} onChange={e => setFullText(e.target.value)} placeholder="Após colar a cópia fiel do inteiro teor, clique na Extração IA ali em cima ↗️ para ela formatar o restante." />
+                            </div>
                         </div>
 
                         <div style={{ padding: '1rem', background: 'var(--surface2)', borderRadius: 12 }}>
