@@ -43,7 +43,7 @@ export function PrecedentCard({ precedent: p, onToggleRead }: PrecedentCardProps
         setLoading(true);
         const next = !isRead;
         try {
-            await fetch('/api/user/reads', {
+            await fetch('/api/user/read', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ precedentId: p.id, read: next }),
