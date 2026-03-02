@@ -15,6 +15,8 @@ export default function AdminImportClient() {
     const [pubDate, setPubDate] = useState('');
 
     const [pdfLoading, setPdfLoading] = useState(false);
+    const [importMode, setImportMode] = useState<'pdf' | 'text'>('pdf');
+    const [rawBulkText, setRawBulkText] = useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     // Precedente sendo editado
@@ -166,6 +168,54 @@ export default function AdminImportClient() {
         }
     }
 
+    async function handleBulkTextUpload() {
+        if (!rawBulkText.trim()) return alert("Cole o texto do informativo primeiro.");
+
+        setPdfLoading(true);
+        try {
+            const res = await fetch('/api/admin/gemini', { // We can reuse the JSON logic or similar
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: rawBulkText, isBulk: true })
+            });
+
+            const rawResponse = await res.text();
+            let data: any;
+            try { data = JSON.parse(rawResponse); } catch (e) { throw new Error("Erro no processamento da IA (Timeout ou Formato Inválido)."); }
+
+            if (!res.ok) throw new Error(data?.error || 'Erro Gemini');
+
+            const results = data.precedents || [data.suggestion]; // Handle both single and array returns
+            const aiDrafts = (Array.isArray(results) ? results : [results]).map((p: any) => ({
+                id: Date.now().toString() + Math.random().toString(36).substring(7),
+                title: p.title || '',
+                summary: p.summary || '',
+                fullTextOrLink: p.fullText || p.fullTextOrLink || '',
+                processClass: p.processClass || '',
+                processNumber: '',
+                organ: p.organ || '',
+                rapporteur: p.rapporteur || '',
+                judgmentDate: p.judgmentDate || null,
+                theme: p.theme || '',
+                flashcardQuestion: p.flashcardQuestion || '',
+                flashcardAnswer: p.flashcardAnswer !== undefined ? p.flashcardAnswer : true,
+                forAll: true,
+                forProcurador: false,
+                forJuizFederal: false,
+                forJuizEstadual: false,
+            }));
+
+            setPrecedentsDrafts(prev => [...aiDrafts, ...prev]);
+            setRawBulkText('');
+            alert(`✨ Sucesso! ${aiDrafts.length} teses extraídas do texto e adicionadas para revisão.`);
+        } catch (err: any) {
+            console.error(err);
+            alert(`Falha na extração por texto: ${err.message}`);
+        } finally {
+            setPdfLoading(false);
+        }
+    }
+
     async function handleGeminiFill() {
         if (!fullText) return alert("Cole o 'Inteiro Teor' ou pedaço do Acórdão na caixa primeiro para a IA ler.");
         setAiLoading(true);
@@ -246,19 +296,38 @@ export default function AdminImportClient() {
                     </div>
                 </div>
 
-                {/* BOTÃO MÁGICO DO PDF */}
-                <div style={{ marginTop: '1.5rem', background: 'rgba(201, 138, 0, 0.05)', border: '1px dashed #c98a00', padding: '1rem', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                        <div style={{ fontWeight: 800, color: '#a06e00', fontSize: '0.9rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Brain size={16} /> Auto-Preencher com PDF</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>O Google Gemini vai ler o arquivo do Informativo inteiro e quebrar as teses em rascunhos aqui em baixo. O processo demora uns 15 segundos.</div>
+                {/* BOTÃO MÁGICO DO PDF / TEXTO */}
+                <div style={{ marginTop: '1.5rem', background: 'rgba(201, 138, 0, 0.05)', border: '1px dashed #c98a00', padding: '1.5rem', borderRadius: 12 }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <button type="button" onClick={() => setImportMode('pdf')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c98a00', background: importMode === 'pdf' ? '#c98a00' : 'transparent', color: importMode === 'pdf' ? '#fff' : '#c98a00', fontWeight: 800, cursor: 'pointer' }}>Via Arquivo PDF</button>
+                        <button type="button" onClick={() => setImportMode('text')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c98a00', background: importMode === 'text' ? '#c98a00' : 'transparent', color: importMode === 'text' ? '#fff' : '#c98a00', fontWeight: 800, cursor: 'pointer' }}>Via Texto Copiado</button>
                     </div>
-                    <div>
-                        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pdfLoading} className="btn" style={{ background: '#a06e00', color: '#fff', fontSize: '0.8rem', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.FileText size={14} />}
-                            {pdfLoading ? 'Lendo o PDF gigantesco...' : 'Carregar PDF do Informativo'}
-                        </button>
-                        <input type="file" accept="application/pdf" ref={fileInputRef} onChange={handlePDFUpload} style={{ display: 'none' }} />
-                    </div>
+
+                    {importMode === 'pdf' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <div style={{ fontWeight: 800, color: '#a06e00', fontSize: '0.9rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Brain size={16} /> Auto-Preencher com PDF</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Ideal para PDFs de até 15-20 páginas para evitar o limite de tempo do servidor.</div>
+                            </div>
+                            <div>
+                                <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pdfLoading} className="btn" style={{ background: '#a06e00', color: '#fff', fontSize: '0.8rem', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.FileText size={14} />}
+                                    {pdfLoading ? 'Lendo...' : 'Selecionar Informativo PDF'}
+                                </button>
+                                <input type="file" accept="application/pdf" ref={fileInputRef} onChange={handlePDFUpload} style={{ display: 'none' }} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div style={{ fontWeight: 800, color: '#a06e00', fontSize: '0.9rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Brain size={16} /> Colar Texto do Informativo Integrado</div>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: '10px' }}>Copie o conteúdo do informativo no site do tribunal ou no seu leitor de PDF e cole abaixo. A IA vai separar todas as teses automaticamente.</p>
+                            <textarea className="form-input" rows={6} value={rawBulkText} onChange={e => setRawBulkText(e.target.value)} placeholder="Cole aqui o texto bruto do informativo (pode ser o documento inteiro)..." style={{ background: '#fff', border: '1px solid #e2e8f0', marginBottom: '1rem' }} />
+                            <button type="button" onClick={handleBulkTextUpload} disabled={pdfLoading || !rawBulkText} className="btn" style={{ width: '100%', background: '#a06e00', color: '#fff', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.Plus size={14} />}
+                                {pdfLoading ? 'Processando Grandes Dados...' : 'Extrair Múltiplas Teses deste Texto'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
