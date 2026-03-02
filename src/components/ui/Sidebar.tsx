@@ -164,7 +164,8 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                                 active={pathname === '/admin' || (pathname.startsWith('/admin') && !pathname.startsWith('/admin/subjects') && !pathname.startsWith('/admin/precedents') && !pathname.startsWith('/admin/changelog'))}
                             />
                             <NavLink href="/admin/subjects" icon={<SvgIcons.Subjects size={18} />} label="Matérias" />
-                            <NavLink href="/admin/precedents" icon={<SvgIcons.Gavel size={18} />} label="Precedentes" />
+                            <NavLink href="/admin/precedents" icon={<SvgIcons.Gavel size={18} />} label="Edição de Precedentes" />
+                            <NavLink href="/admin/import" icon={<SvgIcons.Sparkles size={18} />} label="Importador Mágico" />
                             <NavLink href="/admin/changelog" icon={<SvgIcons.History size={18} />} label="Log de Versões" />
                         </>
                     ) : (
