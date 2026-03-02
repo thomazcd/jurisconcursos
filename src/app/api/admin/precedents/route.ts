@@ -68,9 +68,7 @@ export async function POST(req: NextRequest) {
             judgmentDate: judgmentDate ? new Date(judgmentDate) : null,
             subjects: {
                 connect: subjectIds.map(id => ({ id }))
-            },
-            // Maintain compatibility with legacy field if needed
-            subjectId: subjectIds[0] || null
+            }
         },
         include: { subjects: true }
     });

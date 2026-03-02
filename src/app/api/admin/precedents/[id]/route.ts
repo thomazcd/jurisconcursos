@@ -46,7 +46,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         updateData.subjects = {
             set: subjectIds.map(id => ({ id }))
         };
-        updateData.subjectId = subjectIds[0] || null;
     }
 
     const precedent = await prisma.precedent.update({
