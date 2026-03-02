@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const schema = z.object({ activeTrack: z.enum(['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR']) });
 
 // GET current profile

@@ -4,6 +4,8 @@ import { requireAuth } from '@/lib/guards';
 import { getApplicabilityFilter } from '@/lib/eligibility';
 import { Track, TrackScope } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 function getSubjectFilter(track: Track) {
     if (track === 'PROCURADOR') return { forProcurador: true };
     if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };

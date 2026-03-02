@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.038',
+        date: '2026-03-02',
+        description: 'Limpeza e Estabilização de API',
+        changes: [
+            'Dynamic Everywhere: Todas as rotas de API de usuário agora utilizam force-dynamic para evitar erros intermitentes de build na Vercel.',
+            'Consistência de Dados: Garantia de que informativos, matérias e perfil sejam sempre servidos em tempo real para o usuário autenticado.',
+            'Deploy: Build v1.1.038 disparado para manutenção preventiva da infraestrutura.'
+        ]
+    },
+    {
         version: '1.1.037',
         date: '2026-03-02',
         description: 'Estabilização de Build (Vercel)',

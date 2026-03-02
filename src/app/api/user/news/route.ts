@@ -4,6 +4,8 @@ import { requireAuth } from '@/lib/guards';
 import { getApplicabilityFilter, getEligibleTrackScopes } from '@/lib/eligibility';
 import { Track } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/user/news – last 30 eligible unread precedents
 export async function GET(req: NextRequest) {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
