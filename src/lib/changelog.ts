@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '1.1.041',
+        date: '2026-03-02',
+        description: 'Vercel Lambda Optimization',
+        changes: [
+            'Otimização de Build Serverless: Configuração do next.config.js para não embutir o motor do Prisma e o bcryptjs no pacote estático, reduzindo drasticamente o tamanho das funções na Vercel.',
+            'Mitigação do Internal Error: Tentativa de evitar o limite de payload ("Deploying outputs...") na plataforma Serverless da Vercel.',
+            'Deploy: Build v1.1.041 enviado para estabilizar o ambiente cloud.'
+        ]
+    },
+    {
         version: '1.1.040',
         date: '2026-03-02',
         description: 'Manutenção de Infraestrutura',
