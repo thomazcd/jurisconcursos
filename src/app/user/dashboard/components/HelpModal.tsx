@@ -33,61 +33,47 @@ export const HelpModal: React.FC<HelpModalProps> = ({
                 <div style={{ width: 72, height: 72, borderRadius: '22px', background: 'linear-gradient(135deg, var(--accent), #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', margin: '0 auto 1.25rem', boxShadow: '0 10px 25px rgba(20,184,166,0.3)', transform: 'rotate(-5deg)' }}>
                     {[
                         <SvgIcons.Sparkles size={36} key="s0" />,
-                        <SvgIcons.Gavel size={36} key="s1" />,
-                        <SvgIcons.Layout size={36} key="s2" />,
-                        <SvgIcons.Copy size={36} key="s3" />,
-                        <SvgIcons.Brain size={36} key="s4" />,
-                        <SvgIcons.Target size={36} key="s5" />,
-                        <SvgIcons.RotateCw size={36} key="s6" />
+                        <SvgIcons.Search size={36} key="s1" />,
+                        <SvgIcons.Brain size={36} key="s2" />,
+                        <SvgIcons.Sun size={36} key="s3" />,
+                        <SvgIcons.Target size={36} key="s4" />,
+                        <SvgIcons.Star size={36} key="s5" />,
+                        <SvgIcons.Clipboard size={36} key="s6" />,
+                        <SvgIcons.Chart size={36} key="s7" />
                     ][helpStep]}
                 </div>
 
                 {/* Título */}
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
                     {[
-                        'Bem-vindo ao Novo Juris!',
-                        'Fidelidade Jurisdicional',
-                        'Inteiro Teor Premium',
-                        'Agilidade no Estudo',
-                        'Flashcards (V/F)',
-                        'Foco e Visualização',
-                        'Filtros e Matérias'
+                        'Bem-vindo ao Juris 2.1!',
+                        'Filtros e Matérias',
+                        'Modo Leitura vs V/F',
+                        'Conforto e Impressão',
+                        'Modo Foco e Compacto',
+                        'Favoritos e Anotações',
+                        'Inteiro Teor e Detalhes',
+                        'Contagem e Desempenho'
                     ][helpStep]}
                 </h2>
 
                 {/* Descrição */}
                 <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                     {[
-                        'A interface do Juris foi otimizada para sua aprovação. Desenvolvemos uma experiência fluida, premium e focada no alto rendimento. Vamos explorar as ferramentas fundamentais para sua jornada!',
-                        'Implementamos precisão total para o STJ. Agora você visualiza o Órgão Julgador (Turmas/Seções) e a distinção clara entre Relator original e para Acórdão, garantindo que você estude com os dados exatos do informativo.',
-                        'Acesse detalhes completos clicando diretamente no Número do Processo ou no ícone de busca. Isso abrirá o card com o Inteiro Teor estruturado e todas as informações acessoriais do julgado.',
-                        'Facilitamos sua vida acadêmica. Ao abrir um card, você encontrará um botão para copiar o número do processo com um clique. Ideal para buscas rápidas ou citações em petições e resumos.',
-                        'Estudo ativo é a chave. No topo, mude para "V/F" e teste seus conhecimentos. O sistema oculta a tese, permitindo que você julgue o item. Estatísticas em tempo real mostram seus pontos fortes e fracos.',
-                        'Elimine distrações com o MODO FOCO. Se preferir uma visão ampla, o "Modo Compacto" permite visualizar dezenas de teses simultaneamente. Ajuste o tamanho da fonte para o conforto total dos olhos.',
-                        'Agrupamos julgados por matéria automaticamente. Use a barra de pesquisa para encontrar palavras-chave. Filtre por Tribunal ou Informativo específico para nichar seu estudo de forma estratégica.'
+                        'Escolha seu foco! No topo do dashboard, você pode alternar entre as trilhas específicas para Magistratura, Procuradorias ou visualizar "Todas as Matérias" do banco de dados de uma só vez.',
+                        'Use o seletor para focar em uma matéria específica ou a barra de busca para encontrar temas. Filtre também por Tribunal (STF/STJ) ou pelo número do Informativo desejado de forma cirúrgica.',
+                        'Transforme o portal! No topo, escolha entre o modo "Leitura" para ver as teses prontas, ou o modo "V/F" para esconder as teses e julgar os itens como certo ou errado, testando seu conhecimento.',
+                        'Ajuste o tamanho da fonte (A+/A-) para sua leitura ideal. Troque entre modo claro e escuro no ícone de sol/lua para conforto visual, ou gere um PDF formatado de toda sua lista no botão de impressora.',
+                        'Personalize a exibição! O Modo Foco remove distrações para leitura profunda. Já o Modo Compacto reduz o tamanho dos cards, excelente para revisões rápidas por listas de teses.',
+                        'Salve o que é importante! Clique na Estrela para favoritar julgados críticos ou no ícone de Pen (Notas) para escrever seus próprios resumos vinculados diretamente ao julgado.',
+                        'Precisa de mais contexto? Clique diretamente no Título do informativo ou no número do processo. Isso abrirá os detalhes completos com o texto do acórdão, tese, relator e órgão julgador.',
+                        'O Juris monitora seu progresso. O contador azul mostra quantas vezes você já revisou aquele item e o sistema salva seu histórico de acertos/erros (V/F) para alimentar suas estatísticas globais.'
                     ][helpStep]}
                 </div>
 
-                {helpStep === 6 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: 16, border: '1px solid var(--border)' }}>
-                        <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
-                            <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Zona de Gerenciamento</h4>
-                            <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações limpam seu progresso local.</p>
-                        </div>
-                        <div
-                            className="btn btn-secondary"
-                            style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
-                        ><SvgIcons.RotateCcw size={14} /> Marcar TUDO como Não Lido</div>
-                        <div
-                            className="btn btn-secondary"
-                            style={{ fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
-                        ><SvgIcons.RotateCw size={14} /> Zerar Estatísticas de V/F</div>
-                    </div>
-                )}
-
                 {/* Pontos de progresso */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                    {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
                         <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
                     ))}
                 </div>
@@ -95,8 +81,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({
                 {/* Botões */}
                 <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
                     {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                    <button className="btn btn-primary" onClick={() => helpStep < 6 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {helpStep < 6 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Entendi!</>}
+                    <button className="btn btn-primary" onClick={() => helpStep < 7 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {helpStep < 7 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Começar a Estudar!</>}
                     </button>
                 </div>
             </div>
