@@ -14,6 +14,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { DashboardHeader } from './components/DashboardHeader';
 import { DashboardFilters } from './components/DashboardFilters';
 import { FocusModeOverlay } from './components/FocusModeOverlay';
+import { PrecedentList } from './components/PrecedentList';
 import { HelpModal } from './components/HelpModal';
 import { Subject, Precedent } from './types';
 
@@ -304,37 +305,6 @@ export default function DashboardClient({ userName, track }: Props) {
             });
     }, [selectedSubject, filtered]);
 
-    const renderPrecedent = (p: Precedent, currentSubjectContext?: string) => {
-        const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
-        const isRevealed = studyMode === 'READ' || revealed[p.id];
-        const flashResult = flashcardResults[p.id];
-
-        return (
-            <PrecedentCard
-                key={`${p.id}-${currentSubjectContext || 'all'}`}
-                p={p}
-                readData={readData}
-                isRevealed={isRevealed}
-                studyMode={studyMode}
-                compactMode={compactMode}
-                currentSubjectContext={currentSubjectContext}
-                flashResult={flashResult}
-                showHint={showHints[p.id] || false}
-                copyingId={copying}
-                onMarkRead={markRead}
-                onDecrementRead={decrementRead}
-                onResetRead={resetRead}
-                onHandleFlashcard={handleFlashcard}
-                onToggleFavorite={toggleFavorite}
-                onShowNotes={(id, notes, e) => { e.stopPropagation(); setNotesModal({ id, notes }); }}
-                onShowHistory={(id, events, e) => { e.stopPropagation(); setHistoryModal({ id, events }); }}
-                onSelectPrecedent={(p, e) => { e.stopPropagation(); setSelectedPrecedent(p); }}
-                onCopyNumber={copyToClipboard}
-                onShowHint={(id, e) => { e.stopPropagation(); setShowHints(prev => ({ ...prev, [id]: true })); }}
-            />
-        );
-    };
-
     return (
         <div className={`dashboard-container ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
             {/* MODAL DE ANOTAÇÕES */}
@@ -361,7 +331,6 @@ export default function DashboardClient({ userName, track }: Props) {
                 isDark={isDark}
                 setShowHelp={setShowHelp}
             />
-
 
             <DashboardFilters
                 isFocusMode={isFocusMode}
@@ -395,41 +364,31 @@ export default function DashboardClient({ userName, track }: Props) {
                 isDark={isDark}
             />
 
-            <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
-
-                {loading ? (
-                    <div className="main-content">
-                        <div className="page-header" style={{ marginBottom: '2rem' }}>
-                            <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
-                        </div>
-                        <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
-                            ))}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {[1, 2, 3, 4, 5].map(i => (
-                                <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
-                            ))}
-                        </div>
-                    </div>
-                ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
-                    <div key={subName} style={{ marginBottom: isFocusMode ? '1rem' : '0.5rem' }}>
-                        <div className="subject-header">
-                            <div className="subject-icon">
-                                <SvgIcons.BookOpen size={20} />
-                            </div>
-                            <h3>{subName}</h3>
-                            <div className="line" />
-                            <span>{list.length}</span>
-                        </div>
-                        {list.map(p => renderPrecedent(p, subName as string))}
-                    </div>
-                )) : filtered.map(p => {
-                    const currentSubName = subjects.find(s => s.id === selectedSubject)?.name;
-                    return renderPrecedent(p, currentSubName);
-                }))}
-            </div>
+            <PrecedentList
+                isFocusMode={isFocusMode}
+                loading={loading}
+                groupedPrecedents={groupedPrecedents}
+                filtered={filtered}
+                subjects={subjects}
+                selectedSubject={selectedSubject}
+                readMap={readMap}
+                studyMode={studyMode}
+                revealed={revealed}
+                flashcardResults={flashcardResults}
+                compactMode={compactMode}
+                showHints={showHints}
+                copyingId={copying}
+                markRead={markRead}
+                decrementRead={decrementRead}
+                resetRead={resetRead}
+                handleFlashcard={handleFlashcard}
+                toggleFavorite={toggleFavorite}
+                setNotesModal={setNotesModal}
+                setHistoryModal={setHistoryModal}
+                setSelectedPrecedent={setSelectedPrecedent}
+                copyToClipboard={copyToClipboard}
+                setShowHints={setShowHints}
+            />
 
             <HelpModal
                 showHelp={showHelp}
@@ -588,12 +547,11 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            {/* MODAL DE HISTÓRICO */}
             <HistoryModal historyModal={historyModal} setHistoryModal={setHistoryModal} />
 
             <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
                 v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
             </div>
-        </div >
+        </div>
     );
 }
