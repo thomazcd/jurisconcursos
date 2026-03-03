@@ -323,10 +323,10 @@ export default function DashboardClient({ userName }: Props) {
                 />
 
                 <HelpModal
-                    isOpen={showHelp}
-                    onClose={() => setShowHelp(false)}
-                    step={helpStep}
-                    setStep={setHelpStep}
+                    showHelp={showHelp}
+                    setShowHelp={setShowHelp}
+                    helpStep={helpStep}
+                    setHelpStep={setHelpStep}
                 />
 
                 {selectedPrecedent && (
