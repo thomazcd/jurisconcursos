@@ -8,6 +8,9 @@ import { Icons as SvgIcons } from '@/components/ui/Icons';
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 import { PrecedentCard } from './components/PrecedentCard';
+import { NotesModal } from './components/NotesModal';
+import { PrecedentDetailsModal } from './components/PrecedentDetailsModal';
+import { HistoryModal } from './components/HistoryModal';
 import { Subject, Precedent } from './types';
 
 interface Props { userName: string; track: string; }
@@ -331,232 +334,16 @@ export default function DashboardClient({ userName, track }: Props) {
     return (
         <div className={`dashboard-container ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
             {/* MODAL DE ANOTAÇÕES */}
-            {notesModal && (
-                <div className="modal-overlay" onClick={() => setNotesModal(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{ width: '90%', maxWidth: '500px', padding: '2rem', borderRadius: '24px', background: 'var(--surface)', border: '1px solid var(--border-strong)', boxShadow: '0 30px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '10px' }}><SvgIcons.MessageSquare size={24} /> Minhas Anotações</h3>
-                            <button onClick={() => setNotesModal(null)} style={{ border: 'none', background: 'var(--surface2)', width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', fontWeight: 900, display: 'flex', alignItems: 'center', justifySelf: 'center', padding: 8 }}><SvgIcons.X size={16} /></button>
-                        </div>
+            <NotesModal notesModal={notesModal} setNotesModal={setNotesModal} saveNote={saveNote} />
 
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginBottom: '1rem', lineHeight: '1.4' }}>
-                            Escreva mnemônicos, observações ou pontos importantes para revisar depois.
-                        </p>
-
-                        <textarea
-                            autoFocus
-                            value={notesModal.notes || ''}
-                            onChange={(e) => setNotesModal({ ...notesModal, notes: e.target.value })}
-                            placeholder="Digite sua nota aqui..."
-                            style={{
-                                width: '100%',
-                                height: '200px',
-                                padding: '1rem',
-                                borderRadius: '12px',
-                                border: '2px solid var(--border)',
-                                background: 'var(--surface2)',
-                                color: 'var(--text)',
-                                fontSize: '0.95rem',
-                                lineHeight: '1.6',
-                                resize: 'none',
-                                outline: 'none',
-                                transition: 'border-color 0.2s'
-                            }}
-                            onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                            onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                        />
-
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-                            <button
-                                onClick={() => {
-                                    saveNote(notesModal.id, notesModal.notes || '');
-                                    setNotesModal(null);
-                                }}
-                                className="btn btn-primary"
-                                style={{ flex: 1, height: '45px', borderRadius: '12px', fontWeight: 800 }}
-                            >
-                                Salvar Nota
-                            </button>
-                            <button
-                                onClick={() => setNotesModal(null)}
-                                className="btn btn-ghost"
-                                style={{ flex: 1, height: '45px', borderRadius: '12px', fontWeight: 700 }}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {selectedPrecedent && (
-                <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
-                    <div className="modal-content" style={{ maxWidth: '650px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header" style={{ position: 'relative', justifyContent: 'center', padding: '1rem', borderBottom: '1px solid var(--border)' }}>
-                            <h2 style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-3)', textAlign: 'center', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}><SvgIcons.Search size={14} /> Detalhes do Julgado</h2>
-                            <button
-                                onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}
-                                className="btn-close"
-                                style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', padding: 8, background: 'var(--surface2)', borderRadius: '50%' }}
-                            ><SvgIcons.X size={16} /></button>
-                        </div>
-
-                        <div className="modal-body" style={{ overflowY: 'auto', padding: '1.25rem 1.75rem', fontSize: '0.9rem' }}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <h3 style={{
-                                    fontSize: '1.2rem',
-                                    fontWeight: 900,
-                                    color: 'var(--text)',
-                                    marginBottom: '1rem',
-                                    lineHeight: '1.3',
-                                    letterSpacing: '-0.01em',
-                                    display: 'block',
-                                    wordWrap: 'break-word',
-                                    overflowWrap: 'break-word'
-                                }}>{selectedPrecedent.theme?.includes('|') ? selectedPrecedent.theme.split('|')[1].trim() : selectedPrecedent.title}</h3>
-
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                                    gap: '1rem',
-                                    padding: '1.25rem',
-                                    background: 'var(--surface2)',
-                                    borderRadius: 12,
-                                    fontSize: '0.8rem',
-                                    color: 'var(--text-2)',
-                                    border: '1px solid var(--border)',
-                                    marginBottom: '1.5rem'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Pin size={12} /> Tema:
-                                        </strong>
-                                        <span>{(selectedPrecedent.theme?.includes('|') && selectedPrecedent.theme.split('|')[0].trim()) || 'Não afetado'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Landmark size={12} /> Tribunal:
-                                        </strong>
-                                        <span>{selectedPrecedent.court}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.FileText size={12} /> Informativo:
-                                        </strong>
-                                        <span>{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Scale size={12} /> Processo:
-                                        </strong>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
-                                            {selectedPrecedent.processNumber && (
-                                                <button
-                                                    onClick={(e) => copyToClipboard(selectedPrecedent.processNumber || '', 'modal-' + selectedPrecedent.id, e)}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '4px',
-                                                        border: '1px solid var(--border)',
-                                                        background: 'var(--surface2)',
-                                                        padding: '2px 8px',
-                                                        borderRadius: '6px',
-                                                        color: copying === 'modal-' + selectedPrecedent.id ? 'var(--accent)' : 'var(--text-3)',
-                                                        fontSize: '0.65rem',
-                                                        fontWeight: 900,
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                    title="Copiar número do processo"
-                                                >
-                                                    {copying === 'modal-' + selectedPrecedent.id ? (
-                                                        <><SvgIcons.Check size={10} /> número do processo copiado</>
-                                                    ) : (
-                                                        <><SvgIcons.Copy size={10} /> Copiar</>
-                                                    )}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.User size={12} /> Relator:
-                                        </strong>
-                                        <span>{selectedPrecedent.rapporteur || '---'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Gavel size={12} /> Órgão:
-                                        </strong>
-                                        <span>{selectedPrecedent.organ || '---'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Calendar size={12} /> Publicação:
-                                        </strong>
-                                        <span>{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
-                                            <SvgIcons.Scale size={12} /> Julgamento:
-                                        </strong>
-                                        <span>{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
-                                    </div>
-                                </div>
-
-                                <div style={{
-                                    fontSize: '0.65rem',
-                                    fontWeight: 900,
-                                    color: 'var(--text-3)',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '4px',
-                                    letterSpacing: '0.05em'
-                                }}>
-                                    DESTAQUE:
-                                </div>
-                                <div style={{
-                                    fontSize: '0.92em',
-                                    fontWeight: 700,
-                                    color: 'var(--text-2)',
-                                    marginBottom: '1.5rem',
-                                    lineHeight: '1.5'
-                                }}>
-                                    {selectedPrecedent.summary}
-                                </div>
-
-                                {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
-                                    <>
-                                        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <SvgIcons.FileText size={12} /> INFORMAÇÕES DO INTEIRO TEOR:
-                                        </div>
-                                        <div style={{
-                                            fontSize: '0.85em',
-                                            color: 'var(--text-2)',
-                                            lineHeight: '1.7',
-                                            padding: '0',
-                                            textAlign: 'justify',
-                                            hyphens: 'auto'
-                                        }}>
-                                            {selectedPrecedent.fullTextOrLink.split('\n').map((line, i) => (
-                                                <p key={i} style={{ marginBottom: line.trim() ? '1.2em' : '0' }}>{line}</p>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1rem', borderRadius: '0 0 24px 24px', justifyContent: 'center' }}>
-                            {selectedPrecedent.fullTextOrLink && selectedPrecedent.fullTextOrLink.startsWith('http') && (
-                                <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ minWidth: '150px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={16} /> Ver Inteiro Teor Online</a>
-                            )}
-                            {(!selectedPrecedent.fullTextOrLink || !selectedPrecedent.fullTextOrLink.startsWith('http')) && (
-                                <button onClick={() => setSelectedPrecedent(null)} className="btn btn-ghost" style={{ fontSize: '0.8rem', fontWeight: 800 }}>Fechar Detalhes</button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* MODAL DETALHES DO JULGADO */}
+            <PrecedentDetailsModal
+                selectedPrecedent={selectedPrecedent}
+                setSelectedPrecedent={setSelectedPrecedent}
+                setIsFocusMode={setIsFocusMode}
+                copyToClipboard={copyToClipboard}
+                copyingId={copying}
+            />
 
             <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
                 marginBottom: '1.25rem',
@@ -1072,48 +859,8 @@ export default function DashboardClient({ userName, track }: Props) {
                     body { background: white !important; }
                 }
             `}</style>
-            {
-                historyModal && (
-                    <div className="modal-overlay" style={{ zIndex: 30000 }} onClick={() => setHistoryModal(null)}>
-                        <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                            background: 'var(--surface)',
-                            border: '1px solid var(--border-strong)',
-                            borderRadius: 20,
-                            padding: '1.5rem',
-                            maxWidth: '320px',
-                            width: 'calc(100% - 2rem)',
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-                            position: 'relative'
-                        }}>
-                            <button onClick={() => setHistoryModal(null)} style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <SvgIcons.History size={18} style={{ color: 'var(--accent)' }} /> Histórico de Leitura
-                            </h3>
-                            <div style={{ maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '4px' }}>
-                                {historyModal.events.length > 0 ? [...historyModal.events].reverse().map((e, idx) => (
-                                    <div key={idx} style={{
-                                        padding: '8px 12px',
-                                        background: 'var(--surface2)',
-                                        borderRadius: 10,
-                                        fontSize: '0.85rem',
-                                        border: '1px solid var(--border)',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontWeight: 700, color: 'var(--accent)' }}>#{historyModal.events.length - idx}</span>
-                                        <span style={{ color: 'var(--text)' }}>
-                                            {new Date(e).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
-                                )) : (
-                                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-3)', fontSize: '0.9rem' }}>Nenhum evento registrado.</div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
+            {/* MODAL DE HISTÓRICO */}
+            <HistoryModal historyModal={historyModal} setHistoryModal={setHistoryModal} />
 
             <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
                 v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
