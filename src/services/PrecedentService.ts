@@ -61,29 +61,33 @@ export class PrecedentService {
         const readMap = new Map<string, any>(readsList.map((r: any) => [r.precedentId, r]));
 
         // 3. Mescla o Público com o Privado (Hydration)
-        return precedentsDb.map((p: any) => {
-            const r = readMap.get(p.id);
+        try {
+            return precedentsDb.map((p: any) => {
+                const r = readMap.get(p.id);
 
-            // Retro-compatibilidade (Flat Map para a Interface legada do Dashboard)
-            // Futuramente mudaremos o React para ler p.informatory.number direto
-            const mappedP = {
-                ...p,
-                court: p.informatory?.court || p.court,
-                informatoryNumber: p.informatory?.number || null,
-                informatoryYear: p.informatory?.year || null,
-            };
+                // Retro-compatibilidade (Flat Map para a Interface legada do Dashboard)
+                const mappedP = {
+                    ...p,
+                    court: p.informatory?.court || p.court,
+                    informatoryNumber: p.informatory?.number || null,
+                    informatoryYear: p.informatory?.year || null,
+                };
 
-            return {
-                ...mappedP,
-                readCount: r?.readCount ?? 0,
-                isRead: (r?.readCount ?? 0) > 0,
-                readEvents: r?.readEvents ?? [],
-                correctCount: r?.correctCount ?? 0,
-                wrongCount: r?.wrongCount ?? 0,
-                lastResult: r?.lastResult ?? null,
-                isFavorite: r?.isFavorite ?? false,
-                notes: r?.notes ?? null,
-            };
-        });
+                return {
+                    ...mappedP,
+                    readCount: r?.readCount ?? 0,
+                    isRead: (r?.readCount ?? 0) > 0,
+                    readEvents: r?.readEvents ?? [],
+                    correctCount: r?.correctCount ?? 0,
+                    wrongCount: r?.wrongCount ?? 0,
+                    lastResult: r?.lastResult ?? null,
+                    isFavorite: r?.isFavorite ?? false,
+                    notes: r?.notes ?? null,
+                };
+            });
+        } catch (mergeError: any) {
+            console.error('[PrecedentService] Error merging data:', mergeError);
+            throw new Error(`Erro ao processar dados dos julgados localmente: ${mergeError.message}`);
+        }
     }
 }
