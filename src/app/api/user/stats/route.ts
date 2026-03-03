@@ -11,13 +11,23 @@ export async function GET(req: NextRequest) {
         if (error) return error;
         const userId = (session!.user as any).id;
 
-        const profile = await prisma.userProfile.findUnique({ where: { userId } });
+        const profile = await prisma.userProfile.findUnique({
+            where: { userId },
+            include: { selectedSubjects: { select: { id: true } } }
+        });
         const track = profile?.activeTrack ?? 'JUIZ_ESTADUAL';
-        const eligibility = getApplicabilityFilter(track as any);
+        const selectedIds = profile?.selectedSubjects.map((s: any) => s.id) || [];
 
-        // 1. Busca simplificada dos dados brutos com O(2) Queries ao invés de 7+
+        // Se houver seleção manual, ignoramos o filtro de carreira para estatísticas globais das matérias escolhidas
+        const eligibility = selectedIds.length > 0 ? {} : getApplicabilityFilter(track as any);
+        const subjectFilter = selectedIds.length > 0 ? { id: { in: selectedIds } } : {};
+
+        // 1. Busca simplificada dos dados brutos
         const allPrecedents = await prisma.precedent.findMany({
-            where: eligibility,
+            where: {
+                ...eligibility,
+                ...(selectedIds.length > 0 ? { subjects: { some: { id: { in: selectedIds } } } } : {})
+            },
             select: { id: true, court: true, informatoryYear: true, judgmentDate: true, subjects: { select: { id: true, name: true } } }
         });
 
@@ -46,6 +56,9 @@ export async function GET(req: NextRequest) {
             if (isStj) stjTotal++;
 
             for (const sub of p.subjects) {
+                // Se o usuário selecionou matérias manualmente, só contabilizamos as selecionadas
+                if (selectedIds.length > 0 && !selectedIds.includes(sub.id)) continue;
+
                 if (!subjectMap[sub.id]) subjectMap[sub.id] = { name: sub.name, total: 0, read: 0, hits: 0, misses: 0 };
                 subjectMap[sub.id].total++;
             }
@@ -66,6 +79,9 @@ export async function GET(req: NextRequest) {
                 if (isStj) { stjHits += r.correctCount; stjMisses += r.wrongCount; }
 
                 for (const sub of p.subjects) {
+                    // Se o usuário selecionou matérias manualmente, só contabilizamos as selecionadas
+                    if (selectedIds.length > 0 && !selectedIds.includes(sub.id)) continue;
+
                     if (hasRead) subjectMap[sub.id].read++;
                     subjectMap[sub.id].hits += r.correctCount;
                     subjectMap[sub.id].misses += r.wrongCount;
