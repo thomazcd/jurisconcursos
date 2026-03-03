@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
         : getSubjectFilter(track);
 
     // Se o usuário escolheu matérias manualmente, queremos ver TUDO dessas matérias,
+    // Se o usuário escolheu matérias manualmente, queremos ver TUDO dessas matérias,
     // ignorando os filtros restritivos de carreira.
     const appFilter = selectedIds.length > 0 ? {} : getApplicabilityFilter(track);
 
@@ -34,22 +35,34 @@ export async function GET(req: NextRequest) {
         where: subjectFilter,
         orderBy: { name: 'asc' },
         include: {
+            // Conta rápida sem baixar os objetos inteiros para memória
+            _count: {
+                select: { precedents: { where: appFilter } }
+            },
             precedents: {
                 where: appFilter,
                 select: {
                     id: true,
+                    // Traz apenas a relação de leitura filtrada por esse usuário.
+                    // Se reads.length > 0, o julgado foi lido.
                     reads: { where: { userId }, select: { userId: true } },
-                },
-            },
+                }
+            }
         },
     });
 
     const result = subjects.map((s: any) => {
-        const total = s.precedents.length;
+        const total = s._count.precedents;
         const readCount = s.precedents.filter((p: any) => p.reads.length > 0).length;
         const unreadCount = total - readCount;
-        const { precedents, ...rest } = s;
-        return { ...rest, total, readCount, unreadCount };
+
+        return {
+            id: s.id,
+            name: s.name,
+            total,
+            readCount,
+            unreadCount
+        };
     });
 
     return NextResponse.json({ subjects: result, track, hasSelection: selectedIds.length > 0 });

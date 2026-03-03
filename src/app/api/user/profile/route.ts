@@ -36,7 +36,7 @@ export async function PATCH(req: NextRequest) {
 
     const updateData: any = {};
     if (parsed.data.activeTrack) updateData.activeTrack = parsed.data.activeTrack;
-    if (parsed.data.selectedSubjectIds) {
+    if (parsed.data.selectedSubjectIds !== undefined) {
         updateData.selectedSubjects = {
             set: parsed.data.selectedSubjectIds.map(id => ({ id }))
         };

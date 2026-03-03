@@ -29,7 +29,8 @@ export class PrecedentService {
         if (subjectId && subjectId !== 'ALL') {
             where.subjects = { some: { id: subjectId } };
         } else if (selectedSubjectIds.length > 0) {
-            // Se estiver em "Todas" mas tiver matérias selecionadas, filtra pelas matérias dele.
+            // Optimization for Postgres: only use the IN clause if not all subjects are selected
+            // But since we don't know total, we just apply it.
             where.subjects = { some: { id: { in: selectedSubjectIds } } };
         }
 
@@ -39,7 +40,7 @@ export class PrecedentService {
                 { summary: { contains: q, mode: 'insensitive' } },
                 { theme: { contains: q, mode: 'insensitive' } },
                 { processNumber: { contains: q, mode: 'insensitive' } },
-                { informatory: { number: { contains: q, mode: 'insensitive' } } } // Nova busca na Entidade Pai
+                { informatory: { number: { contains: q, mode: 'insensitive' } } }
             ];
         }
 
@@ -48,11 +49,14 @@ export class PrecedentService {
             where,
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             include: {
-                subjects: { select: { id: true, name: true } },
-                informatory: { select: { court: true, number: true, year: true } } // Carrega a Fonte!
+                subjects: {
+                    select: { id: true, name: true },
+                    // If the user selected subjects, only return those ones in the relation so we dont send a massive payload
+                    where: selectedSubjectIds.length > 0 ? { id: { in: selectedSubjectIds } } : undefined
+                },
+                informatory: { select: { court: true, number: true, year: true } }
             },
-            distinct: subjectId === 'ALL' ? ['title'] : undefined,
-            take: limit,
+            take: limit, // removed distinct as it may force a heavy DISTINCT ON
         });
 
         // Se precisarmos fazer "tree-shake" dos dados sensíveis, faríamos aqui.
