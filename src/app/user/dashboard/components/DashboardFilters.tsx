@@ -78,7 +78,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = (props) => {
                     >
                         <option value="ALL">Visualizar: Todas as Habilitadas</option>
                         {subjects.map(s => (
-                            <option key={s.id} value={s.id}>{s.name} ({s.total})</option>
+                            <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>
                 </div>
