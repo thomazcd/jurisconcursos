@@ -331,24 +331,26 @@ export default function DashboardClient({ userName }: Props) {
 
                 {selectedPrecedent && (
                     <PrecedentDetailsModal
-                        p={selectedPrecedent}
-                        onClose={() => setSelectedPrecedent(null)}
-                        readData={readMap[selectedPrecedent.id]}
+                        selectedPrecedent={selectedPrecedent}
+                        setSelectedPrecedent={setSelectedPrecedent}
+                        setIsFocusMode={setIsFocusMode}
+                        copyToClipboard={copyToClipboard}
+                        copyingId={copying}
                     />
                 )}
 
                 {historyModal && (
                     <HistoryModal
-                        events={historyModal.events}
-                        onClose={() => setHistoryModal(null)}
+                        historyModal={historyModal}
+                        setHistoryModal={setHistoryModal}
                     />
                 )}
 
                 {notesModal && (
                     <NotesModal
-                        initialNotes={notesModal.notes}
-                        onClose={() => setNotesModal(null)}
-                        onSave={(notes) => saveNotes(notesModal.id, notes)}
+                        notesModal={notesModal}
+                        setNotesModal={setNotesModal}
+                        saveNote={saveNotes}
                     />
                 )}
             </main>
