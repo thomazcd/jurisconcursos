@@ -35,9 +35,14 @@ export default function UserSettingsPage() {
         });
         setTrack(newTrack);
         setSaving(false);
-        router.refresh();
         const label = TRACKS.find((t) => t.value === newTrack)?.label ?? newTrack;
-        setSuccess(`Perfil alterado para ${label} com sucesso!`);
+        setSuccess(`Perfil alterado para ${label}! Redirecionando...`);
+
+        // Pequeno delay para leitura da mensagem e então redirecionamento forçado
+        setTimeout(() => {
+            router.push('/user/dashboard');
+            router.refresh();
+        }, 1000);
     }
 
     async function resetAllReads() {

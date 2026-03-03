@@ -50,7 +50,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     {track === 'JUIZ_FEDERAL' && <SvgIcons.Landmark size={16} />}
                     {track === 'JUIZ_ESTADUAL' && <SvgIcons.Scale size={16} />}
                     {track === 'TODAS' && <SvgIcons.BookOpen size={16} />}
-                    {track.replace('_', ' ')}
+                    {track === 'JUIZ_ESTADUAL' ? 'Juiz Estadual' :
+                        track === 'JUIZ_FEDERAL' ? 'Juiz Federal' :
+                            track === 'PROCURADOR' ? 'Procurador' :
+                                'Todas as Matérias'}
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

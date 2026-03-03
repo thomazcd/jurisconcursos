@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { APP_VERSION } from '@/lib/version';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json());
 
 import { PrecedentCard } from './components/PrecedentCard';
 import { NotesModal } from './components/NotesModal';

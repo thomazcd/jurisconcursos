@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,8 +30,13 @@ export async function PATCH(req: NextRequest) {
 
     const profile = await prisma.userProfile.upsert({
         where: { userId },
-        update: { activeTrack: parsed.data.activeTrack },
-        create: { userId, activeTrack: parsed.data.activeTrack },
+        update: { activeTrack: parsed.data.activeTrack as any },
+        create: { userId, activeTrack: parsed.data.activeTrack as any },
     });
+
+    revalidatePath('/user/dashboard');
+    revalidatePath('/user/stats');
+    revalidatePath('/api/user/subjects');
+
     return NextResponse.json({ profile });
 }
