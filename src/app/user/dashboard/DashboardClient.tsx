@@ -103,6 +103,11 @@ export default function DashboardClient({ userName, track }: Props) {
         setShowHints({});
     }, [precData]);
 
+    // Reset selected subject when track changes to ensure filters match the career
+    useEffect(() => {
+        setSelectedSubject('ALL');
+    }, [track]);
+
     useEffect(() => {
         if (isFocusMode) {
             document.body.classList.add('is-focus-mode');
@@ -334,6 +339,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 selectedSubject={selectedSubject}
                 setSelectedSubject={setSelectedSubject}
                 subjects={subjects}
+                loadingSubjects={!subData && !subjects.length}
                 search={search}
                 setSearch={setSearch}
                 courtFilter={courtFilter}
@@ -348,6 +354,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 setFilterHideRead={setFilterHideRead}
                 filterOnlyErrors={filterOnlyErrors}
                 setFilterOnlyErrors={setFilterOnlyErrors}
+                track={track}
             />
 
             {/* Barra flutuante do Modo Foco */}

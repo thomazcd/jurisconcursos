@@ -21,20 +21,23 @@ interface DashboardFiltersProps {
     setFilterHideRead: (val: boolean) => void;
     filterOnlyErrors: boolean;
     setFilterOnlyErrors: (val: boolean) => void;
+    loadingSubjects: boolean;
+    track: string;
 }
 
 export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     isFocusMode, selectedSubject, setSelectedSubject, subjects, search, setSearch,
     courtFilter, setCourtFilter, filteredCount, availableInformatories, infFilter, setInfFilter,
     filterOnlyFavorites, setFilterOnlyFavorites, filterHideRead, setFilterHideRead,
-    filterOnlyErrors, setFilterOnlyErrors
+    filterOnlyErrors, setFilterOnlyErrors,
+    loadingSubjects, track
 }) => {
     return (
         <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 240px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
-                    <option value="ALL">Todas as Matérias</option>
-                    {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    <option value="ALL">{loadingSubjects ? 'Carregando matérias...' : (track === 'TODAS' ? 'Todas do Banco' : 'Todas da Carreira')}</option>
+                    {!loadingSubjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <div style={{ flex: 1, position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}><SvgIcons.Search size={16} /></span>
