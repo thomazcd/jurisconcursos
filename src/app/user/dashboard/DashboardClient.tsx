@@ -24,6 +24,7 @@ const TRACK_LABELS: Record<string, React.ReactNode> = {
     JUIZ_ESTADUAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Scale size={16} /> Juiz Estadual</span>,
     JUIZ_FEDERAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Landmark size={16} /> Juiz Federal</span>,
     PROCURADOR: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Briefcase size={16} /> Procurador</span>,
+    TODAS: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.BookOpen size={16} /> Todas as Matérias</span>,
 };
 
 export default function DashboardClient({ userName, track }: Props) {
@@ -66,14 +67,14 @@ export default function DashboardClient({ userName, track }: Props) {
     const [notesModal, setNotesModal] = useState<{ id: string, notes: string | null } | null>(null);
     const [showHints, setShowHints] = useState<Record<string, boolean>>({});
 
-    const { data: subData, mutate: mutateSubjects } = useSWR('/api/user/subjects', fetcher);
+    const { data: subData, mutate: mutateSubjects } = useSWR(['/api/user/subjects', track], ([url]) => fetcher(url));
     const subjects: Subject[] = subData?.subjects ?? [];
 
     const precUrl = selectedSubject === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${selectedSubject}`;
     const searchParam = search ? (precUrl.includes('?') ? `&q=${encodeURIComponent(search)}` : `?q=${encodeURIComponent(search)}`) : '';
     const finalUrl = `${precUrl}${searchParam}`;
 
-    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR(finalUrl, fetcher, {
+    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR([finalUrl, track], ([url]) => fetcher(url), {
         keepPreviousData: true,
         revalidateOnFocus: false,
     });
@@ -325,6 +326,7 @@ export default function DashboardClient({ userName, track }: Props) {
                 toggleTheme={toggleTheme}
                 isDark={isDark}
                 setShowHelp={setShowHelp}
+                track={track}
             />
 
             <DashboardFilters

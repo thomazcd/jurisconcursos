@@ -8,6 +8,7 @@ const TRACKS = [
     { value: 'JUIZ_ESTADUAL', icon: <SvgIcons.Scale size={20} />, label: 'Juiz Estadual', desc: 'Magistratura Estadual' },
     { value: 'JUIZ_FEDERAL', icon: <SvgIcons.Landmark size={20} />, label: 'Juiz Federal', desc: 'Magistratura Federal' },
     { value: 'PROCURADOR', icon: <SvgIcons.Briefcase size={20} />, label: 'Procurador do Estado', desc: 'Procuradoria do Estado' },
+    { value: 'TODAS', icon: <SvgIcons.BookOpen size={20} />, label: 'Todas as Matérias', desc: 'Engloba todas as carreiras' },
 ];
 
 export default function UserSettingsPage() {

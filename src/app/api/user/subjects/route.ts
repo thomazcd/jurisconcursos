@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
-import { getApplicabilityFilter } from '@/lib/eligibility';
-import { Track, TrackScope } from '@prisma/client';
-
-export const dynamic = 'force-dynamic';
-
-function getSubjectFilter(track: Track) {
-    if (track === 'PROCURADOR') return { forProcurador: true };
-    if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
-    return { forJuizEstadual: true };
-}
+import { getSubjectFilter, getApplicabilityFilter } from '@/lib/eligibility';
+import { Track } from '@prisma/client';
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
 export async function GET(req: NextRequest) {

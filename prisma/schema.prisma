@@ -20,6 +20,7 @@ enum Track {
   PROCURADOR
   JUIZ_FEDERAL
   JUIZ_ESTADUAL
+  TODAS
 }
 
 enum TrackScope {

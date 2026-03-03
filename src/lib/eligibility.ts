@@ -8,6 +8,7 @@ export function getApplicabilityFilter(track: Track) {
     if (track === 'PROCURADOR') return { OR: [{ forAll: true }, { forProcurador: true }] };
     if (track === 'JUIZ_FEDERAL') return { OR: [{ forAll: true }, { forJuizFederal: true }] };
     if (track === 'JUIZ_ESTADUAL') return { OR: [{ forAll: true }, { forJuizEstadual: true }] };
+    if (track === 'TODAS') return {};
     return { forAll: true };
 }
 
@@ -18,6 +19,7 @@ export function getSubjectFilter(track: Track) {
     if (track === 'PROCURADOR') return { forProcurador: true };
     if (track === 'JUIZ_FEDERAL') return { forJuizFederal: true };
     if (track === 'JUIZ_ESTADUAL') return { forJuizEstadual: true };
+    if (track === 'TODAS') return {};
     return {};
 }
 
@@ -27,6 +29,7 @@ export function getSubjectFilter(track: Track) {
 export function getEligibleTrackScopes(track: Track): string[] {
     if (track === 'PROCURADOR') return ['COMMON', 'PROCURADOR'];
     if (track === 'JUIZ_FEDERAL') return ['COMMON', 'JUIZ_FEDERAL'];
+    if (track === 'TODAS') return ['COMMON', 'PROCURADOR', 'JUIZ_FEDERAL', 'JUIZ_ESTADUAL'];
     return ['COMMON', 'JUIZ_ESTADUAL'];
 }
 
@@ -36,7 +39,8 @@ export function getEligibleTrackScopes(track: Track): string[] {
 export function trackLabel(track: string): string {
     if (track === 'PROCURADOR') return '📋 Procurador do Estado';
     if (track === 'JUIZ_FEDERAL') return '⚖️ Juiz Federal';
+    if (track === 'TODAS') return '📚 Todas as Matérias';
     return '⚖️ Juiz Estadual';
 }
 
-export const ALL_TRACKS: Track[] = ['PROCURADOR', 'JUIZ_FEDERAL', 'JUIZ_ESTADUAL'];
+export const ALL_TRACKS: Track[] = ['PROCURADOR', 'JUIZ_FEDERAL', 'JUIZ_ESTADUAL', 'TODAS'];

@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-const schema = z.object({ activeTrack: z.enum(['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR']) });
+const schema = z.object({ activeTrack: z.enum(['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR', 'TODAS']) });
 
 // GET current profile
 export async function GET(req: NextRequest) {

@@ -12,11 +12,12 @@ interface DashboardHeaderProps {
     toggleTheme: () => void;
     isDark: boolean;
     setShowHelp: (val: boolean) => void;
+    track: string;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     isFocusMode, setIsFocusMode, studyMode, setStudyMode,
-    compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp
+    compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp, track
 }) => {
     return (
         <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
@@ -32,7 +33,27 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             gap: '2rem'
         }}>
             {/* Grupos de Ações Centralizados */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 14px',
+                    background: 'rgba(20, 184, 166, 0.1)',
+                    border: '1px solid rgba(20, 184, 166, 0.2)',
+                    borderRadius: '10px',
+                    color: 'var(--accent)',
+                    fontSize: '0.8rem',
+                    fontWeight: 800
+                }}>
+                    {track === 'PROCURADOR' && <SvgIcons.Briefcase size={16} />}
+                    {track === 'JUIZ_FEDERAL' && <SvgIcons.Landmark size={16} />}
+                    {track === 'JUIZ_ESTADUAL' && <SvgIcons.Scale size={16} />}
+                    {track === 'TODAS' && <SvgIcons.BookOpen size={16} />}
+                    {track.replace('_', ' ')}
+                </div>
+
+                <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
 
                 {/* Modo de Estudo */}
                 <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '3px', gap: '2px' }}>
