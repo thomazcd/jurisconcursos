@@ -15,7 +15,7 @@ export default async function AdminChangelogPage() {
 
     return (
         <div className="layout">
-            <Sidebar role={role} name={session.user.name ?? ''} />
+            <Sidebar role={role} name={session.user.name ?? ''} email={session.user.email ?? ''} />
             <main className="main-content">
                 <div className="page-header">
                     <div>

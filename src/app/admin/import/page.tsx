@@ -13,7 +13,7 @@ export default async function AdminImportPage() {
 
     return (
         <div className="layout">
-            <Sidebar role={role} name={session.user.name ?? ''} />
+            <Sidebar role={role} name={session.user.name ?? ''} email={session.user.email ?? ''} />
             <main className="main-content">
                 <AdminImportClient />
             </main>

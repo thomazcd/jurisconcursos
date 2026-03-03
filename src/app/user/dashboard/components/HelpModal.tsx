@@ -50,7 +50,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
                     {[
                         'Seu Novo Juris 2.1!',
-                        'Trilhas de Carreira',
+                        'Banco de Dados Completo',
                         'Filtros Inteligentes',
                         'Modos de Estudo (V/F)',
                         'Visualização Flexível',
@@ -66,7 +66,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({
                 <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '1.5rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
                     {[
                         'O Juris foi reimaginado! Criamos uma central de inteligência jurídica focada na sua aprovação em concursos de alto nível. Vamos conhecer as ferramentas que vão acelerar seu estudo!',
-                        'No topo, você gerencia sua Trilha Ativa. Alterne entre Magistratura Estadual, Federal, Procuradorias ou a nova trilha "Todas as Matérias" para englobar todo o conhecimento de uma só vez.',
+                        'O Juris agora engloba todo o conhecimento jurídico de STF e STJ em um só lugar. Você pode ver todos os julgados do banco de dados simultaneamente ou filtrar por matérias específicas.',
                         'Refine sua busca! Filtre por matérias específicas, busque por palavras-chave em tempo real, escolha entre STF/STJ ou selecione um número de Informativo específico para um estudo cirúrgico.',
                         'Estudo ativo é a chave. Use o botão "Leitura" para revisar teses completas, ou mude para o modo "V/F" (Flashcards) para esconder a tese e testar seu julgamento sobre o item.',
                         'Ganhe produtividade! O Modo Compacto permite revisar dezenas de itens rapidamente. Já o Modo Foco remove todas as distrações da tela, deixando você sozinho com o texto da lei e do julgado.',

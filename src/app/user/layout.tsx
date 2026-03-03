@@ -18,12 +18,9 @@ export default async function UserLayout({
     // Admin/Gestor shouldn't be in the user section
     if (role === 'ADMIN' || role === 'GESTOR') redirect('/admin');
 
-    const profile = await prisma.userProfile.findUnique({ where: { userId } });
-    const track = profile?.activeTrack ?? 'JUIZ_ESTADUAL';
-
     return (
         <div className="layout">
-            <Sidebar role={role} name={session.user.name ?? ''} track={track} />
+            <Sidebar role={role} name={session.user.name ?? ''} email={session.user.email ?? ''} />
             <main className="main-content">
                 {children}
             </main>

@@ -12,7 +12,7 @@ export default async function AdminPrecedentsPage() {
 
     return (
         <div className="layout">
-            <Sidebar role={role} name={session.user.name ?? ''} />
+            <Sidebar role={role} name={session.user.name ?? ''} email={session.user.email ?? ''} />
             <main className="main-content">
                 <AdminPrecedentsClient />
             </main>

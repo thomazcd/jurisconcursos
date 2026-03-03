@@ -50,16 +50,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
                     fontSize: '0.8rem',
                     fontWeight: 800
                 }}>
-                    {track === 'PROCURADOR' && <SvgIcons.Briefcase size={16} />}
-                    {track === 'JUIZ_FEDERAL' && <SvgIcons.Landmark size={16} />}
-                    {track === 'JUIZ_ESTADUAL' && <SvgIcons.Scale size={16} />}
-                    {track === 'TODAS' && <SvgIcons.BookOpen size={16} />}
-                    {hasSelection ? 'Seleção Personalizada' : (
-                        track === 'JUIZ_ESTADUAL' ? 'Juiz Estadual' :
-                            track === 'JUIZ_FEDERAL' ? 'Juiz Federal' :
-                                track === 'PROCURADOR' ? 'Procurador' :
-                                    'Todas as Matérias'
-                    )}
+                    {hasSelection ? 'Matérias Selecionadas' : 'Todas as Matérias'}
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

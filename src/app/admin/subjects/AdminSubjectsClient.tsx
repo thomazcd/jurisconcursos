@@ -11,21 +11,7 @@ type Subject = {
     createdAt: string;
 };
 
-function scopeLabel(s: Subject): string {
-    const tracks: string[] = [];
-    if (s.forJuizEstadual) tracks.push('J.Est');
-    if (s.forJuizFederal) tracks.push('J.Fed');
-    if (s.forProcurador) tracks.push('PGE');
-    if (tracks.length === 3) return 'Comum (todos)';
-    return tracks.join(' + ') || s.trackScope;
-}
-
 function scopeBadgeClass(s: Subject): string {
-    const all3 = s.forJuizEstadual && s.forJuizFederal && s.forProcurador;
-    if (all3) return 'badge-geral';
-    if (s.forProcurador && !s.forJuizFederal && !s.forJuizEstadual) return 'badge-proc';
-    if (s.forJuizFederal && !s.forJuizEstadual && !s.forProcurador) return 'badge-stf';
-    if (s.forJuizEstadual && !s.forJuizFederal && !s.forProcurador) return 'badge-stj';
     return 'badge-geral';
 }
 
@@ -111,7 +97,6 @@ export default function AdminSubjectsClient() {
                         <thead>
                             <tr>
                                 <th>Nome</th>
-                                <th>Visível para</th>
                                 <th>Cadastro</th>
                                 <th style={{ textAlign: 'right' }}>Ações</th>
                             </tr>
@@ -123,11 +108,6 @@ export default function AdminSubjectsClient() {
                             {!loading && subjects.map((s) => (
                                 <tr key={s.id}>
                                     <td>{s.name}</td>
-                                    <td>
-                                        <span className={`badge ${scopeBadgeClass(s)}`}>
-                                            {scopeLabel(s)}
-                                        </span>
-                                    </td>
                                     <td>{new Date(s.createdAt).toLocaleDateString('pt-BR')}</td>
                                     <td style={{ textAlign: 'right' }}>
                                         <div className="flex gap-2" style={{ justifyContent: 'flex-end' }}>
@@ -160,21 +140,7 @@ export default function AdminSubjectsClient() {
                             <input type="text" value={form.name} onChange={(e: any) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Direito Constitucional" />
                         </div>
 
-                        <div className="form-group">
-                            <label>Visível para quais trilhas</label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.25rem' }}>
-                                {([
-                                    { field: 'forJuizEstadual', label: '⚖️ Juiz Estadual' },
-                                    { field: 'forJuizFederal', label: '🏛️ Juiz Federal' },
-                                    { field: 'forProcurador', label: '📋 Procurador do Estado' },
-                                ] as const).map(({ field, label }) => (
-                                    <label key={field} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                        <input type="checkbox" checked={form[field]} onChange={() => toggleTrack(field)} />
-                                        {label}
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
+
 
                         <div className="modal-actions">
                             <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>

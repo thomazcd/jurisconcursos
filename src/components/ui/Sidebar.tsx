@@ -10,10 +10,10 @@ import { Icons as SvgIcons } from '@/components/ui/Icons';
 interface SidebarProps {
     role: string;
     name: string;
-    track?: string;
+    email?: string;
 }
 
-export function Sidebar({ role, name, track }: SidebarProps) {
+export function Sidebar({ role, name, email }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +34,7 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                 setProgress({ total, read });
             })
             .catch(() => { });
-    }, [track]);
+    }, []);
 
     const toggleTheme = () => {
         const next = !isDark;
@@ -58,11 +58,6 @@ export function Sidebar({ role, name, track }: SidebarProps) {
         setShowComingSoon(true);
         setTimeout(() => setShowComingSoon(false), 3000);
     };
-
-    const trackLabel =
-        track === 'JUIZ_FEDERAL' ? 'Juiz Federal' :
-            track === 'JUIZ_ESTADUAL' ? 'Juiz Estadual' :
-                'Procurador';
 
     const NavLink = ({
         href,
@@ -254,8 +249,8 @@ export function Sidebar({ role, name, track }: SidebarProps) {
                         </div>
                         <div style={{ minWidth: 0 }}>
                             <div style={{ fontWeight: 700, fontSize: '0.78rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 700 }}>
-                                {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : trackLabel}
+                            <div style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {isAdmin ? (role === 'ADMIN' ? 'Administrador' : 'Gestor') : email}
                             </div>
                         </div>
                     </div>

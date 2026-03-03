@@ -3,16 +3,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { APP_VERSION } from '@/lib/version';
 
-const TRACKS = [
-    { value: 'JUIZ_ESTADUAL', label: '⚖️ Juiz Estadual' },
-    { value: 'JUIZ_FEDERAL', label: '🏛️ Juiz Federal' },
-    { value: 'PROCURADOR', label: '📋 Procurador' },
-];
+
 
 export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [form, setForm] = useState({ name: '', email: '', password: '', track: 'JUIZ_ESTADUAL', phone: '' });
+    const [form, setForm] = useState({ name: '', email: '', password: '', track: 'TODAS', phone: '' });
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -79,23 +75,7 @@ export default function RegisterPage() {
                             required minLength={6}
                         />
                     </div>
-                    <div className="form-group">
-                        <label>Trilha de estudo</label>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.25rem' }}>
-                            {TRACKS.map(t => (
-                                <label key={t.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', padding: '0.4rem 0.6rem', borderRadius: 8, border: `1px solid ${form.track === t.value ? 'var(--accent)' : 'var(--border)'}`, background: form.track === t.value ? 'rgba(58,125,68,0.07)' : 'transparent' }}>
-                                    <input
-                                        type="radio"
-                                        name="track"
-                                        value={t.value}
-                                        checked={form.track === t.value}
-                                        onChange={() => setForm({ ...form, track: t.value })}
-                                    />
-                                    {t.label}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
+
                     <button
                         type="submit"
                         className="btn btn-primary"

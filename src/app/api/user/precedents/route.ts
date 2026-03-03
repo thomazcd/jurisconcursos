@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
             where: { userId },
             include: { selectedSubjects: { select: { id: true } } }
         });
-        const track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as any;
+        const track = (profile?.activeTrack ?? 'TODAS') as any;
         const selectedSubjectIds = profile?.selectedSubjects.map(s => s.id) || [];
 
         const { searchParams } = new URL(req.url);

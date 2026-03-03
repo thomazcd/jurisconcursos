@@ -20,12 +20,7 @@ import { Subject, Precedent } from './types';
 
 interface Props { userName: string; track: string; }
 
-const TRACK_LABELS: Record<string, React.ReactNode> = {
-    JUIZ_ESTADUAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Scale size={16} /> Juiz Estadual</span>,
-    JUIZ_FEDERAL: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Landmark size={16} /> Juiz Federal</span>,
-    PROCURADOR: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Briefcase size={16} /> Procurador</span>,
-    TODAS: <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SvgIcons.BookOpen size={16} /> Todas as Matérias</span>,
-};
+
 
 export default function DashboardClient({ userName, track }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('ALL');
@@ -356,7 +351,6 @@ export default function DashboardClient({ userName, track }: Props) {
                 setFilterHideRead={setFilterHideRead}
                 filterOnlyErrors={filterOnlyErrors}
                 setFilterOnlyErrors={setFilterOnlyErrors}
-                track={track}
             />
 
             {/* Barra flutuante do Modo Foco */}

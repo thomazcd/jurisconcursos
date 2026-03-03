@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         include: { selectedSubjects: { select: { id: true } } }
     });
 
-    const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
+    const track: Track = (profile?.activeTrack ?? 'TODAS') as Track;
     const selectedIds = profile?.selectedSubjects?.map(s => s.id) || [];
 
     // Se o usuário selecionou matérias específicas, filtramos apenas por IDs.

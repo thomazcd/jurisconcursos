@@ -17,25 +17,13 @@ type Precedent = {
 const COURTS = ['STF', 'STJ', 'TRF', 'TJ'] as const;
 const EMPTY_FORM = {
     court: 'STJ', title: '', summary: '', fullTextOrLink: '',
-    subjectIds: [] as string[], forAll: false, forProcurador: false, forJuizFederal: false, forJuizEstadual: false,
+    subjectIds: [] as string[], forAll: true, forProcurador: true, forJuizFederal: true, forJuizEstadual: true,
     judgmentDate: '', isRG: false, rgTheme: '', informatoryNumber: '',
     processClass: '', processNumber: '', organ: '', rapporteur: '', theme: '', tags: '',
 };
 
 function visibilityLabel(p: Precedent) {
-    if (p.forAll) return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Sparkles size={14} /> Geral</span>;
-    const t = [];
-    if (p.forJuizEstadual) t.push(<span key="je" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Scale size={14} /> J.Est</span>);
-    if (p.forJuizFederal) t.push(<span key="jf" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Landmark size={14} /> J.Fed</span>);
-    if (p.forProcurador) t.push(<span key="pg" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Briefcase size={14} /> PGE</span>);
-
-    if (t.length === 0) return '—';
-
-    return (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {t}
-        </div>
-    );
+    return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Sparkles size={14} /> Geral</span>;
 }
 
 function DetailRow({ label, value }: { label: string; value?: any }) {
@@ -261,18 +249,6 @@ export default function AdminPrecedentsClient() {
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', padding: '0.25rem 0' }}>
                     <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
                         <input type="checkbox" checked={f.isRG} onChange={e => set('isRG', e.target.checked)} /> <SvgIcons.Target size={14} /> RG (Repercussão Geral)
-                    </label>
-                    <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forAll} onChange={e => set('forAll', e.target.checked)} /> <SvgIcons.Sparkles size={14} /> Geral (todos)
-                    </label>
-                    <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forJuizEstadual} onChange={e => set('forJuizEstadual', e.target.checked)} /> <SvgIcons.Scale size={14} /> Juiz Estadual
-                    </label>
-                    <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forJuizFederal} onChange={e => set('forJuizFederal', e.target.checked)} /> <SvgIcons.Landmark size={14} /> Juiz Federal
-                    </label>
-                    <label style={{ fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={f.forProcurador} onChange={e => set('forProcurador', e.target.checked)} /> <SvgIcons.Briefcase size={14} /> Procurador
                     </label>
                 </div>
             </div>
