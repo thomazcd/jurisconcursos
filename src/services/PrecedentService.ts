@@ -3,7 +3,6 @@ import { Track } from '@prisma/client';
 import { getApplicabilityFilter } from '@/lib/eligibility';
 
 export interface GetPrecedentsOptions {
-    track: Track;
     userId: string;
     subjectId?: string | null;
     q?: string | null;
@@ -16,10 +15,10 @@ export class PrecedentService {
      * Busca os precedentes publicados, filtrados pela Trilha do usuário,
      * e os mescla com os dados de "Lido/Favoritos/Estatísticas" próprios daquele usuário.
      */
-    static async getForUser({ track, userId, subjectId, q, selectedSubjectIds = [], limit = 500 }: GetPrecedentsOptions) {
+    static async getForUser({ userId, subjectId, q, selectedSubjectIds = [], limit = 500 }: GetPrecedentsOptions) {
         // Se houver seleção manual de matérias, ignoramos o filtro de carreira para dar liberdade total.
         // Exceto se a trilha for 'TODAS', o appFilter já é vazio.
-        const appFilter = selectedSubjectIds.length > 0 ? {} : getApplicabilityFilter(track);
+        const appFilter = selectedSubjectIds.length > 0 ? {} : getApplicabilityFilter();
 
         let where: any = {
             status: 'PUBLISHED',
@@ -28,10 +27,6 @@ export class PrecedentService {
 
         if (subjectId && subjectId !== 'ALL') {
             where.subjects = { some: { id: subjectId } };
-        } else if (selectedSubjectIds.length > 0) {
-            // Optimization for Postgres: only use the IN clause if not all subjects are selected
-            // But since we don't know total, we just apply it.
-            where.subjects = { some: { id: { in: selectedSubjectIds } } };
         }
 
         if (q) {

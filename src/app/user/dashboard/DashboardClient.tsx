@@ -18,11 +18,11 @@ import { PrecedentList } from './components/PrecedentList';
 import { HelpModal } from './components/HelpModal';
 import { Subject, Precedent } from './types';
 
-interface Props { userName: string; track: string; }
+interface Props { userName: string; }
 
 
 
-export default function DashboardClient({ userName, track }: Props) {
+export default function DashboardClient({ userName }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('ALL');
     const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean, notes: string | null }>>({});
     const [search, setSearch] = useState('');
@@ -45,6 +45,7 @@ export default function DashboardClient({ userName, track }: Props) {
     const [showHelp, setShowHelp] = useState(false);
     const [helpStep, setHelpStep] = useState(0);
     const [isDark, setIsDark] = useState(false);
+    const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
     useEffect(() => {
         setIsDark(document.documentElement.classList.contains('dark-theme'));
@@ -62,14 +63,14 @@ export default function DashboardClient({ userName, track }: Props) {
     const [notesModal, setNotesModal] = useState<{ id: string, notes: string | null } | null>(null);
     const [showHints, setShowHints] = useState<Record<string, boolean>>({});
 
-    const { data: subData, mutate: mutateSubjects } = useSWR(['/api/user/subjects', track], ([url]) => fetcher(url));
+    const { data: subData, mutate: mutateSubjects } = useSWR(['/api/user/subjects'], ([url]) => fetcher(url));
     const subjects: Subject[] = subData?.subjects ?? [];
 
     const precUrl = selectedSubject === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${selectedSubject}`;
     const searchParam = search ? (precUrl.includes('?') ? `&q=${encodeURIComponent(search)}` : `?q=${encodeURIComponent(search)}`) : '';
     const finalUrl = `${precUrl}${searchParam}`;
 
-    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR([finalUrl, track], ([url]) => fetcher(url), {
+    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR([finalUrl], ([url]) => fetcher(url), {
         keepPreviousData: true,
         revalidateOnFocus: false,
     });
@@ -98,10 +99,7 @@ export default function DashboardClient({ userName, track }: Props) {
         setShowHints({});
     }, [precData]);
 
-    // Reset selected subject when track changes to ensure filters match the career
-    useEffect(() => {
-        setSelectedSubject('ALL');
-    }, [track]);
+
 
     useEffect(() => {
         if (isFocusMode) {
@@ -326,9 +324,11 @@ export default function DashboardClient({ userName, track }: Props) {
                 toggleTheme={toggleTheme}
                 isDark={isDark}
                 setShowHelp={setShowHelp}
-                track={track}
+
                 userName={userName}
                 hasSelection={subData?.hasSelection}
+                onToggleFilter={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                currentSubjectName={selectedSubject === 'ALL' ? 'Todas do Banco' : subjects.find(s => s.id === selectedSubject)?.name || 'Carregando...'}
             />
 
             <DashboardFilters
@@ -351,6 +351,8 @@ export default function DashboardClient({ userName, track }: Props) {
                 setFilterHideRead={setFilterHideRead}
                 filterOnlyErrors={filterOnlyErrors}
                 setFilterOnlyErrors={setFilterOnlyErrors}
+                isOpen={isFilterDropdownOpen}
+                setIsOpen={setIsFilterDropdownOpen}
             />
 
             {/* Barra flutuante do Modo Foco */}

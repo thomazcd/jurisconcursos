@@ -12,17 +12,19 @@ interface DashboardHeaderProps {
     toggleTheme: () => void;
     isDark: boolean;
     setShowHelp: (val: boolean) => void;
-    track: string;
     userName: string;
     hasSelection?: boolean;
+    onToggleFilter?: () => void;
+    currentSubjectName: string;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
     const {
         isFocusMode, setIsFocusMode, studyMode, setStudyMode,
-        compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp, track,
-        userName, hasSelection
+        compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp,
+        userName, hasSelection, onToggleFilter, currentSubjectName
     } = props;
+
     return (
         <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
             marginBottom: '1.25rem',
@@ -38,19 +40,28 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
         }}>
             {/* Grupos de Ações Centralizados */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 14px',
-                    background: 'rgba(20, 184, 166, 0.1)',
-                    border: '1px solid rgba(20, 184, 166, 0.2)',
-                    borderRadius: '10px',
-                    color: 'var(--accent)',
-                    fontSize: '0.8rem',
-                    fontWeight: 800
-                }}>
-                    {hasSelection ? 'Matérias Selecionadas' : 'Todas as Matérias'}
+                <div
+                    onClick={onToggleFilter}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 14px',
+                        background: 'rgba(20, 184, 166, 0.12)',
+                        border: '1px solid rgba(20, 184, 166, 0.25)',
+                        borderRadius: '12px',
+                        color: 'var(--accent)',
+                        fontSize: '0.85rem',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 2px 8px rgba(20, 184, 166, 0.08)'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.18)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.12)'; }}
+                >
+                    <SvgIcons.BookOpen size={16} /> {currentSubjectName}
+                    <SvgIcons.ChevronDown size={14} style={{ opacity: 0.6 }} />
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

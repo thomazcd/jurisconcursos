@@ -22,6 +22,8 @@ interface DashboardFiltersProps {
     filterOnlyErrors: boolean;
     setFilterOnlyErrors: (val: boolean) => void;
     loadingSubjects: boolean;
+    isOpen: boolean;
+    setIsOpen: (val: boolean) => void;
 }
 
 export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
@@ -29,9 +31,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     courtFilter, setCourtFilter, filteredCount, availableInformatories, infFilter, setInfFilter,
     filterOnlyFavorites, setFilterOnlyFavorites, filterHideRead, setFilterHideRead,
     filterOnlyErrors, setFilterOnlyErrors,
-    loadingSubjects
+    loadingSubjects, isOpen, setIsOpen
 }) => {
-    const [isOpen, setIsOpen] = React.useState(false);
     return (
         <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>

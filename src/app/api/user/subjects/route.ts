@@ -17,19 +17,8 @@ export async function GET(req: NextRequest) {
         include: { selectedSubjects: { select: { id: true } } }
     });
 
-    const track: Track = (profile?.activeTrack ?? 'TODAS') as Track;
-    const selectedIds = profile?.selectedSubjects?.map(s => s.id) || [];
-
-    // Se o usuário selecionou matérias específicas, filtramos apenas por IDs.
-    // Caso contrário, usamos a lógica de carreira original.
-    const subjectFilter = selectedIds.length > 0
-        ? { id: { in: selectedIds } }
-        : getSubjectFilter(track);
-
-    // Se o usuário escolheu matérias manualmente, queremos ver TUDO dessas matérias,
-    // Se o usuário escolheu matérias manualmente, queremos ver TUDO dessas matérias,
-    // ignorando os filtros restritivos de carreira.
-    const appFilter = selectedIds.length > 0 ? {} : getApplicabilityFilter(track);
+    const subjectFilter = {};
+    const appFilter = {};
 
     const subjects = await prisma.subject.findMany({
         where: subjectFilter,
@@ -65,5 +54,5 @@ export async function GET(req: NextRequest) {
         };
     });
 
-    return NextResponse.json({ subjects: result, track, hasSelection: selectedIds.length > 0 });
+    return NextResponse.json({ subjects: result, hasSelection: false });
 }

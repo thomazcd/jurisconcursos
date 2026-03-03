@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
             where: { userId },
             include: { selectedSubjects: { select: { id: true } } }
         });
-        const track = (profile?.activeTrack ?? 'TODAS') as any;
         const selectedSubjectIds = profile?.selectedSubjects.map(s => s.id) || [];
 
         const { searchParams } = new URL(req.url);
@@ -26,7 +25,6 @@ export async function GET(req: NextRequest) {
 
         // Centralizado! O Serviço puxa do Banco (incluindo o pai Informatory) e amarra estatísticas
         const precedents = await PrecedentService.getForUser({
-            track,
             userId,
             subjectId,
             q,
