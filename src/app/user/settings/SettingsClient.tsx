@@ -128,12 +128,6 @@ export default function UserSettingsPage() {
                     ))}
                 </div>
 
-                {activeTrack && (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {activeTrack.icon} Trilha <strong>{activeTrack.label}</strong> ativa. Você verá matérias e precedentes específicos desta carreira.
-                    </p>
-                )}
-
                 <div className="divider" style={{ margin: '1.5rem 0' }} />
 
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
