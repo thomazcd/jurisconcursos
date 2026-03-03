@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/guards';
 import { prisma } from '@/lib/prisma';
 import { PrecedentService } from '@/services/PrecedentService';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+    noStore();
     try {
         const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
         if (error) return error;

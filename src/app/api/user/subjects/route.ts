@@ -3,9 +3,11 @@ import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/guards';
 import { getSubjectFilter, getApplicabilityFilter } from '@/lib/eligibility';
 import { Track } from '@prisma/client';
+import { unstable_noStore as noStore } from 'next/cache';
 
 // GET /api/user/subjects – list subjects for user's active track + unread counts
 export async function GET(req: NextRequest) {
+    noStore();
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
 
