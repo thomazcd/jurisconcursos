@@ -6,7 +6,6 @@ export interface GetPrecedentsOptions {
     userId: string;
     subjectId?: string | null;
     q?: string | null;
-    selectedSubjectIds?: string[];
     limit?: number;
 }
 
@@ -15,7 +14,7 @@ export class PrecedentService {
      * Busca os precedentes publicados, filtrados pela Trilha do usuário,
      * e os mescla com os dados de "Lido/Favoritos/Estatísticas" próprios daquele usuário.
      */
-    static async getForUser({ userId, subjectId, q, selectedSubjectIds = [], limit = 500 }: GetPrecedentsOptions) {
+    static async getForUser({ userId, subjectId, q, limit = 500 }: GetPrecedentsOptions) {
         let where: any = {
             status: 'PUBLISHED'
         };
