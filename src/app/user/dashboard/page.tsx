@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import DashboardClient from './DashboardClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UserDashboardPage() {
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any).id;
