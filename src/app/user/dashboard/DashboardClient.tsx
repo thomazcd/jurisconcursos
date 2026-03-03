@@ -27,6 +27,7 @@ export default function DashboardClient({ userName }: Props) {
     const [isMutating, setIsMutating] = useState(false);
     const [studyMode, setStudyMode] = useState<'READ' | 'FLASHCARD'>('READ');
     const [filterHideRead, setFilterHideRead] = useState(false);
+    const [filterShowRead, setFilterShowRead] = useState(false);
     const [filterOnlyErrors, setFilterOnlyErrors] = useState(false);
     const [filterOnlyFavorites, setFilterOnlyFavorites] = useState(false);
     const [courtFilter, setCourtFilter] = useState<'ALL' | 'STF' | 'STJ'>('ALL');
@@ -143,7 +144,7 @@ export default function DashboardClient({ userName }: Props) {
         const prev = readMap[id];
         if (!prev || prev.count <= 0) return;
         setReadMap(m => ({ ...m, [id]: { ...prev, count: prev.count - 1, events: prev.events.slice(1) } }));
-        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'DECREMENT' }) });
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'decrement' }) });
         mutateSubjects();
     };
 
@@ -151,7 +152,7 @@ export default function DashboardClient({ userName }: Props) {
         e.stopPropagation();
         if (!confirm('Zerar todas as leituras deste julgado?')) return;
         setReadMap(m => ({ ...m, [id]: { ...m[id], count: 0, events: [] } }));
-        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'RESET' }) });
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'reset' }) });
         mutateSubjects();
         mutatePrecedents();
     };
@@ -160,7 +161,7 @@ export default function DashboardClient({ userName }: Props) {
         e.stopPropagation();
         const prev = readMap[id] || { isFavorite: false };
         setReadMap(m => ({ ...m, [id]: { ...m[id], isFavorite: !prev.isFavorite } }));
-        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'FAVORITE' }) });
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'toggle_favorite' }) });
     };
 
     const handleFlashcard = async (p: Precedent, userChoice: boolean) => {
@@ -177,13 +178,13 @@ export default function DashboardClient({ userName }: Props) {
                 last: isCorrect ? 'HIT' : 'MISS'
             }
         }));
-        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: p.id, action: isCorrect ? 'HIT' : 'MISS' }) });
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: p.id, action: 'flashcard', isCorrect }) });
         mutateSubjects();
     };
 
     const saveNotes = async (id: string, notes: string | null) => {
         setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));
-        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'NOTES', notes }) });
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'save_note', notes }) });
         setNotesModal(null);
     };
 
@@ -198,6 +199,7 @@ export default function DashboardClient({ userName }: Props) {
         return precedents.filter(p => {
             const readData = readMap[p.id] || { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null };
             if (filterHideRead && readData.count > 0) return false;
+            if (filterShowRead && readData.count === 0) return false;
             if (filterOnlyErrors && readData.last !== 'MISS') return false;
             if (filterOnlyFavorites && !readData.isFavorite) return false;
             if (courtFilter !== 'ALL' && p.court !== courtFilter) return false;
@@ -270,6 +272,8 @@ export default function DashboardClient({ userName }: Props) {
                     setFilterOnlyFavorites={setFilterOnlyFavorites}
                     filterHideRead={filterHideRead}
                     setFilterHideRead={setFilterHideRead}
+                    filterShowRead={filterShowRead}
+                    setFilterShowRead={setFilterShowRead}
                     filterOnlyErrors={filterOnlyErrors}
                     setFilterOnlyErrors={setFilterOnlyErrors}
                     loadingSubjects={!subData && !allSubjects.length}
@@ -291,6 +295,7 @@ export default function DashboardClient({ userName }: Props) {
                         setYearFilter('ALL');
                         setInfFilter('ALL');
                         setFilterHideRead(false);
+                        setFilterShowRead(false);
                         setFilterOnlyFavorites(false);
                         setFilterOnlyErrors(false);
                     }}

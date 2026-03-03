@@ -19,6 +19,8 @@ interface DashboardFiltersProps {
     setFilterOnlyFavorites: (val: boolean) => void;
     filterHideRead: boolean;
     setFilterHideRead: (val: boolean) => void;
+    filterShowRead: boolean;
+    setFilterShowRead: (val: boolean) => void;
     filterOnlyErrors: boolean;
     setFilterOnlyErrors: (val: boolean) => void;
     loadingSubjects?: boolean;
@@ -31,6 +33,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = (props) => {
         availableInformatories, infFilter, setInfFilter,
         filterOnlyFavorites, setFilterOnlyFavorites,
         filterHideRead, setFilterHideRead,
+        filterShowRead, setFilterShowRead,
         filterOnlyErrors, setFilterOnlyErrors,
         loadingSubjects
     } = props;
@@ -157,7 +160,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = (props) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-soft, rgba(0,0,0,0.03))' }}>
                 <div style={{ display: 'flex', gap: '0.6rem' }}>
                     <FilterToggle active={filterOnlyFavorites} onClick={() => setFilterOnlyFavorites(!filterOnlyFavorites)} icon={<SvgIcons.Star size={14} />} label="Favoritos" />
-                    <FilterToggle active={filterHideRead} onClick={() => setFilterHideRead(!filterHideRead)} icon={<SvgIcons.CheckCircle size={14} />} label="Não Lidos" />
+                    <FilterToggle active={filterShowRead} onClick={() => setFilterShowRead(!filterShowRead)} icon={<SvgIcons.CheckCircle size={14} />} label="Lidos" />
+                    <FilterToggle active={filterHideRead} onClick={() => setFilterHideRead(!filterHideRead)} icon={<SvgIcons.Check size={14} />} label="Não Lidos" />
                     <FilterToggle active={filterOnlyErrors} onClick={() => setFilterOnlyErrors(!filterOnlyErrors)} icon={<SvgIcons.X size={14} />} label="Com Erros" />
                 </div>
 
@@ -172,6 +176,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = (props) => {
                             setCourtFilter('ALL');
                             setInfFilter('ALL');
                             setFilterHideRead(false);
+                            setFilterShowRead(false);
                             setFilterOnlyFavorites(false);
                             setFilterOnlyErrors(false);
                         }}
