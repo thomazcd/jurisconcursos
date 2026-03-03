@@ -45,9 +45,7 @@ export class PrecedentService {
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
             include: {
                 subjects: {
-                    select: { id: true, name: true },
-                    // If the user selected subjects, only return those ones in the relation so we dont send a massive payload
-                    where: selectedSubjectIds.length > 0 ? { id: { in: selectedSubjectIds } } : undefined
+                    select: { id: true, name: true }
                 },
                 informatory: { select: { court: true, number: true, year: true } }
             },

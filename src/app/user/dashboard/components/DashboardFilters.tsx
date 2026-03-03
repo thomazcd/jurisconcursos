@@ -57,9 +57,22 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
                                 <div
                                     key={s.id}
                                     onClick={() => { setSelectedSubject(s.id); setIsOpen(false); }}
-                                    style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.85rem', background: selectedSubject === s.id ? 'var(--surface2)' : 'transparent', fontWeight: selectedSubject === s.id ? 700 : 500, borderTop: '1px solid var(--border)' }}
+                                    style={{
+                                        padding: '8px 12px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        background: selectedSubject === s.id ? 'var(--surface2)' : 'transparent',
+                                        fontWeight: selectedSubject === s.id ? 700 : 500,
+                                        borderTop: '1px solid var(--border)',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}
                                 >
-                                    {s.name}
+                                    <span>{s.name}</span>
+                                    <span style={{ fontSize: '0.7rem', opacity: 0.6, fontWeight: 800 }}>
+                                        ({s.readCount}/{s.total})
+                                    </span>
                                 </div>
                             ))}
                         </div>
