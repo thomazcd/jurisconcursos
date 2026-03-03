@@ -1,6 +1,8 @@
 import React from 'react';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
+import { Subject } from '../types';
+
 interface DashboardHeaderProps {
     isFocusMode: boolean;
     setIsFocusMode: (val: boolean) => void;
@@ -14,16 +16,21 @@ interface DashboardHeaderProps {
     setShowHelp: (val: boolean) => void;
     userName: string;
     hasSelection?: boolean;
-    onToggleFilter?: () => void;
     currentSubjectName: string;
+    subjects: Subject[];
+    selectedSubject: string;
+    onSelectSubject: (val: string) => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
     const {
         isFocusMode, setIsFocusMode, studyMode, setStudyMode,
         compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp,
-        userName, hasSelection, onToggleFilter, currentSubjectName
+        userName, hasSelection, currentSubjectName,
+        subjects, selectedSubject, onSelectSubject
     } = props;
+
+    const [isOpen, setIsOpen] = React.useState(false);
 
     return (
         <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
@@ -40,28 +47,86 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
         }}>
             {/* Grupos de Ações Centralizados */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-                <div
-                    onClick={onToggleFilter}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '6px 14px',
-                        background: 'rgba(20, 184, 166, 0.12)',
-                        border: '1px solid rgba(20, 184, 166, 0.25)',
-                        borderRadius: '12px',
-                        color: 'var(--accent)',
-                        fontSize: '0.85rem',
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: '0 2px 8px rgba(20, 184, 166, 0.08)'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.18)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.12)'; }}
-                >
-                    <SvgIcons.BookOpen size={16} /> {currentSubjectName}
-                    <SvgIcons.ChevronDown size={14} style={{ opacity: 0.6 }} />
+                <div style={{ position: 'relative' }}>
+                    <div
+                        onClick={() => setIsOpen(!isOpen)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '6px 14px',
+                            background: 'rgba(20, 184, 166, 0.12)',
+                            border: '1px solid rgba(20, 184, 166, 0.25)',
+                            borderRadius: '12px',
+                            color: 'var(--accent)',
+                            fontSize: '0.85rem',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(20, 184, 166, 0.08)'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.18)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.12)'; }}
+                    >
+                        <SvgIcons.BookOpen size={16} /> {currentSubjectName}
+                        <SvgIcons.ChevronDown size={14} style={{ opacity: 0.6 }} />
+                    </div>
+
+                    {isOpen && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            marginTop: '8px',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 14,
+                            zIndex: 1000,
+                            maxHeight: '400px',
+                            overflowY: 'auto',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                            minWidth: '240px',
+                            animation: 'fadeIn 0.2s'
+                        }}>
+                            <div
+                                onClick={() => { onSelectSubject('ALL'); setIsOpen(false); }}
+                                style={{
+                                    padding: '10px 16px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem',
+                                    background: selectedSubject === 'ALL' ? 'var(--surface2)' : 'transparent',
+                                    fontWeight: selectedSubject === 'ALL' ? 800 : 500,
+                                    color: selectedSubject === 'ALL' ? 'var(--accent)' : 'var(--text)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                Todas do Banco
+                            </div>
+                            {subjects.map(s => (
+                                <div
+                                    key={s.id}
+                                    onClick={() => { onSelectSubject(s.id); setIsOpen(false); }}
+                                    style={{
+                                        padding: '10px 16px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        background: selectedSubject === s.id ? 'var(--surface2)' : 'transparent',
+                                        fontWeight: selectedSubject === s.id ? 800 : 500,
+                                        borderTop: '1px solid var(--border)',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        color: selectedSubject === s.id ? 'var(--accent)' : 'var(--text)',
+                                    }}
+                                >
+                                    <span>{s.name}</span>
+                                    <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{s.readCount}/{s.total}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

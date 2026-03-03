@@ -85,6 +85,14 @@ export const PrecedentList: React.FC<PrecedentListProps> = ({
                         ))}
                     </div>
                 </div>
+            ) : filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface)', borderRadius: 24, border: '2px dashed var(--border)', marginTop: '1rem' }}>
+                    <div style={{ background: 'var(--surface2)', width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--text-4)' }}>
+                        <SvgIcons.Search size={32} />
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem' }}>Nenhum julgado encontrado</h3>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>Não encontramos julgados com os filtros atuais. Tente mudar a matéria ou limpar a busca.</p>
+                </div>
             ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
                 <div key={subName} style={{ marginBottom: isFocusMode ? '1rem' : '0.5rem' }}>
                     <div className="subject-header">

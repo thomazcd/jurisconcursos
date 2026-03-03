@@ -45,7 +45,7 @@ export default function DashboardClient({ userName }: Props) {
     const [showHelp, setShowHelp] = useState(false);
     const [helpStep, setHelpStep] = useState(0);
     const [isDark, setIsDark] = useState(false);
-    const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+
 
     useEffect(() => {
         setIsDark(document.documentElement.classList.contains('dark-theme'));
@@ -327,16 +327,14 @@ export default function DashboardClient({ userName }: Props) {
 
                 userName={userName}
                 hasSelection={subData?.hasSelection}
-                onToggleFilter={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
                 currentSubjectName={selectedSubject === 'ALL' ? 'Todas do Banco' : subjects.find(s => s.id === selectedSubject)?.name || 'Carregando...'}
+                subjects={subjects}
+                selectedSubject={selectedSubject}
+                onSelectSubject={setSelectedSubject}
             />
 
             <DashboardFilters
                 isFocusMode={isFocusMode}
-                selectedSubject={selectedSubject}
-                setSelectedSubject={setSelectedSubject}
-                subjects={subjects}
-                loadingSubjects={!subData && !subjects.length}
                 search={search}
                 setSearch={setSearch}
                 courtFilter={courtFilter}
@@ -351,8 +349,7 @@ export default function DashboardClient({ userName }: Props) {
                 setFilterHideRead={setFilterHideRead}
                 filterOnlyErrors={filterOnlyErrors}
                 setFilterOnlyErrors={setFilterOnlyErrors}
-                isOpen={isFilterDropdownOpen}
-                setIsOpen={setIsFilterDropdownOpen}
+                loadingSubjects={!subData && !subjects.length}
             />
 
             {/* Barra flutuante do Modo Foco */}
