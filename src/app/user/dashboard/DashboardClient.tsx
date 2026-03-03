@@ -318,7 +318,8 @@ export default function DashboardClient({ userName }: Props) {
                     compactMode={compactMode}
                     setCompactMode={setCompactMode}
                     setFontSize={setFontSize}
-                    fontSize={fontSize}
+                    toggleTheme={toggleTheme}
+                    isDark={isDark}
                 />
 
                 <HelpModal
