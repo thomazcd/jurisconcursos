@@ -3,7 +3,7 @@ import './globals.css';
 import { SessionProvider } from '@/components/SessionProvider';
 
 export const metadata: Metadata = {
-    title: 'Juris Concursos – Jurisprudência para Concursos',
+    title: 'jurisconcursos.com.br',
     description: 'Plataforma de estudo de jurisprudência do STF e STJ para Magistratura e Procuradoria',
 };
 
