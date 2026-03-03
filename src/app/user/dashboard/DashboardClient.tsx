@@ -11,6 +11,10 @@ import { PrecedentCard } from './components/PrecedentCard';
 import { NotesModal } from './components/NotesModal';
 import { PrecedentDetailsModal } from './components/PrecedentDetailsModal';
 import { HistoryModal } from './components/HistoryModal';
+import { DashboardHeader } from './components/DashboardHeader';
+import { DashboardFilters } from './components/DashboardFilters';
+import { FocusModeOverlay } from './components/FocusModeOverlay';
+import { HelpModal } from './components/HelpModal';
 import { Subject, Precedent } from './types';
 
 interface Props { userName: string; track: string; }
@@ -345,241 +349,51 @@ export default function DashboardClient({ userName, track }: Props) {
                 copyingId={copying}
             />
 
-            <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
-                marginBottom: '1.25rem',
-                padding: '0.6rem 1.25rem',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 20,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                display: isFocusMode ? 'none' : 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '2rem'
-            }}>
-                {/* Grupos de Ações Centralizados */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-
-                    {/* Modo de Estudo */}
-                    <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '3px', gap: '2px' }}>
-                        <button
-                            onClick={() => setStudyMode('READ')}
-                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'READ' ? 'var(--accent)' : 'transparent', color: studyMode === 'READ' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        ><SvgIcons.Book size={14} /> Leitura</button>
-                        <button
-                            onClick={() => setStudyMode('FLASHCARD')}
-                            style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'FLASHCARD' ? 'var(--accent)' : 'transparent', color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        ><SvgIcons.Brain size={14} /> V/F</button>
-                    </div>
-
-                    <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
-
-                    {/* Visualização */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <button
-                            onClick={() => setCompactMode(c => !c)}
-                            title={compactMode ? 'Modo completo' : 'Modo compacto: só título e tese'}
-                            style={{ padding: '6px 14px', borderRadius: 10, fontSize: '0.78rem', fontWeight: 800, border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.15s', background: compactMode ? 'var(--accent)' : 'var(--surface2)', color: compactMode ? '#fff' : 'var(--text-3)', height: '34px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >{compactMode ? <><SvgIcons.Minimize2 size={14} /> Compacto</> : <><SvgIcons.Layout size={14} /> Compacto</>}</button>
-
-                        <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', height: '34px' }}>
-                            <button onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 12px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)' }}>A−</button>
-                            <div style={{ width: 1, background: 'var(--border)' }} />
-                            <button onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte" style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 12px', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-3)' }}>A+</button>
-                        </div>
-                    </div>
-
-                    <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
-
-                    {/* Utilidades */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <button
-                            onClick={() => window.print()}
-                            title="Gerar PDF completo da lista filtrada"
-                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', width: '34px', height: '34px', borderRadius: 10, transition: 'all 0.15s', color: 'var(--text-2)' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        </button>
-
-                        <button
-                            onClick={() => setShowHelp(true)}
-                            title="Tutorial do sistema"
-                            style={{ border: '1px solid var(--border)', background: 'var(--surface2)', cursor: 'pointer', padding: '0 16px', borderRadius: 10, fontSize: '0.75rem', fontWeight: 800, transition: 'all 0.15s', color: 'var(--text-2)', height: '34px', whiteSpace: 'nowrap' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface3, var(--border))'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                        >Tutorial</button>
-                    </div>
-
-                    <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
-
-                    {/* Ação Principal */}
-                    <button
-                        onClick={() => setIsFocusMode(!isFocusMode)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            border: '1px solid var(--border)',
-                            cursor: 'pointer',
-                            padding: '0 16px',
-                            borderRadius: 10,
-                            fontSize: '0.75rem',
-                            fontWeight: 900,
-                            transition: 'all 0.2s',
-                            background: isFocusMode ? 'rgba(245, 158, 11, 0.12)' : 'rgba(20, 184, 166, 0.12)',
-                            color: isFocusMode ? '#f59e0b' : 'var(--accent)',
-                            height: '34px',
-                            letterSpacing: '0.05em'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.2)' : 'rgba(20, 184, 166, 0.2)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = isFocusMode ? 'rgba(245, 158, 11, 0.12)' : 'rgba(20, 184, 166, 0.12)'; }}
-                    >{isFocusMode ? <><SvgIcons.Unlock size={14} /> SAIR FOCO</> : <><SvgIcons.Target size={14} /> MODO FOCO</>}</button>
-                    <button
-                        onClick={toggleTheme}
-                        style={{
-                            background: 'var(--surface2)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 12,
-                            width: 36,
-                            height: 36,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            color: 'var(--text-3)',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                        title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                    >
-                        {isDark ? ThemeIcons.sun : ThemeIcons.moon}
-                    </button>
-                </div>
-            </div>
+            <DashboardHeader
+                isFocusMode={isFocusMode}
+                setIsFocusMode={setIsFocusMode}
+                studyMode={studyMode}
+                setStudyMode={setStudyMode}
+                compactMode={compactMode}
+                setCompactMode={setCompactMode}
+                setFontSize={setFontSize}
+                toggleTheme={toggleTheme}
+                isDark={isDark}
+                setShowHelp={setShowHelp}
+            />
 
 
-            <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                    <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 240px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
-                        <option value="ALL">Todas as Matérias</option>
-                        {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}><SvgIcons.Search size={16} /></span>
-                        <input type="search" placeholder="Buscar em tudo..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }} />
-                    </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', background: 'var(--surface2)', padding: '2px', borderRadius: 8, border: '1px solid var(--border)' }}>
-                            {(['ALL', 'STF', 'STJ'] as const).map(c => <button key={c} onClick={() => setCourtFilter(c)} style={{ padding: '6px 14px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 800, border: 'none', background: courtFilter === c ? 'var(--accent)' : 'transparent', color: courtFilter === c ? '#fff' : 'var(--text-3)', cursor: 'pointer', transition: 'all 0.1s' }}>{c === 'ALL' ? 'Todos' : c}</button>)}
-                        </div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)', opacity: 0.8, marginLeft: '0.4rem' }}>
-                            {filtered.length} {filtered.length === 1 ? 'julgado encontrado' : 'julgados encontrados'}
-                        </span>
-
-                        {courtFilter !== 'ALL' && availableInformatories.length > 0 && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', animation: 'fadeIn 0.2s' }}>
-                                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-3)' }}>INF:</span>
-                                <select
-                                    value={infFilter}
-                                    onChange={e => setInfFilter(e.target.value)}
-                                    style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.75rem', fontWeight: 700 }}
-                                >
-                                    <option value="ALL">Todos os Nos</option>
-                                    {availableInformatories.map(n => <option key={n} value={n}>{n}</option>)}
-                                </select>
-                            </div>
-                        )}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                        <button className={`btn-tag ${filterOnlyFavorites ? 'active' : ''}`} onClick={() => { setFilterOnlyFavorites(!filterOnlyFavorites); setFilterHideRead(false); setFilterOnlyErrors(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyFavorites ? 'var(--accent)' : 'transparent', color: filterOnlyFavorites ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
-                            <SvgIcons.Star size={12} fill={filterOnlyFavorites ? '#fff' : 'none'} /> Favoritos
-                        </button>
-                        <button className={`btn-tag ${filterHideRead ? 'active' : ''}`} onClick={() => { setFilterHideRead(!filterHideRead); setFilterOnlyFavorites(false); setFilterOnlyErrors(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterHideRead ? 'var(--accent)' : 'transparent', color: filterHideRead ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
-                            <SvgIcons.Sparkles size={12} /> Não Lidos
-                        </button>
-                        <button className={`btn-tag ${filterOnlyErrors ? 'active' : ''}`} onClick={() => { setFilterOnlyErrors(!filterOnlyErrors); setFilterHideRead(false); setFilterOnlyFavorites(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', padding: '4px 10px', background: filterOnlyErrors ? 'var(--rose)' : 'transparent', color: filterOnlyErrors ? '#fff' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: 20, fontWeight: 700 }}>
-                            <SvgIcons.X size={12} /> Erros
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <DashboardFilters
+                isFocusMode={isFocusMode}
+                selectedSubject={selectedSubject}
+                setSelectedSubject={setSelectedSubject}
+                subjects={subjects}
+                search={search}
+                setSearch={setSearch}
+                courtFilter={courtFilter}
+                setCourtFilter={setCourtFilter}
+                filteredCount={filtered.length}
+                availableInformatories={availableInformatories}
+                infFilter={infFilter}
+                setInfFilter={setInfFilter}
+                filterOnlyFavorites={filterOnlyFavorites}
+                setFilterOnlyFavorites={setFilterOnlyFavorites}
+                filterHideRead={filterHideRead}
+                setFilterHideRead={setFilterHideRead}
+                filterOnlyErrors={filterOnlyErrors}
+                setFilterOnlyErrors={setFilterOnlyErrors}
+            />
 
             {/* Barra flutuante do Modo Foco */}
-            {
-                isFocusMode && (
-                    <div style={{
-                        position: 'fixed',
-                        top: '0.75rem',
-                        right: '1rem',
-                        zIndex: 9999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 12,
-                        padding: '6px 10px',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                        opacity: 0.6,
-                        transition: 'opacity 0.2s',
-                    }}
-                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                        onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}
-                    >
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            style={{ fontSize: '0.75rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => setIsFocusMode(false)}
-                            title="Sair do Modo Foco"
-                        >
-                            <SvgIcons.Minimize2 size={14} /> Sair Foco
-                        </button>
-
-                        <button
-                            onClick={toggleTheme}
-                            style={{
-                                background: 'var(--surface2)',
-                                border: '1px solid var(--border)',
-                                borderRadius: 12,
-                                width: 32,
-                                height: 32,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                color: 'var(--text-3)',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                            title={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                        >
-                            {isDark ? ThemeIcons.sun : ThemeIcons.moon}
-                        </button>
-
-                        <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
-
-                        <button
-                            className={`btn btn-sm ${compactMode ? 'btn-primary' : 'btn-secondary'}`}
-                            style={{ fontSize: '0.75rem', padding: '4px 10px' }}
-                            onClick={() => setCompactMode(c => !c)}
-                            title={compactMode ? 'Voltar ao modo completo' : 'Modo compacto: só título e tese'}
-                        >{compactMode ? <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Layout size={14} /> Completo</span> : <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Minimize2 size={14} /> Compacto</span>}</button>
-
-                        <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 2px' }} />
-
-                        <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.max(10, f - 1))} title="Diminuir fonte">A-</button>
-                        <button className="btn btn-ghost btn-xs" style={{ fontSize: '0.75rem' }} onClick={() => setFontSize(f => Math.min(24, f + 1))} title="Aumentar fonte">A+</button>
-                    </div>
-                )
-            }
+            <FocusModeOverlay
+                isFocusMode={isFocusMode}
+                setIsFocusMode={setIsFocusMode}
+                compactMode={compactMode}
+                setCompactMode={setCompactMode}
+                setFontSize={setFontSize}
+                toggleTheme={toggleTheme}
+                isDark={isDark}
+            />
 
             <div className={`prec-list ${isFocusMode ? 'focus-list' : ''}`}>
 
@@ -617,97 +431,12 @@ export default function DashboardClient({ userName, track }: Props) {
                 }))}
             </div>
 
-            {
-                showHelp && (
-                    <div className="modal-overlay" style={{ zIndex: 20000 }} onClick={() => { setShowHelp(false); setHelpStep(0); }}>
-                        <div className="modal-content-animated" onClick={e => e.stopPropagation()} style={{
-                            background: 'var(--surface)',
-                            border: '1px solid var(--border-strong)',
-                            borderRadius: 30,
-                            padding: '2.5rem',
-                            maxWidth: '550px',
-                            width: 'calc(100% - 2rem)',
-                            boxShadow: '0 30px 60px rgba(0,0,0,0.3)',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            {/* Close button */}
-                            <button onClick={() => setShowHelp(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: '1rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-
-                            {/* Ícone com fundo colorido */}
-                            <div style={{ width: 72, height: 72, borderRadius: '22px', background: 'linear-gradient(135deg, var(--accent), #14b8a6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', margin: '0 auto 1.25rem', boxShadow: '0 10px 25px rgba(20,184,166,0.3)', transform: 'rotate(-5deg)' }}>
-                                {[
-                                    <SvgIcons.Sparkles size={36} key="s0" />,
-                                    <SvgIcons.Gavel size={36} key="s1" />,
-                                    <SvgIcons.Layout size={36} key="s2" />,
-                                    <SvgIcons.Copy size={36} key="s3" />,
-                                    <SvgIcons.Brain size={36} key="s4" />,
-                                    <SvgIcons.Target size={36} key="s5" />,
-                                    <SvgIcons.RotateCw size={36} key="s6" />
-                                ][helpStep]}
-                            </div>
-
-                            {/* Título */}
-                            <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.75rem' }}>
-                                {[
-                                    'Bem-vindo ao Novo Juris!',
-                                    'Fidelidade Jurisdicional',
-                                    'Inteiro Teor Premium',
-                                    'Agilidade no Estudo',
-                                    'Flashcards (V/F)',
-                                    'Foco e Visualização',
-                                    'Filtros e Matérias'
-                                ][helpStep]}
-                            </h2>
-
-                            {/* Descrição */}
-                            <div style={{ color: 'var(--text-2)', lineHeight: '1.7', fontSize: '0.92rem', marginBottom: '2rem', background: 'var(--surface2)', borderRadius: 16, padding: '1.25rem', border: '1px solid var(--border)', textAlign: 'left' }}>
-                                {[
-                                    'A interface do Juris foi otimizada para sua aprovação. Desenvolvemos uma experiência fluida, premium e focada no alto rendimento. Vamos explorar as ferramentas fundamentais para sua jornada!',
-                                    'Implementamos precisão total para o STJ. Agora você visualiza o Órgão Julgador (Turmas/Seções) e a distinção clara entre Relator original e para Acórdão, garantindo que você estude com os dados exatos do informativo.',
-                                    'Acesse detalhes completos clicando diretamente no Número do Processo ou no ícone de busca. Isso abrirá o card com o Inteiro Teor estruturado e todas as informações acessoriais do julgado.',
-                                    'Facilitamos sua vida acadêmica. Ao abrir um card, você encontrará um botão para copiar o número do processo com um clique. Ideal para buscas rápidas ou citações em petições e resumos.',
-                                    'Estudo ativo é a chave. No topo, mude para "V/F" e teste seus conhecimentos. O sistema oculta a tese, permitindo que você julgue o item. Estatísticas em tempo real mostram seus pontos fortes e fracos.',
-                                    'Elimine distrações com o MODO FOCO. Se preferir uma visão ampla, o "Modo Compacto" permite visualizar dezenas de teses simultaneamente. Ajuste o tamanho da fonte para o conforto total dos olhos.',
-                                    'Agrupamos julgados por matéria automaticamente. Use a barra de pesquisa para encontrar palavras-chave. Filtre por Tribunal ou Informativo específico para nichar seu estudo de forma estratégica.'
-                                ][helpStep]}
-                            </div>
-
-                            {helpStep === 6 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: 16, border: '1px solid var(--border)' }}>
-                                    <div style={{ textAlign: 'left', marginBottom: '0.5rem' }}>
-                                        <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.25rem' }}>Zona de Gerenciamento</h4>
-                                        <p style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Atenção: estas ações limpam seu progresso local.</p>
-                                    </div>
-                                    <div
-                                        className="btn btn-secondary"
-                                        style={{ color: 'var(--rose)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
-                                    ><SvgIcons.RotateCcw size={14} /> Marcar TUDO como Não Lido</div>
-                                    <div
-                                        className="btn btn-secondary"
-                                        style={{ fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'default', opacity: 0.8 }}
-                                    ><SvgIcons.RotateCw size={14} /> Zerar Estatísticas de V/F</div>
-                                </div>
-                            )}
-
-                            {/* Pontos de progresso */}
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                                {[0, 1, 2, 3, 4, 5, 6].map(i => (
-                                    <div key={i} onClick={() => setHelpStep(i)} style={{ width: i === helpStep ? 24 : 8, height: 8, borderRadius: 99, background: i === helpStep ? 'var(--accent)' : 'var(--border-strong)', cursor: 'pointer', transition: 'all 0.2s' }} />
-                                ))}
-                            </div>
-
-                            {/* Botões */}
-                            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                                {helpStep > 0 && <button className="btn btn-secondary" onClick={() => setHelpStep(helpStep - 1)}>← Voltar</button>}
-                                <button className="btn btn-primary" onClick={() => helpStep < 6 ? setHelpStep(helpStep + 1) : setShowHelp(false)} style={{ borderRadius: 12, padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {helpStep < 6 ? 'Próximo →' : <><SvgIcons.CheckCircle size={18} /> Entendi!</>}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
+            <HelpModal
+                showHelp={showHelp}
+                setShowHelp={setShowHelp}
+                helpStep={helpStep}
+                setHelpStep={setHelpStep}
+            />
 
 
 
