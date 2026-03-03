@@ -153,6 +153,7 @@ export default function DashboardClient({ userName }: Props) {
         setReadMap(m => ({ ...m, [id]: { ...m[id], count: 0, events: [] } }));
         await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'RESET' }) });
         mutateSubjects();
+        mutatePrecedents();
     };
 
     const toggleFavorite = async (id: string, e: React.MouseEvent) => {

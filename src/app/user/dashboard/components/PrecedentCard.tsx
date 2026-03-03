@@ -182,7 +182,29 @@ export const PrecedentCard: React.FC<PrecedentCardProps> = ({
                                 >
                                     {readData.count}×
                                 </div>
-                                <button onClick={(e) => onResetRead(p.id, e)} className="no-print" style={{ border: 'none', background: 'transparent', padding: '0 4px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-4)', opacity: 0.5 }} title="Marcar como Não Lido"><SvgIcons.RefreshCw size={12} /></button>
+                                <button
+                                    onClick={(e) => onResetRead(p.id, e)}
+                                    className="no-print"
+                                    style={{
+                                        border: '1px solid var(--border)',
+                                        background: 'var(--surface2)',
+                                        padding: '4px 8px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: 'var(--text-4)',
+                                        fontSize: '0.65rem',
+                                        fontWeight: 800,
+                                        transition: 'all 0.2s',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-4)'; }}
+                                    title="Zerar todas as leituras"
+                                >
+                                    Marcar não lido
+                                </button>
                             </div>
                         )}
                         {!isRead && (
