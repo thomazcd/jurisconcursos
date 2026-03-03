@@ -35,10 +35,38 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
     return (
         <div className={`no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{ background: 'var(--surface)', padding: '1rem', borderRadius: 16, marginBottom: '1rem', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ flex: '0 0 240px', padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem' }}>
-                    <option value="ALL">{loadingSubjects ? 'Carregando matérias...' : (track === 'TODAS' ? 'Todas do Banco' : 'Todas da Carreira')}</option>
-                    {!loadingSubjects && subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                <div style={{ flex: '0 0 240px', position: 'relative' }}>
+                    <div
+                        onClick={() => {
+                            const sel = document.getElementById('subject-dropdown');
+                            if (sel) sel.style.display = sel.style.display === 'none' ? 'block' : 'none';
+                        }}
+                        style={{ padding: '0.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                        {loadingSubjects ? 'Carregando matérias...' : (selectedSubject === 'ALL' ? 'Todas do Banco' : subjects.find(s => s.id === selectedSubject)?.name || 'Matéria Selecionada')}
+                        <SvgIcons.ChevronDown size={14} />
+                    </div>
+
+                    {!loadingSubjects && (
+                        <div id="subject-dropdown" style={{ display: 'none', position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, zIndex: 100, maxHeight: '300px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                            <div
+                                onClick={() => { setSelectedSubject('ALL'); document.getElementById('subject-dropdown')!.style.display = 'none'; }}
+                                style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.85rem', background: selectedSubject === 'ALL' ? 'var(--surface2)' : 'transparent', fontWeight: selectedSubject === 'ALL' ? 700 : 500 }}
+                            >
+                                Todas do Banco
+                            </div>
+                            {subjects.map(s => (
+                                <div
+                                    key={s.id}
+                                    onClick={() => { setSelectedSubject(s.id); document.getElementById('subject-dropdown')!.style.display = 'none'; }}
+                                    style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.85rem', background: selectedSubject === s.id ? 'var(--surface2)' : 'transparent', fontWeight: selectedSubject === s.id ? 700 : 500, borderTop: '1px solid var(--border)' }}
+                                >
+                                    {s.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 <div style={{ flex: 1, position: 'relative' }}>
                     <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }}><SvgIcons.Search size={16} /></span>
                     <input type="search" placeholder="Buscar em tudo..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '0.85rem' }} />
