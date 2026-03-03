@@ -10,12 +10,12 @@ const TRACKS = [
     { value: 'PROCURADOR', icon: <SvgIcons.Briefcase size={20} />, label: 'Procurador do Estado', desc: 'Procuradoria do Estado' },
     { value: 'TODAS', icon: <SvgIcons.BookOpen size={20} />, label: 'Todas as Matérias', desc: 'Engloba todas as carreiras' },
 ];
-
 export default function UserSettingsPage() {
     const { data: session } = useSession();
     const router = useRouter();
     const [allSubjects, setAllSubjects] = useState<any[]>([]);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [savedSelectedIds, setSavedSelectedIds] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
 
@@ -26,12 +26,14 @@ export default function UserSettingsPage() {
         // Fetch Profile
         fetch('/api/user/profile').then(r => r.json()).then(d => {
             if (d.profile?.selectedSubjects) {
-                setSelectedIds(d.profile.selectedSubjects.map((s: any) => s.id));
+                const ids = d.profile.selectedSubjects.map((s: any) => s.id);
+                setSelectedIds(ids);
+                setSavedSelectedIds(ids);
             }
         });
     }, []);
 
-    async function handleToggleSubject(subjectId: string) {
+    function handleToggleSubject(subjectId: string) {
         let newIds = [...selectedIds];
         if (newIds.includes(subjectId)) {
             newIds = newIds.filter(id => id !== subjectId);
@@ -39,27 +41,30 @@ export default function UserSettingsPage() {
             newIds.push(subjectId);
         }
         setSelectedIds(newIds);
-
-        await fetch('/api/user/profile', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ selectedSubjectIds: newIds }),
-        });
-
-        router.refresh(); // Refresh background data
     }
 
-    async function handleSelectAll(all: boolean) {
-        const newIds = all ? allSubjects.map(s => s.id) : [];
-        setSelectedIds(newIds);
+    function handleSelectAll(all: boolean) {
+        setSelectedIds(all ? allSubjects.map(s => s.id) : []);
+    }
+
+    async function handleSaveSubjects() {
         setSaving(true);
-        await fetch('/api/user/profile', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ selectedSubjectIds: newIds }),
-        });
-        setSaving(false);
-        router.refresh();
+        setSuccess('');
+        try {
+            await fetch('/api/user/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ selectedSubjectIds: selectedIds, activeTrack: 'TODAS' }), // Forçamos 'TODAS' para não usar restrição de carreira
+            });
+            setSavedSelectedIds(selectedIds);
+            setSuccess('Matérias salvas com sucesso!');
+            router.refresh();
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao salvar matérias.');
+        } finally {
+            setSaving(false);
+        }
     }
 
     async function resetAllReads() {
@@ -125,7 +130,7 @@ export default function UserSettingsPage() {
                     </div>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1.5rem' }}>
-                    Selecione as matérias que você deseja que apareçam no seu dashboard. Se nenhuma estiver marcada, usaremos a trilha padrão.
+                    Selecione as matérias que você deseja estudar. Se nenhuma estiver marcada, você verá todas as matérias disponíveis.
                 </p>
 
                 <div style={{
@@ -135,6 +140,7 @@ export default function UserSettingsPage() {
                     maxHeight: '400px',
                     overflowY: 'auto',
                     padding: '4px',
+                    marginBottom: '1.5rem',
                 }}>
                     {allSubjects.map((s) => (
                         <div
@@ -174,6 +180,17 @@ export default function UserSettingsPage() {
                         </div>
                     ))}
                 </div>
+
+                {JSON.stringify(selectedIds.sort()) !== JSON.stringify(savedSelectedIds.sort()) && (
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleSaveSubjects}
+                        disabled={saving}
+                        style={{ width: '100%' }}
+                    >
+                        {saving ? 'Salvando...' : 'Salvar Matérias'}
+                    </button>
+                )}
 
                 <div className="divider" style={{ margin: '1.5rem 0' }} />
 
