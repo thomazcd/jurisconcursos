@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         const selectedIds = profile?.selectedSubjects.map((s: any) => s.id) || [];
 
         // Se houver seleção manual, ignoramos o filtro de carreira para estatísticas globais das matérias escolhidas
-        const eligibility = selectedIds.length > 0 ? {} : getApplicabilityFilter(track as any);
+        const eligibility = selectedIds.length > 0 ? {} : getApplicabilityFilter();
         const subjectFilter = selectedIds.length > 0 ? { id: { in: selectedIds } } : {};
 
         // 1. Busca simplificada dos dados brutos

@@ -14,8 +14,8 @@ export async function GET(req: NextRequest) {
     const userId = (session!.user as any).id as string;
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
     const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
-    const appFilter = getApplicabilityFilter(track);
-    const scopes = getEligibleTrackScopes(track);
+    const appFilter = getApplicabilityFilter();
+    const scopes = getEligibleTrackScopes();
 
     const precedents = await prisma.precedent.findMany({
         where: {
