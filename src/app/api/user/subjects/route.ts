@@ -5,7 +5,6 @@ import { getSubjectFilter, getApplicabilityFilter } from '@/lib/eligibility';
 import { Track } from '@prisma/client';
 import { unstable_noStore as noStore } from 'next/cache';
 
-// GET /api/user/subjects – list subjects for user's active track + unread counts
 export async function GET(req: NextRequest) {
     noStore();
     try {
@@ -13,20 +12,13 @@ export async function GET(req: NextRequest) {
         if (error) return error;
 
         const userId = (session!.user as any).id as string;
-        const profile = await prisma.userProfile.findUnique({
-            where: { userId },
-            include: { selectedSubjects: { select: { id: true } } }
-        });
 
-        const appFilter = { status: 'PUBLISHED' as const };
+        // Fetch subjects and their PUBLISHED precedents
         const subjects = await prisma.subject.findMany({
             orderBy: { name: 'asc' },
             include: {
-                _count: {
-                    select: { precedents: { where: appFilter } }
-                },
                 precedents: {
-                    where: appFilter,
+                    where: { status: 'PUBLISHED' },
                     select: {
                         id: true,
                         reads: { where: { userId }, select: { userId: true } },
@@ -36,7 +28,7 @@ export async function GET(req: NextRequest) {
         });
 
         const result = subjects.map((s: any) => {
-            const total = s._count.precedents;
+            const total = s.precedents.length;
             const readCount = s.precedents.filter((p: any) => p.reads.length > 0).length;
             const unreadCount = total - readCount;
 
@@ -49,6 +41,8 @@ export async function GET(req: NextRequest) {
             };
         });
 
+        // Optionally filter out subjects with 0 precedents to keep it clean, 
+        // but for now return all as the user wants to see everything.
         return NextResponse.json({ subjects: result, hasSelection: false });
     } catch (err: any) {
         console.error('ERROR in GET /api/user/subjects:', err);

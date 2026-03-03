@@ -16,13 +16,8 @@ export class PrecedentService {
      * e os mescla com os dados de "Lido/Favoritos/Estatísticas" próprios daquele usuário.
      */
     static async getForUser({ userId, subjectId, q, selectedSubjectIds = [], limit = 500 }: GetPrecedentsOptions) {
-        // Se houver seleção manual de matérias, ignoramos o filtro de carreira para dar liberdade total.
-        // Exceto se a trilha for 'TODAS', o appFilter já é vazio.
-        const appFilter = selectedSubjectIds.length > 0 ? {} : getApplicabilityFilter();
-
         let where: any = {
-            status: 'PUBLISHED',
-            ...appFilter
+            status: 'PUBLISHED'
         };
 
         if (subjectId && subjectId !== 'ALL') {
