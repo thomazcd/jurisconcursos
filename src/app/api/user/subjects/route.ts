@@ -26,7 +26,9 @@ export async function GET(req: NextRequest) {
         ? { id: { in: selectedIds } }
         : getSubjectFilter(track);
 
-    const appFilter = getApplicabilityFilter(track);
+    // Se o usuário escolheu matérias manualmente, queremos ver TUDO dessas matérias,
+    // ignorando os filtros restritivos de carreira.
+    const appFilter = selectedIds.length > 0 ? {} : getApplicabilityFilter(track);
 
     const subjects = await prisma.subject.findMany({
         where: subjectFilter,
