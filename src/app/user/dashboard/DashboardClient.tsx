@@ -20,8 +20,6 @@ import { Subject, Precedent } from './types';
 
 interface Props { userName: string; }
 
-
-
 export default function DashboardClient({ userName }: Props) {
     const [selectedSubject, setSelectedSubject] = useState('ALL');
     const [readMap, setReadMap] = useState<Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean, notes: string | null }>>({});
@@ -38,7 +36,6 @@ export default function DashboardClient({ userName }: Props) {
     const [copying, setCopying] = useState<string | null>(null);
     const [flashcardResults, setFlashcardResults] = useState<Record<string, 'CORRECT' | 'WRONG' | null>>({});
 
-    // User Preferences
     const [fontSize, setFontSize] = useState(14);
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [compactMode, setCompactMode] = useState(false);
@@ -46,6 +43,23 @@ export default function DashboardClient({ userName }: Props) {
     const [helpStep, setHelpStep] = useState(0);
     const [isDark, setIsDark] = useState(false);
 
+    // Nível 1: Escopo de Matérias (Enabled)
+    const [enabledSubjectIds, setEnabledSubjectIds] = useState<string[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('juris-scope');
+        if (saved) {
+            try { setEnabledSubjectIds(JSON.parse(saved)); } catch (e) { console.error(e); }
+        }
+        setIsInitialized(true);
+    }, []);
+
+    useEffect(() => {
+        if (isInitialized) {
+            localStorage.setItem('juris-scope', JSON.stringify(enabledSubjectIds));
+        }
+    }, [enabledSubjectIds, isInitialized]);
 
     useEffect(() => {
         setIsDark(document.documentElement.classList.contains('dark-theme'));
@@ -63,14 +77,32 @@ export default function DashboardClient({ userName }: Props) {
     const [notesModal, setNotesModal] = useState<{ id: string, notes: string | null } | null>(null);
     const [showHints, setShowHints] = useState<Record<string, boolean>>({});
 
-    const { data: subData, mutate: mutateSubjects } = useSWR(['/api/user/subjects'], ([url]) => fetcher(url));
-    const subjects: Subject[] = subData?.subjects ?? [];
+    const { data: subData, mutate: mutateSubjects } = useSWR('/api/user/subjects', fetcher);
+    const allSubjects: Subject[] = subData?.subjects ?? [];
 
-    const precUrl = selectedSubject === 'ALL' ? '/api/user/precedents' : `/api/user/precedents?subjectId=${selectedSubject}`;
-    const searchParam = search ? (precUrl.includes('?') ? `&q=${encodeURIComponent(search)}` : `?q=${encodeURIComponent(search)}`) : '';
-    const finalUrl = `${precUrl}${searchParam}`;
+    // Matérias disponíveis no seletor de baixo: Todas as "habilitadas" no topo
+    const enabledSubjects = useMemo(() => {
+        if (enabledSubjectIds.length === 0) return allSubjects;
+        return allSubjects.filter(sf => enabledSubjectIds.includes(sf.id));
+    }, [allSubjects, enabledSubjectIds]);
 
-    const { data: precData, isValidating: isValidatingPrecedents, error: precError, mutate: mutatePrecedents } = useSWR(finalUrl, fetcher, {
+    const precUrl = useMemo(() => {
+        const base = '/api/user/precedents';
+        const params = new URLSearchParams();
+
+        if (selectedSubject !== 'ALL') {
+            params.set('subjectId', selectedSubject);
+        } else if (enabledSubjectIds.length > 0) {
+            enabledSubjectIds.forEach(id => params.append('subjectIds', id));
+        }
+
+        if (search) params.set('q', search);
+
+        const queryString = params.toString();
+        return queryString ? `${base}?${queryString}` : base;
+    }, [selectedSubject, enabledSubjectIds, search]);
+
+    const { data: precData, isValidating: isValidatingPrecedents, error: precError, mutate: mutatePrecedents } = useSWR(precUrl, fetcher, {
         keepPreviousData: false,
         revalidateOnFocus: true,
     });
@@ -78,7 +110,6 @@ export default function DashboardClient({ userName }: Props) {
     const loading = !precData && !precError;
     const precedents: Precedent[] = precData?.precedents ?? [];
 
-    // Sync SWR Data with Local Optimistic Map whenever new data arrives from server
     useEffect(() => {
         if (!precData?.precedents) return;
         const map: Record<string, any> = {};
@@ -94,145 +125,66 @@ export default function DashboardClient({ userName }: Props) {
             };
         });
         setReadMap(map);
-        // Reset local hint reveals when new data sweeps in
         setRevealed({});
         setFlashcardResults({});
         setShowHints({});
     }, [precData]);
 
-
-
-    useEffect(() => {
-        if (isFocusMode) {
-            document.body.classList.add('is-focus-mode');
-        } else {
-            document.body.classList.remove('is-focus-mode');
-        }
-        return () => document.body.classList.remove('is-focus-mode');
-    }, [isFocusMode]);
-
-    const loadSubjects = useCallback(() => {
+    const markRead = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const prev = readMap[id] || { count: 0, events: [], isFavorite: false, notes: null, correct: 0, wrong: 0, last: null };
+        setReadMap(m => ({ ...m, [id]: { ...prev, count: prev.count + 1, events: [new Date().toISOString(), ...prev.events] } }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'READ' }) });
         mutateSubjects();
-    }, [mutateSubjects]);
+    };
 
-    const loadPrecedents = useCallback(async () => {
-        await mutatePrecedents();
-    }, [mutatePrecedents]);
-
-
-    async function saveNote(id: string, notes: string) {
-        setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));
-        await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: id, action: 'save_note', notes }),
-        });
-    }
-
-    async function toggleFavorite(id: string, e: React.MouseEvent) {
+    const decrementRead = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        const r = await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: id, action: 'toggle_favorite' }),
-        });
-        const d = await r.json();
-        setReadMap(m => ({ ...m, [id]: { ...m[id], isFavorite: d.isFavorite } }));
-    }
+        const prev = readMap[id];
+        if (!prev || prev.count <= 0) return;
+        setReadMap(m => ({ ...m, [id]: { ...prev, count: prev.count - 1, events: prev.events.slice(1) } }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'DECREMENT' }) });
+        mutateSubjects();
+    };
 
-    async function markRead(id: string, e: React.MouseEvent) {
+    const resetRead = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        const r = await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: id, action: 'increment' }),
-        });
-        const d = await r.json();
-        setReadMap(m => ({ ...m, [id]: { ...m[id], count: d.readCount, events: d.readEvents || [] } }));
-        loadSubjects();
-    }
+        if (!confirm('Zerar todas as leituras deste julgado?')) return;
+        setReadMap(m => ({ ...m, [id]: { ...m[id], count: 0, events: [] } }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'RESET' }) });
+        mutateSubjects();
+    };
 
-    async function handleFlashcard(p: Precedent, userChoice: boolean) {
-        const isCorrectResult = userChoice === (p.flashcardAnswer ?? true);
-        setFlashcardResults(prev => ({ ...prev, [p.id]: isCorrectResult ? 'CORRECT' : 'WRONG' }));
+    const toggleFavorite = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const prev = readMap[id] || { isFavorite: false };
+        setReadMap(m => ({ ...m, [id]: { ...m[id], isFavorite: !prev.isFavorite } }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'FAVORITE' }) });
+    };
+
+    const handleFlashcard = async (p: Precedent, userChoice: boolean) => {
+        const isCorrect = p.flashcardAnswer === userChoice;
         setRevealed(prev => ({ ...prev, [p.id]: true }));
-        setShowHints(prev => ({ ...prev, [p.id]: false })); // Hide hint after answering
+        setFlashcardResults(prev => ({ ...prev, [p.id]: isCorrect ? 'CORRECT' : 'WRONG' }));
+        const current = readMap[p.id] || { correct: 0, wrong: 0 };
+        setReadMap(m => ({
+            ...m,
+            [p.id]: {
+                ...m[p.id],
+                correct: isCorrect ? current.correct + 1 : current.correct,
+                wrong: !isCorrect ? current.wrong + 1 : current.wrong,
+                last: isCorrect ? 'HIT' : 'MISS'
+            }
+        }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: p.id, action: isCorrect ? 'HIT' : 'MISS' }) });
+        mutateSubjects();
+    };
 
-        const r = await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: p.id, action: 'flashcard', isCorrect: isCorrectResult }),
-        });
-        const d = await r.json();
-        setReadMap(m => ({ ...m, [p.id]: { ...m[p.id], count: d.readCount, correct: d.correctCount, wrong: d.wrongCount, last: d.lastResult } }));
-        loadSubjects();
-    }
-
-    async function decrementRead(id: string, e: React.MouseEvent) {
-        e.stopPropagation();
-        const r = await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: id, action: 'decrement' }),
-        });
-        const d = await r.json();
-        setReadMap(m => ({ ...m, [id]: { ...m[id], count: d.readCount, events: d.readEvents || [] } }));
-        loadSubjects();
-    }
-
-    async function resetAllReads() {
-        if (!confirm('Deseja marcar TODOS os julgados como não lidos? Isso zerará o contador de leituras de todo o sistema.')) return;
-        setIsMutating(true);
-        try {
-            await fetch('/api/user/read', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'bulk_reset_reads', precedentId: 'ALL' }),
-            });
-            await loadPrecedents();
-            loadSubjects();
-            setShowHelp(false);
-            setHelpStep(0);
-        } catch (err) {
-            console.error(err);
-            alert('Erro ao resetar leituras');
-        } finally {
-            setIsMutating(false);
-        }
-    }
-
-    async function resetAllStats() {
-        if (!confirm('Deseja zerar TODAS as estatísticas de desempenho (V/F)?')) return;
-        setIsMutating(true);
-        try {
-            await fetch('/api/user/read', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'bulk_reset_stats', precedentId: 'ALL' }),
-            });
-            await loadPrecedents();
-            loadSubjects();
-            setShowHelp(false);
-            setHelpStep(0);
-        } catch (err) {
-            console.error(err);
-            alert('Erro ao resetar estatísticas');
-        } finally {
-            setIsMutating(false);
-        }
-    }
-
-    async function resetRead(id: string, e: React.MouseEvent) {
-        e.stopPropagation();
-        if (!confirm('Deseja zerar o progresso deste precedente?')) return;
-        await fetch('/api/user/read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ precedentId: id, action: 'reset' }),
-        });
-        setReadMap(m => ({ ...m, [id]: { count: 0, events: [], correct: 0, wrong: 0, last: null, isFavorite: false, notes: null } }));
-        loadSubjects();
-    }
+    const saveNotes = async (id: string, notes: string | null) => {
+        setReadMap(m => ({ ...m, [id]: { ...m[id], notes } }));
+        await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'NOTES', notes }) });
+        setNotesModal(null);
+    };
 
     const copyToClipboard = (text: string, id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -240,25 +192,6 @@ export default function DashboardClient({ userName }: Props) {
         setCopying(id);
         setTimeout(() => setCopying(null), 2000);
     };
-
-    const availableInformatories = useMemo(() => {
-        if (courtFilter === 'ALL') return [];
-        const set = new Set<string>();
-        precedents.forEach(p => {
-            if (p.court === courtFilter && p.informatoryNumber) {
-                set.add(p.informatoryNumber);
-            }
-        });
-        return Array.from(set).sort((a, b) => {
-            const na = parseInt(a) || 0;
-            const nb = parseInt(b) || 0;
-            return nb - na;
-        });
-    }, [precedents, courtFilter]);
-
-    useEffect(() => {
-        setInfFilter('ALL');
-    }, [courtFilter]);
 
     const filtered = useMemo(() => {
         return precedents.filter(p => {
@@ -274,296 +207,162 @@ export default function DashboardClient({ userName }: Props) {
             if (infFilter !== 'ALL' && p.informatoryNumber !== infFilter) return false;
             return true;
         });
-    }, [precedents, filterHideRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter, readMap]);
+    }, [precedents, readMap, filterHideRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter]);
+
+    const availableInformatories = useMemo(() => {
+        const set = new Set<string>();
+        precedents.forEach(p => { if (p.informatoryNumber) set.add(p.informatoryNumber); });
+        return Array.from(set).sort((a, b) => b.localeCompare(a));
+    }, [precedents]);
 
     const groupedPrecedents = useMemo(() => {
         if (selectedSubject !== 'ALL') return null;
-
         const groups: Record<string, Precedent[]> = {};
         filtered.forEach(p => {
-            const subs = p.subjects && p.subjects.length > 0 ? p.subjects : [{ name: 'Geral', id: 'geral' }];
-            subs.forEach(s => {
-                const subName = s.name;
-                if (!groups[subName]) groups[subName] = [];
-                // Evitar o mesmo precedente no mesmo grupo por engano, mas permitir em grupos diferentes
-                groups[subName].push(p);
-            });
+            const subName = p.subjects?.[0]?.name || 'Outros';
+            if (!groups[subName]) groups[subName] = [];
+            groups[subName].push(p);
         });
+        return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+    }, [filtered, selectedSubject]);
 
-        // Ordenar grupos alfabeticamente, mas colocar 'Geral' por último se existir
-        return Object.entries(groups)
-            .filter(([_, list]) => list.length > 0)
-            .sort(([a], [b]) => {
-                if (a === 'Geral') return 1;
-                if (b === 'Geral') return -1;
-                return a.localeCompare(b);
-            });
-    }, [selectedSubject, filtered]);
+    if (!isInitialized) return null;
 
     return (
-        <div className={`dashboard-container ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
-            {/* MODAL DE ANOTAÇÕES */}
-            <NotesModal notesModal={notesModal} setNotesModal={setNotesModal} saveNote={saveNote} />
+        <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 font-sans ${isFocusMode ? 'focus-mode-active' : ''}`} style={{ fontSize: `${fontSize}px` }}>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                <DashboardHeader
+                    isFocusMode={isFocusMode}
+                    setIsFocusMode={setIsFocusMode}
+                    studyMode={studyMode}
+                    setStudyMode={setStudyMode}
+                    compactMode={compactMode}
+                    setCompactMode={setCompactMode}
+                    setFontSize={setFontSize}
+                    toggleTheme={toggleTheme}
+                    isDark={isDark}
+                    setShowHelp={setShowHelp}
+                    userName={userName}
+                    hasSelection={subData?.hasSelection}
+                    currentSubjectName={selectedSubject === 'ALL' ? 'Todas as Habilitadas' : allSubjects.find(s => s.id === selectedSubject)?.name || 'Carregando...'}
+                    subjects={allSubjects}
+                    selectedSubject={selectedSubject}
+                    onSelectSubject={setSelectedSubject}
+                    enabledSubjectIds={enabledSubjectIds}
+                    setEnabledSubjectIds={setEnabledSubjectIds}
+                />
 
-            {/* MODAL DETALHES DO JULGADO */}
-            <PrecedentDetailsModal
-                selectedPrecedent={selectedPrecedent}
-                setSelectedPrecedent={setSelectedPrecedent}
-                setIsFocusMode={setIsFocusMode}
-                copyToClipboard={copyToClipboard}
-                copyingId={copying}
-            />
+                <DashboardFilters
+                    isFocusMode={isFocusMode}
+                    selectedSubject={selectedSubject}
+                    setSelectedSubject={setSelectedSubject}
+                    subjects={enabledSubjects}
+                    search={search}
+                    setSearch={setSearch}
+                    courtFilter={courtFilter}
+                    setCourtFilter={setCourtFilter}
+                    filteredCount={filtered.length}
+                    availableInformatories={availableInformatories}
+                    infFilter={infFilter}
+                    setInfFilter={setInfFilter}
+                    filterOnlyFavorites={filterOnlyFavorites}
+                    setFilterOnlyFavorites={setFilterOnlyFavorites}
+                    filterHideRead={filterHideRead}
+                    setFilterHideRead={setFilterHideRead}
+                    filterOnlyErrors={filterOnlyErrors}
+                    setFilterOnlyErrors={setFilterOnlyErrors}
+                    loadingSubjects={!subData && !allSubjects.length}
+                />
 
-            <DashboardHeader
-                isFocusMode={isFocusMode}
-                setIsFocusMode={setIsFocusMode}
-                studyMode={studyMode}
-                setStudyMode={setStudyMode}
-                compactMode={compactMode}
-                setCompactMode={setCompactMode}
-                setFontSize={setFontSize}
-                toggleTheme={toggleTheme}
-                isDark={isDark}
-                setShowHelp={setShowHelp}
+                <PrecedentList
+                    isFocusMode={isFocusMode}
+                    loading={loading}
+                    error={precError || (precData?.error ? { message: precData.details || precData.error } : null)}
+                    groupedPrecedents={groupedPrecedents}
+                    filtered={filtered}
+                    subjects={allSubjects}
+                    selectedSubject={selectedSubject}
+                    onSelectSubject={setSelectedSubject}
+                    onResetFilters={() => {
+                        setSelectedSubject('ALL');
+                        setSearch('');
+                        setCourtFilter('ALL');
+                        setYearFilter('ALL');
+                        setInfFilter('ALL');
+                        setFilterHideRead(false);
+                        setFilterOnlyFavorites(false);
+                        setFilterOnlyErrors(false);
+                    }}
+                    readMap={readMap}
+                    studyMode={studyMode}
+                    revealed={revealed}
+                    flashcardResults={flashcardResults}
+                    compactMode={compactMode}
+                    showHints={showHints}
+                    copyingId={copying}
+                    markRead={markRead}
+                    decrementRead={decrementRead}
+                    resetRead={resetRead}
+                    handleFlashcard={handleFlashcard}
+                    toggleFavorite={toggleFavorite}
+                    setNotesModal={setNotesModal}
+                    setHistoryModal={setHistoryModal}
+                    setSelectedPrecedent={setSelectedPrecedent}
+                    copyToClipboard={copyToClipboard}
+                    setShowHints={setShowHints}
+                />
 
-                userName={userName}
-                hasSelection={subData?.hasSelection}
-                currentSubjectName={selectedSubject === 'ALL' ? 'Todas do Banco' : subjects.find(s => s.id === selectedSubject)?.name || 'Carregando...'}
-                subjects={subjects}
-                selectedSubject={selectedSubject}
-                onSelectSubject={setSelectedSubject}
-            />
+                <FocusModeOverlay
+                    isFocusMode={isFocusMode}
+                    setIsFocusMode={setIsFocusMode}
+                    compactMode={compactMode}
+                    setCompactMode={setCompactMode}
+                    setFontSize={setFontSize}
+                    fontSize={fontSize}
+                />
 
-            <DashboardFilters
-                isFocusMode={isFocusMode}
-                search={search}
-                setSearch={setSearch}
-                courtFilter={courtFilter}
-                setCourtFilter={setCourtFilter}
-                filteredCount={filtered.length}
-                availableInformatories={availableInformatories}
-                infFilter={infFilter}
-                setInfFilter={setInfFilter}
-                filterOnlyFavorites={filterOnlyFavorites}
-                setFilterOnlyFavorites={setFilterOnlyFavorites}
-                filterHideRead={filterHideRead}
-                setFilterHideRead={setFilterHideRead}
-                filterOnlyErrors={filterOnlyErrors}
-                setFilterOnlyErrors={setFilterOnlyErrors}
-                loadingSubjects={!subData && !subjects.length}
-            />
+                <HelpModal
+                    isOpen={showHelp}
+                    onClose={() => setShowHelp(false)}
+                    step={helpStep}
+                    setStep={setHelpStep}
+                />
 
-            {/* Barra flutuante do Modo Foco */}
-            <FocusModeOverlay
-                isFocusMode={isFocusMode}
-                setIsFocusMode={setIsFocusMode}
-                compactMode={compactMode}
-                setCompactMode={setCompactMode}
-                setFontSize={setFontSize}
-                toggleTheme={toggleTheme}
-                isDark={isDark}
-            />
+                {selectedPrecedent && (
+                    <PrecedentDetailsModal
+                        p={selectedPrecedent}
+                        onClose={() => setSelectedPrecedent(null)}
+                        readData={readMap[selectedPrecedent.id]}
+                    />
+                )}
 
-            <PrecedentList
-                isFocusMode={isFocusMode}
-                loading={loading}
-                error={precError || (precData?.error ? { message: precData.details || precData.error } : null)}
-                groupedPrecedents={groupedPrecedents}
-                filtered={filtered}
-                subjects={subjects}
-                selectedSubject={selectedSubject}
-                onSelectSubject={setSelectedSubject}
-                onResetFilters={() => {
-                    setSelectedSubject('ALL');
-                    setSearch('');
-                    setCourtFilter('ALL');
-                    setYearFilter('ALL');
-                    setInfFilter('ALL');
-                    setFilterHideRead(false);
-                    setFilterOnlyFavorites(false);
-                    setFilterOnlyErrors(false);
-                }}
-                readMap={readMap}
-                studyMode={studyMode}
-                revealed={revealed}
-                flashcardResults={flashcardResults}
-                compactMode={compactMode}
-                showHints={showHints}
-                copyingId={copying}
-                markRead={markRead}
-                decrementRead={decrementRead}
-                resetRead={resetRead}
-                handleFlashcard={handleFlashcard}
-                toggleFavorite={toggleFavorite}
-                setNotesModal={setNotesModal}
-                setHistoryModal={setHistoryModal}
-                setSelectedPrecedent={setSelectedPrecedent}
-                copyToClipboard={copyToClipboard}
-                setShowHints={setShowHints}
-            />
+                {historyModal && (
+                    <HistoryModal
+                        events={historyModal.events}
+                        onClose={() => setHistoryModal(null)}
+                    />
+                )}
 
-            <HelpModal
-                showHelp={showHelp}
-                setShowHelp={setShowHelp}
-                helpStep={helpStep}
-                setHelpStep={setHelpStep}
-            />
+                {notesModal && (
+                    <NotesModal
+                        initialNotes={notesModal.notes}
+                        onClose={() => setNotesModal(null)}
+                        onSave={(notes) => saveNotes(notesModal.id, notes)}
+                    />
+                )}
+            </main>
 
+            <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-slate-200 dark:border-slate-800 text-center text-slate-400 text-xs">
+                <p>Juris Concursos &copy; {new Date().getFullYear()} • Versão {APP_VERSION}</p>
+            </footer>
 
-
-            <style jsx>{`
-                .hidden-focus { display: none !important; }
-                .focus-exit {
-                    position: fixed;
-                    top: 1.5rem;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    z-index: 10000;
-                    background: var(--surface);
-                    padding: 0.5rem 1.5rem;
-                    border-radius: 50px;
-                    display: flex;
-                    align-items: center;
-                    gap: 1.5rem;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-                    border: 1px solid var(--border);
-                }
-                .subject-header { 
-                    display: flex; 
-                    align-items: center; 
-                    gap: 0.8rem; 
-                    margin: 1.5rem 0 1rem;
-                    padding: 0.5rem 0;
-                }
-                .subject-icon { 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    width: 44px; 
-                    height: 44px; 
-                    border-radius: 14px; 
-                    background: linear-gradient(135deg, var(--surface2), var(--surface3));
-                    color: var(--accent); 
-                    border: 1px solid var(--border);
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-                }
-                .subject-header h3 { 
-                    font-size: 1.25rem; 
-                    font-weight: 950; 
-                    color: var(--text); 
-                    letter-spacing: -0.04em; 
-                    white-space: nowrap; 
-                    margin: 0;
-                    text-transform: capitalize;
-                }
-                .subject-header .line { 
-                    flex: 1; 
-                    height: 2px; 
-                    background: linear-gradient(to right, var(--accent), transparent); 
-                    opacity: 0.15; 
-                    border-radius: 2px;
-                }
-                .subject-header span { 
-                    font-size: 0.8rem; 
-                    font-weight: 900; 
-                    color: var(--accent); 
-                    background: rgba(20, 184, 166, 0.1); 
-                    padding: 4px 12px; 
-                    border-radius: 10px;
-                    border: 1px solid rgba(20, 184, 166, 0.2);
-                    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.05);
-                }
-                
-                .btn-activity {
-                    border: 1px solid var(--border);
-                    background: var(--surface2);
-                    color: var(--text-3);
-                    width: 22px;
-                    height: 22px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: 900;
-                    font-size: 0.6rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s;
-                    opacity: 0.4;
-                }
-                .btn-activity:hover {
-                    opacity: 1;
-                    transform: translateY(-1px);
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-                    border-color: var(--border-strong);
-                }
-                .btn-activity-inc:hover {
-                    background: #22c55e;
-                    color: white;
-                    border-color: #22c55e;
-                }
-                .btn-activity-dec:hover {
-                    background: #ef4444;
-                    color: white;
-                    border-color: #ef4444;
-                }
-                
-                .focus-mode-active { 
-                    position: fixed; 
-                    inset: 0; 
-                    z-index: 9999; 
-                    background: var(--background); 
-                    padding: 0; 
-                    overflow-y: auto; 
-                    animation: fadeIn 0.3s ease-out;
-                }
-                
-                .focus-list {
-                    max-width: 850px;
-                    margin: 0 auto;
-                    padding: 4rem 2rem;
-                }
-
-                .modal-fullscreen { 
-                    max-width: 100% !important; 
-                    height: 100vh !important; 
-                    border-radius: 0 !important; 
-                    display: flex;
-                    flex-direction: column;
-                }
-                
-                .modal-fullscreen .modal-body {
-                    max-width: 900px;
-                    margin: 0 auto;
-                    width: 100%;
-                    padding: 4rem 2rem;
-                    flex: 1;
-                    overflow-y: auto;
-                }
-
-                .modal-fullscreen .modal-header {
-                    padding: 1rem 2rem;
-                    background: var(--surface);
-                    border-bottom: 1px solid var(--border);
-                }
-                .detail-label { display: block; fontSize: 0.7rem; color: var(--text-3); fontWeight: 700; textTransform: uppercase; marginBottom: 0.2rem; }
-                .detail-val { fontWeight: 800; color: var(--text); font-size: 0.95rem; }
-                
-                @media print { 
-                    .no-print { display: none !important; } 
-                    .dashboard-container { padding: 0 !important; width: 100% !important; background: white !important; } 
-                    .focus-mode-active { position: static !important; padding: 0 !important; background: transparent !important; }
-                    .prec-item { break-inside: avoid; border: 1px solid #eee !important; margin-bottom: 0.5rem !important; padding: 0.75rem !important; border-radius: 4px !important; } 
-                    .prec-title { color: black !important; font-size: 1.1rem !important; margin-bottom: 0.3rem !important; }
-                    .prec-list { padding: 0 !important; }
-                    .subject-header { margin-bottom: 0.5rem !important; }
-                    body { background: white !important; }
-                }
+            <style jsx global>{`
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+                .dark-theme .skeleton-box { background: #1e293b; }
+                .skeleton-box { background: #f1f5f9; position: relative; overflow: hidden; }
+                .skeleton-box::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0)); animation: shimmer 2s infinite; }
+                @keyframes shimmer { 100% { transform: translateX(100%); } }
             `}</style>
-            <HistoryModal historyModal={historyModal} setHistoryModal={setHistoryModal} />
-
-            <div className="no-print" style={{ textAlign: 'center', padding: '3rem 3rem 2rem', opacity: 0.3, fontSize: '0.65rem', lineHeight: 1.8 }}>
-                v{APP_VERSION}<br />Desenvolvido por Thomaz C. Drumond
-            </div>
         </div>
     );
 }

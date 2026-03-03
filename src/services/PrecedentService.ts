@@ -5,6 +5,7 @@ import { getApplicabilityFilter } from '@/lib/eligibility';
 export interface GetPrecedentsOptions {
     userId: string;
     subjectId?: string | null;
+    subjectIds?: string[] | null;
     q?: string | null;
     limit?: number;
 }
@@ -14,13 +15,15 @@ export class PrecedentService {
      * Busca os precedentes publicados, filtrados pela Trilha do usuário,
      * e os mescla com os dados de "Lido/Favoritos/Estatísticas" próprios daquele usuário.
      */
-    static async getForUser({ userId, subjectId, q, limit = 500 }: GetPrecedentsOptions) {
+    static async getForUser({ userId, subjectId, subjectIds, q, limit = 500 }: GetPrecedentsOptions) {
         let where: any = {
             status: 'PUBLISHED'
         };
 
         if (subjectId && subjectId !== 'ALL') {
             where.subjects = { some: { id: subjectId } };
+        } else if (subjectIds && subjectIds.length > 0) {
+            where.subjects = { some: { id: { in: subjectIds } } };
         }
 
         if (q) {

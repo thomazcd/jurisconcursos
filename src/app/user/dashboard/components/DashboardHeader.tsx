@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
-
 import { Subject } from '../types';
 
 interface DashboardHeaderProps {
@@ -20,6 +19,8 @@ interface DashboardHeaderProps {
     subjects: Subject[];
     selectedSubject: string;
     onSelectSubject: (val: string) => void;
+    enabledSubjectIds: string[];
+    setEnabledSubjectIds: (val: string[]) => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
@@ -27,10 +28,27 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
         isFocusMode, setIsFocusMode, studyMode, setStudyMode,
         compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp,
         userName, hasSelection, currentSubjectName,
-        subjects, selectedSubject, onSelectSubject
+        subjects, selectedSubject, onSelectSubject,
+        enabledSubjectIds, setEnabledSubjectIds
     } = props;
 
-    const [isOpen, setIsOpen] = React.useState(false);
+    const [isScopeModalOpen, setIsScopeModalOpen] = useState(false);
+
+    const toggleSubjectInScope = (id: string) => {
+        if (enabledSubjectIds.includes(id)) {
+            setEnabledSubjectIds(enabledSubjectIds.filter(sid => sid !== id));
+        } else {
+            setEnabledSubjectIds([...enabledSubjectIds, id]);
+        }
+    };
+
+    const toggleAll = () => {
+        if (enabledSubjectIds.length === subjects.length) {
+            setEnabledSubjectIds([]);
+        } else {
+            setEnabledSubjectIds(subjects.map(s => s.id));
+        }
+    };
 
     return (
         <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
@@ -49,7 +67,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                 <div style={{ position: 'relative' }}>
                     <div
-                        onClick={() => setIsOpen(!isOpen)}
+                        onClick={() => setIsScopeModalOpen(true)}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -68,63 +86,103 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
                         onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.18)'; }}
                         onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = 'rgba(20, 184, 166, 0.12)'; }}
                     >
-                        <SvgIcons.BookOpen size={16} /> {currentSubjectName}
-                        <SvgIcons.ChevronDown size={14} style={{ opacity: 0.6 }} />
+                        <SvgIcons.Settings size={16} /> Habilitar Matérias ({enabledSubjectIds.length}/{subjects.length})
                     </div>
 
-                    {isOpen && (
+                    {isScopeModalOpen && (
                         <div style={{
-                            position: 'absolute',
-                            top: '100%',
-                            left: 0,
-                            marginTop: '8px',
-                            background: 'var(--surface)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 14,
-                            zIndex: 1000,
-                            maxHeight: '400px',
-                            overflowY: 'auto',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                            minWidth: '240px',
-                            animation: 'fadeIn 0.2s'
-                        }}>
+                            position: 'fixed',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            zIndex: 2000,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.4)',
+                            backdropFilter: 'blur(4px)',
+                            padding: '20px'
+                        }}
+                            onClick={() => setIsScopeModalOpen(false)}
+                        >
                             <div
-                                onClick={() => { onSelectSubject('ALL'); setIsOpen(false); }}
                                 style={{
-                                    padding: '10px 16px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.85rem',
-                                    background: selectedSubject === 'ALL' ? 'var(--surface2)' : 'transparent',
-                                    fontWeight: selectedSubject === 'ALL' ? 800 : 500,
-                                    color: selectedSubject === 'ALL' ? 'var(--accent)' : 'var(--text)',
+                                    background: 'var(--surface)',
+                                    width: '100%',
+                                    maxWidth: '500px',
+                                    borderRadius: '24px',
+                                    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+                                    overflow: 'hidden',
                                     display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
+                                    flexDirection: 'column',
+                                    maxHeight: '85vh'
                                 }}
+                                onClick={e => e.stopPropagation()}
                             >
-                                Todas do Banco
-                            </div>
-                            {subjects.map(s => (
-                                <div
-                                    key={s.id}
-                                    onClick={() => { onSelectSubject(s.id); setIsOpen(false); }}
-                                    style={{
-                                        padding: '10px 16px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.85rem',
-                                        background: selectedSubject === s.id ? 'var(--surface2)' : 'transparent',
-                                        fontWeight: selectedSubject === s.id ? 800 : 500,
-                                        borderTop: '1px solid var(--border)',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        color: selectedSubject === s.id ? 'var(--accent)' : 'var(--text)',
-                                    }}
-                                >
-                                    <span>{s.name}</span>
-                                    <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{s.readCount}/{s.total}</span>
+                                <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900 }}>Escopo de Estudo</h3>
+                                        <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-3)' }}>Selecione as matérias que deseja habilitar no filtro.</p>
+                                    </div>
+                                    <button onClick={() => setIsScopeModalOpen(false)} style={{ background: 'var(--surface2)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <SvgIcons.X size={16} />
+                                    </button>
                                 </div>
-                            ))}
+                                <div style={{ padding: '16px 32px', borderBottom: '1px solid var(--border)', background: 'var(--surface2)', display: 'flex', justifyContent: 'space-between' }}>
+                                    <button onClick={toggleAll} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem' }}>
+                                        {enabledSubjectIds.length === subjects.length ? 'Desmarcar Todas' : 'Marcar Todas'}
+                                    </button>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.6 }}>{enabledSubjectIds.length} selecionadas</span>
+                                </div>
+                                <div style={{ overflowY: 'auto', padding: '16px 32px', flex: 1 }}>
+                                    {subjects.map(s => (
+                                        <div
+                                            key={s.id}
+                                            onClick={() => toggleSubjectInScope(s.id)}
+                                            style={{
+                                                padding: '12px 16px',
+                                                margin: '4px 0',
+                                                borderRadius: '12px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                background: enabledSubjectIds.includes(s.id) ? 'rgba(20, 184, 166, 0.05)' : 'transparent',
+                                                transition: 'all 0.15s'
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: 20,
+                                                height: 20,
+                                                borderRadius: 6,
+                                                border: `2px solid ${enabledSubjectIds.includes(s.id) ? 'var(--accent)' : 'var(--border)'}`,
+                                                background: enabledSubjectIds.includes(s.id) ? 'var(--accent)' : 'transparent',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: '#fff'
+                                            }}>
+                                                {enabledSubjectIds.includes(s.id) && <SvgIcons.Check size={14} />}
+                                            </div>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: enabledSubjectIds.includes(s.id) ? 700 : 500, flex: 1 }}>{s.name}</span>
+                                            <span style={{ fontSize: '0.75rem', opacity: 0.5, fontWeight: 700 }}>{s.readCount}/{s.total}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div style={{ padding: '24px 32px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                        onClick={() => setIsScopeModalOpen(false)}
+                                        style={{
+                                            padding: '12px 32px',
+                                            borderRadius: '12px',
+                                            background: 'var(--accent)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            fontWeight: 900,
+                                            cursor: 'pointer',
+                                            boxShadow: '0 4px 12px rgba(20, 184, 166, 0.2)'
+                                        }}
+                                    >Continuar Estudos</button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
