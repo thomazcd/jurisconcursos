@@ -7,6 +7,7 @@ export interface GetPrecedentsOptions {
     userId: string;
     subjectId?: string | null;
     q?: string | null;
+    selectedSubjectIds?: string[];
     limit?: number;
 }
 
@@ -15,8 +16,10 @@ export class PrecedentService {
      * Busca os precedentes publicados, filtrados pela Trilha do usuário,
      * e os mescla com os dados de "Lido/Favoritos/Estatísticas" próprios daquele usuário.
      */
-    static async getForUser({ track, userId, subjectId, q, limit = 500 }: GetPrecedentsOptions) {
-        const appFilter = getApplicabilityFilter(track);
+    static async getForUser({ track, userId, subjectId, q, selectedSubjectIds = [], limit = 500 }: GetPrecedentsOptions) {
+        // Se houver seleção manual de matérias, ignoramos o filtro de carreira para dar liberdade total.
+        // Exceto se a trilha for 'TODAS', o appFilter já é vazio.
+        const appFilter = selectedSubjectIds.length > 0 ? {} : getApplicabilityFilter(track);
 
         let where: any = {
             status: 'PUBLISHED',
@@ -25,6 +28,9 @@ export class PrecedentService {
 
         if (subjectId && subjectId !== 'ALL') {
             where.subjects = { some: { id: subjectId } };
+        } else if (selectedSubjectIds.length > 0) {
+            // Se estiver em "Todas" mas tiver matérias selecionadas, filtra pelas matérias dele.
+            where.subjects = { some: { id: { in: selectedSubjectIds } } };
         }
 
         if (q) {

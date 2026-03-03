@@ -332,6 +332,8 @@ export default function DashboardClient({ userName, track }: Props) {
                 isDark={isDark}
                 setShowHelp={setShowHelp}
                 track={track}
+                userName={userName}
+                hasSelection={subData?.hasSelection}
             />
 
             <DashboardFilters

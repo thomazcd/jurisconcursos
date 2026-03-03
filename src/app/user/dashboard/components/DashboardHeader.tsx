@@ -13,12 +13,16 @@ interface DashboardHeaderProps {
     isDark: boolean;
     setShowHelp: (val: boolean) => void;
     track: string;
+    userName: string;
+    hasSelection?: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-    isFocusMode, setIsFocusMode, studyMode, setStudyMode,
-    compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp, track
-}) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
+    const {
+        isFocusMode, setIsFocusMode, studyMode, setStudyMode,
+        compactMode, setCompactMode, setFontSize, toggleTheme, isDark, setShowHelp, track,
+        userName, hasSelection
+    } = props;
     return (
         <div className={`page-header no-print ${isFocusMode ? 'hidden-focus' : ''}`} style={{
             marginBottom: '1.25rem',
@@ -50,10 +54,12 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     {track === 'JUIZ_FEDERAL' && <SvgIcons.Landmark size={16} />}
                     {track === 'JUIZ_ESTADUAL' && <SvgIcons.Scale size={16} />}
                     {track === 'TODAS' && <SvgIcons.BookOpen size={16} />}
-                    {track === 'JUIZ_ESTADUAL' ? 'Juiz Estadual' :
-                        track === 'JUIZ_FEDERAL' ? 'Juiz Federal' :
-                            track === 'PROCURADOR' ? 'Procurador' :
-                                'Todas as Matérias'}
+                    {hasSelection ? 'Seleção Personalizada' : (
+                        track === 'JUIZ_ESTADUAL' ? 'Juiz Estadual' :
+                            track === 'JUIZ_FEDERAL' ? 'Juiz Federal' :
+                                track === 'PROCURADOR' ? 'Procurador' :
+                                    'Todas as Matérias'
+                    )}
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

@@ -12,9 +12,20 @@ export async function GET(req: NextRequest) {
     if (error) return error;
 
     const userId = (session!.user as any).id as string;
-    const profile = await prisma.userProfile.findUnique({ where: { userId } });
+    const profile = await prisma.userProfile.findUnique({
+        where: { userId },
+        include: { selectedSubjects: { select: { id: true } } }
+    });
+
     const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
-    const subjectFilter = getSubjectFilter(track);
+    const selectedIds = profile?.selectedSubjects?.map(s => s.id) || [];
+
+    // Se o usuário selecionou matérias específicas, filtramos apenas por IDs.
+    // Caso contrário, usamos a lógica de carreira original.
+    const subjectFilter = selectedIds.length > 0
+        ? { id: { in: selectedIds } }
+        : getSubjectFilter(track);
+
     const appFilter = getApplicabilityFilter(track);
 
     const subjects = await prisma.subject.findMany({
@@ -39,5 +50,5 @@ export async function GET(req: NextRequest) {
         return { ...rest, total, readCount, unreadCount };
     });
 
-    return NextResponse.json({ subjects: result, track });
+    return NextResponse.json({ subjects: result, track, hasSelection: selectedIds.length > 0 });
 }

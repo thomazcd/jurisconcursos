@@ -13,8 +13,12 @@ export async function GET(req: NextRequest) {
         if (error) return error;
 
         const userId = (session!.user as any).id;
-        const profile = await prisma.userProfile.findUnique({ where: { userId } });
+        const profile = await prisma.userProfile.findUnique({
+            where: { userId },
+            include: { selectedSubjects: { select: { id: true } } }
+        });
         const track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as any;
+        const selectedSubjectIds = profile?.selectedSubjects.map(s => s.id) || [];
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
@@ -26,6 +30,7 @@ export async function GET(req: NextRequest) {
             userId,
             subjectId,
             q,
+            selectedSubjectIds,
             limit: 500
         });
 

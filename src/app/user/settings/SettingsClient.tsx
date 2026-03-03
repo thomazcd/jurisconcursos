@@ -14,35 +14,52 @@ const TRACKS = [
 export default function UserSettingsPage() {
     const { data: session } = useSession();
     const router = useRouter();
-    const [track, setTrack] = useState('JUIZ_ESTADUAL');
+    const [allSubjects, setAllSubjects] = useState<any[]>([]);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        fetch('/api/user/profile').then((r) => r.json()).then((d) => {
-            if (d.profile?.activeTrack) setTrack(d.profile.activeTrack);
+        // Fetch All Subjects
+        fetch('/api/user/subjects/all').then(r => r.json()).then(d => setAllSubjects(d.subjects || []));
+
+        // Fetch Profile
+        fetch('/api/user/profile').then(r => r.json()).then(d => {
+            if (d.profile?.selectedSubjects) {
+                setSelectedIds(d.profile.selectedSubjects.map((s: any) => s.id));
+            }
         });
     }, []);
 
-    async function handleSwitch(newTrack: string) {
-        if (newTrack === track) return;
-        setSaving(true);
-        setSuccess('');
+    async function handleToggleSubject(subjectId: string) {
+        let newIds = [...selectedIds];
+        if (newIds.includes(subjectId)) {
+            newIds = newIds.filter(id => id !== subjectId);
+        } else {
+            newIds.push(subjectId);
+        }
+        setSelectedIds(newIds);
+
         await fetch('/api/user/profile', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ activeTrack: newTrack }),
+            body: JSON.stringify({ selectedSubjectIds: newIds }),
         });
-        setTrack(newTrack);
-        setSaving(false);
-        const label = TRACKS.find((t) => t.value === newTrack)?.label ?? newTrack;
-        setSuccess(`Perfil alterado para ${label}! Redirecionando...`);
 
-        // Pequeno delay para leitura da mensagem e então redirecionamento forçado
-        setTimeout(() => {
-            router.push('/user/dashboard');
-            router.refresh();
-        }, 1000);
+        router.refresh(); // Refresh background data
+    }
+
+    async function handleSelectAll(all: boolean) {
+        const newIds = all ? allSubjects.map(s => s.id) : [];
+        setSelectedIds(newIds);
+        setSaving(true);
+        await fetch('/api/user/profile', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ selectedSubjectIds: newIds }),
+        });
+        setSaving(false);
+        router.refresh();
     }
 
     async function resetAllReads() {
@@ -81,55 +98,80 @@ export default function UserSettingsPage() {
         }
     }
 
-    const activeTrack = TRACKS.find((t) => t.value === track);
-
     return (
         <div>
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Configurações</h1>
-                    <p className="page-subtitle">Gerencie seu perfil de estudo</p>
+                    <p className="page-subtitle">Personalize seu ambiente de estudo</p>
                 </div>
             </div>
 
             {success && <div className="alert alert-success">{success}</div>}
 
-            <div className="card" style={{ maxWidth: '520px' }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem' }}>Conta</h2>
+            <div className="card" style={{ maxWidth: '700px' }}>
+                <h2 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem' }}>Perfil</h2>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', marginBottom: '1.25rem' }}>
                     {session?.user?.name} &mdash; {session?.user?.email}
                 </p>
 
                 <div className="divider" />
 
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, margin: '1.25rem 0 0.35rem' }}>Trilha de concurso ativa</h2>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1rem' }}>
-                    A trilha determina quais matérias e precedentes você verá no dashboard.
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1.25rem 0 0.5rem' }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 700 }}>Matérias do Dashboard</h2>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => handleSelectAll(true)} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Marcar Todas</button>
+                        <button onClick={() => handleSelectAll(false)} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>Limpar</button>
+                    </div>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: '1.5rem' }}>
+                    Selecione as matérias que você deseja que apareçam no seu dashboard. Se nenhuma estiver marcada, usaremos a trilha padrão.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0 }}>
-                    {TRACKS.map((t) => (
-                        <button
-                            key={t.value}
-                            onClick={() => handleSwitch(t.value)}
-                            disabled={saving}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: '0.75rem',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    padding: '4px',
+                }}>
+                    {allSubjects.map((s) => (
+                        <div
+                            key={s.id}
+                            onClick={() => handleToggleSubject(s.id)}
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                                padding: '0.75rem 1rem', borderRadius: '10px', cursor: 'pointer',
-                                border: '2px solid', textAlign: 'left',
-                                borderColor: track === t.value ? 'var(--accent)' : 'var(--border)',
-                                background: track === t.value ? 'var(--accent)' : 'var(--surface2)',
-                                color: track === t.value ? '#fff' : 'var(--text)',
-                                transition: 'all 0.15s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '10px 14px',
+                                borderRadius: '12px',
+                                background: selectedIds.includes(s.id) ? 'var(--accent)' : 'var(--surface2)',
+                                color: selectedIds.includes(s.id) ? '#fff' : 'var(--text)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                border: '1px solid',
+                                borderColor: selectedIds.includes(s.id) ? 'var(--accent)' : 'var(--border)',
+                                fontSize: '0.85rem',
+                                fontWeight: 600
                             }}
                         >
-                            <span style={{ fontSize: '1.3rem', display: 'flex' }}>{t.icon}</span>
-                            <div>
-                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.label}</div>
-                                <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>{t.desc}</div>
+                            <div style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: 4,
+                                border: '2px solid',
+                                borderColor: selectedIds.includes(s.id) ? '#fff' : 'var(--text-3)',
+                                background: selectedIds.includes(s.id) ? '#fff' : 'transparent',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--accent)'
+                            }}>
+                                {selectedIds.includes(s.id) && <SvgIcons.Check size={14} />}
                             </div>
-                            {track === t.value && <span style={{ marginLeft: 'auto', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}><SvgIcons.CheckCircle size={14} /> Ativo</span>}
-                        </button>
+                            {s.name}
+                        </div>
                     ))}
                 </div>
 
