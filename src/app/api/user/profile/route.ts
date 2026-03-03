@@ -18,8 +18,7 @@ export async function GET(req: NextRequest) {
 
     const userId = (session!.user as any).id as string;
     const profile = await prisma.userProfile.findUnique({
-        where: { userId },
-        include: { selectedSubjects: { select: { id: true } } }
+        where: { userId }
     });
     return NextResponse.json({ profile });
 }
@@ -36,23 +35,15 @@ export async function PATCH(req: NextRequest) {
 
     const updateData: any = {};
     if (parsed.data.activeTrack) updateData.activeTrack = parsed.data.activeTrack;
-    if (parsed.data.selectedSubjectIds !== undefined) {
-        updateData.selectedSubjects = {
-            set: parsed.data.selectedSubjectIds.map(id => ({ id }))
-        };
-    }
+
 
     const profile = await prisma.userProfile.upsert({
         where: { userId },
         update: updateData,
         create: {
             userId,
-            activeTrack: (parsed.data.activeTrack as any) || 'JUIZ_ESTADUAL',
-            selectedSubjects: parsed.data.selectedSubjectIds ? {
-                connect: parsed.data.selectedSubjectIds.map(id => ({ id }))
-            } : undefined
-        },
-        include: { selectedSubjects: { select: { id: true } } }
+            activeTrack: (parsed.data.activeTrack as any) || 'JUIZ_ESTADUAL'
+        }
     });
 
     revalidatePath('/user/dashboard');
