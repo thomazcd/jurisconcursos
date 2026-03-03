@@ -6,10 +6,13 @@ import { Subject, Precedent } from '../types';
 interface PrecedentListProps {
     isFocusMode: boolean;
     loading: boolean;
+    error: any;
     groupedPrecedents: [string, Precedent[]][] | null;
     filtered: Precedent[];
     subjects: Subject[];
     selectedSubject: string;
+    onSelectSubject: (val: string) => void;
+    onResetFilters: () => void;
     readMap: Record<string, { count: number, events: string[], correct: number, wrong: number, last: string | null, isFavorite: boolean, notes: string | null }>;
     studyMode: 'READ' | 'FLASHCARD';
     revealed: Record<string, boolean>;
@@ -30,7 +33,8 @@ interface PrecedentListProps {
 }
 
 export const PrecedentList: React.FC<PrecedentListProps> = ({
-    isFocusMode, loading, groupedPrecedents, filtered, subjects, selectedSubject,
+    isFocusMode, loading, error, groupedPrecedents, filtered, subjects, selectedSubject,
+    onSelectSubject, onResetFilters,
     readMap, studyMode, revealed, flashcardResults, compactMode, showHints, copyingId,
     markRead, decrementRead, resetRead, handleFlashcard, toggleFavorite,
     setNotesModal, setHistoryModal, setSelectedPrecedent, copyToClipboard, setShowHints
@@ -74,24 +78,29 @@ export const PrecedentList: React.FC<PrecedentListProps> = ({
                     <div className="page-header" style={{ marginBottom: '2rem' }}>
                         <div className="skeleton-box" style={{ width: '300px', height: '2.5rem', borderRadius: '12px' }} />
                     </div>
-                    <div className="stats-row" style={{ marginBottom: '2.5rem' }}>
-                        {[1, 2, 3, 4].map(i => (
-                            <div key={i} className="skeleton-box" style={{ height: '100px', borderRadius: '20px' }} />
-                        ))}
-                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {[1, 2, 3, 4, 5].map(i => (
                             <div key={i} className="skeleton-box" style={{ height: '180px', borderRadius: '24px', width: '100%' }} />
                         ))}
                     </div>
                 </div>
+            ) : error ? (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem', background: '#fff5f5', borderRadius: 24, border: '2px dashed #feb2b2', marginTop: '1rem' }}>
+                    <div style={{ background: '#fecaca', width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#991b1b' }}>
+                        <SvgIcons.AlertCircle size={32} />
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 950, color: '#991b1b', marginBottom: '0.5rem' }}>Erro ao carregar dados</h3>
+                    <p style={{ color: '#c53030', fontSize: '0.9rem', maxWidth: '350px', margin: '0 auto 1.5rem' }}>{error.message || 'Houve um problema ao buscar os julgados no servidor.'}</p>
+                    <button onClick={() => window.location.reload()} style={{ padding: '0.8rem 1.5rem', borderRadius: 14, background: '#e53e3e', color: '#fff', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Recarregar Página</button>
+                </div>
             ) : filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface)', borderRadius: 24, border: '2px dashed var(--border)', marginTop: '1rem' }}>
                     <div style={{ background: 'var(--surface2)', width: 64, height: 64, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--text-4)' }}>
                         <SvgIcons.Search size={32} />
                     </div>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem' }}>Nenhum julgado encontrado</h3>
-                    <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>Não encontramos julgados com os filtros atuais. Tente mudar a matéria ou limpar a busca.</p>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 950, color: 'var(--text)', marginBottom: '0.5rem' }}>Nenhum julgado encontrado</h3>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto 1.5rem' }}>Não encontramos julgados com os filtros atuais. Tente mudar a matéria ou verifique se há algo nos filtros.</p>
+                    <button onClick={onResetFilters} style={{ padding: '0.8rem 1.5rem', borderRadius: 14, background: 'var(--accent)', color: '#fff', border: 'none', fontWeight: 950, cursor: 'pointer' }}>Limpar Todos os Filtros</button>
                 </div>
             ) : (groupedPrecedents ? groupedPrecedents.map(([subName, list]) => (
                 <div key={subName} style={{ marginBottom: isFocusMode ? '1rem' : '0.5rem' }}>

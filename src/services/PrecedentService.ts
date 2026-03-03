@@ -35,6 +35,8 @@ export class PrecedentService {
         }
 
         // 1. Busca os dados de negócio (Julgados) com Join no Pai (Informativo)
+        console.log('[PrecedentService] Fetching precedents for user:', userId, 'where:', JSON.stringify(where));
+
         const precedentsDb = await prisma.precedent.findMany({
             where,
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
@@ -46,6 +48,8 @@ export class PrecedentService {
             },
             take: limit, // removed distinct as it may force a heavy DISTINCT ON
         });
+
+        console.log('[PrecedentService] Found precedents:', precedentsDb.length);
 
         // Se precisarmos fazer "tree-shake" dos dados sensíveis, faríamos aqui.
         // No momento a estrutura já atende.

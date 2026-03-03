@@ -70,11 +70,12 @@ export default function DashboardClient({ userName }: Props) {
     const searchParam = search ? (precUrl.includes('?') ? `&q=${encodeURIComponent(search)}` : `?q=${encodeURIComponent(search)}`) : '';
     const finalUrl = `${precUrl}${searchParam}`;
 
-    const { data: precData, isValidating: loading, mutate: mutatePrecedents } = useSWR([finalUrl], ([url]) => fetcher(url), {
-        keepPreviousData: true,
-        revalidateOnFocus: false,
+    const { data: precData, isValidating: isValidatingPrecedents, error: precError, mutate: mutatePrecedents } = useSWR(finalUrl, fetcher, {
+        keepPreviousData: false,
+        revalidateOnFocus: true,
     });
 
+    const loading = !precData && !precError;
     const precedents: Precedent[] = precData?.precedents ?? [];
 
     // Sync SWR Data with Local Optimistic Map whenever new data arrives from server
@@ -366,10 +367,22 @@ export default function DashboardClient({ userName }: Props) {
             <PrecedentList
                 isFocusMode={isFocusMode}
                 loading={loading}
+                error={precError || (precData?.error ? { message: precData.details || precData.error } : null)}
                 groupedPrecedents={groupedPrecedents}
                 filtered={filtered}
                 subjects={subjects}
                 selectedSubject={selectedSubject}
+                onSelectSubject={setSelectedSubject}
+                onResetFilters={() => {
+                    setSelectedSubject('ALL');
+                    setSearch('');
+                    setCourtFilter('ALL');
+                    setYearFilter('ALL');
+                    setInfFilter('ALL');
+                    setFilterHideRead(false);
+                    setFilterOnlyFavorites(false);
+                    setFilterOnlyErrors(false);
+                }}
                 readMap={readMap}
                 studyMode={studyMode}
                 revealed={revealed}
