@@ -20,20 +20,9 @@ export function Sidebar({ role, name, email }: SidebarProps) {
     const isAdmin = role === 'ADMIN' || role === 'GESTOR';
     const [showComingSoon, setShowComingSoon] = useState(false);
     const [isDark, setIsDark] = useState(false);
-    const [progress, setProgress] = useState<{ total: number, read: number } | null>(null);
 
     useEffect(() => {
         setIsDark(document.documentElement.classList.contains('dark-theme'));
-
-        // Fetch progress
-        fetch('/api/user/subjects')
-            .then(r => r.json())
-            .then(d => {
-                const total = d.subjects?.reduce((acc: number, s: any) => acc + (s.total || 0), 0) || 0;
-                const read = d.subjects?.reduce((acc: number, s: any) => acc + (s.readCount || 0), 0) || 0;
-                setProgress({ total, read });
-            })
-            .catch(() => { });
     }, []);
 
     const toggleTheme = () => {
@@ -170,14 +159,6 @@ export function Sidebar({ role, name, email }: SidebarProps) {
                                 href="/user/dashboard"
                                 icon={<SvgIcons.Book size={18} />}
                                 label="Informativos"
-                                badge={progress && (
-                                    <div className="progress-mini-container" style={{ flexShrink: 0 }}>
-                                        <div className="progress-mini">
-                                            <div className="progress-mini-bar" style={{ width: `${Math.min(100, (progress.read / progress.total) * 100)}%` }} />
-                                        </div>
-                                        <span className="percentage-badge" style={{ flexShrink: 0, minWidth: '32px', textAlign: 'right' }}>{Math.round((progress.read / progress.total) * 100)}%</span>
-                                    </div>
-                                )}
                             />
                             <NavLink
                                 href="#"
