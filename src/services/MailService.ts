@@ -1,12 +1,26 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicialização segura para não quebrar o build do Vercel caso a chave falte temporariamente
+const getResendInstance = () => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('⚠️ RESEND_API_KEY não configurada. O envio de e-mails não funcionará.');
+    return null;
+  }
+  return new Resend(apiKey);
+};
 
 export class MailService {
   /**
    * Envia o link de recuperação de senha por e-mail.
    */
   static async sendResetPasswordEmail(email: string, token: string) {
+    const resend = getResendInstance();
+
+    if (!resend) {
+      throw new Error('Serviço de e-mail não configurado (chave ausente).');
+    }
+
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
     try {
