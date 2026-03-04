@@ -81,23 +81,24 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'flashcard') {
-        const existing = await prisma.precedentRead.findUnique({
-            where: { userId_precedentId: { userId, precedentId } },
-        });
-
-        const updateData: any = {
-            correctCount: (existing?.correctCount ?? 0) + (isCorrect ? 1 : 0),
-            wrongCount: (existing?.wrongCount ?? 0) + (isCorrect ? 0 : 1),
-            lastResult: isCorrect ? 'HIT' : 'MISS',
-            // Also increment readCount automatically when doing flashcards
-            readCount: (existing?.readCount ?? 0) + 1,
-            readEvents: [...(existing?.readEvents ?? []), now],
-        };
-
         const result = await prisma.precedentRead.upsert({
             where: { userId_precedentId: { userId, precedentId } },
-            create: { userId, precedentId, ...updateData },
-            update: updateData,
+            create: {
+                userId,
+                precedentId,
+                correctCount: isCorrect ? 1 : 0,
+                wrongCount: isCorrect ? 0 : 1,
+                lastResult: isCorrect ? 'HIT' : 'MISS',
+                readCount: 1,
+                readEvents: [now]
+            },
+            update: {
+                correctCount: { increment: isCorrect ? 1 : 0 },
+                wrongCount: { increment: isCorrect ? 0 : 1 },
+                lastResult: isCorrect ? 'HIT' : 'MISS',
+                readCount: { increment: 1 },
+                readEvents: { push: now }
+            },
         });
 
         return NextResponse.json({
@@ -109,18 +110,14 @@ export async function POST(req: NextRequest) {
     }
 
     // default: increment read
-    const existing = await prisma.precedentRead.findUnique({
-        where: { userId_precedentId: { userId, precedentId } },
-    });
-
-    const newCount = (existing?.readCount ?? 0) + 1;
-    const newEvents = [...(existing?.readEvents ?? []), now];
-
     const result = await prisma.precedentRead.upsert({
         where: { userId_precedentId: { userId, precedentId } },
-        create: { userId, precedentId, readCount: newCount, readEvents: newEvents },
-        update: { readCount: newCount, readEvents: newEvents },
+        create: { userId, precedentId, readCount: 1, readEvents: [now] },
+        update: {
+            readCount: { increment: 1 },
+            readEvents: { push: now }
+        },
     });
 
-    return NextResponse.json({ readCount: newCount, readEvents: newEvents });
+    return NextResponse.json({ readCount: result.readCount, readEvents: result.readEvents });
 }

@@ -9,6 +9,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [form, setForm] = useState({ name: '', email: '', password: '', track: 'TODAS', phone: '' });
+    const [loadTime] = useState(() => Date.now());
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -17,7 +18,7 @@ export default function RegisterPage() {
         const res = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form),
+            body: JSON.stringify({ ...form, submitTime: Date.now() - loadTime }),
         });
         const data = await res.json();
         setLoading(false);

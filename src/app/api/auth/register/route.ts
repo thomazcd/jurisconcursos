@@ -11,6 +11,7 @@ const schema = z.object({
     password: z.string().min(6),
     track: z.enum(VALID_TRACKS).optional().default('JUIZ_ESTADUAL'),
     phone: z.string().optional(),
+    submitTime: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -22,10 +23,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Dados inválidos', details: parsed.error.message }, { status: 400 });
         }
 
-        const { name, email, password, track, phone } = parsed.data;
+        const { name, email, password, track, phone, submitTime } = parsed.data;
 
         // Anti-bot honeypot check
-        if (phone) {
+        if (phone || (submitTime !== undefined && submitTime < 2000)) {
             console.warn(`Bot signup attempt blocked: ${email}`);
             return NextResponse.json({ error: 'Bot detected' }, { status: 400 });
         }
@@ -37,12 +38,14 @@ export async function POST(req: NextRequest) {
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
-            data: { name, email, passwordHash, role: 'USER' },
-        });
-
-        await prisma.userProfile.create({
-            data: { userId: user.id, activeTrack: track },
+        const [user, profile] = await prisma.$transaction(async (tx) => {
+            const newUser = await tx.user.create({
+                data: { name, email, passwordHash, role: 'USER' },
+            });
+            const newProfile = await tx.userProfile.create({
+                data: { userId: newUser.id, activeTrack: track },
+            });
+            return [newUser, newProfile];
         });
 
         return NextResponse.json({ success: true, user: { id: user.id, name: user.name, email: user.email } });

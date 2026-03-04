@@ -8,7 +8,7 @@ export async function requireAuth(allowedRoles?: Role[]) {
     if (!session?.user) {
         return { error: NextResponse.json({ error: 'Não autorizado' }, { status: 401 }), session: null };
     }
-    const userRole = (session.user as any).role as Role;
+    const userRole = session.user.role;
     if (allowedRoles && !allowedRoles.includes(userRole)) {
         return { error: NextResponse.json({ error: 'Acesso negado' }, { status: 403 }), session: null };
     }

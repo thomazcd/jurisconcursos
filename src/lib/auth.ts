@@ -2,11 +2,8 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import { Role } from '@prisma/client';
+import { Role, Track } from '@prisma/client';
 
-// Registro temporário de tentativas falhas (In-Memory)
-// Nota: Em produção (Serverless), esse mapa reseta periodicamente.
-const loginAttempts = new Map<string, { count: number, lockUntil: number }>();
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutos em ms
 
@@ -27,14 +24,7 @@ export const authOptions: NextAuthOptions = {
                 if (!credentials?.email || !credentials?.password) return null;
 
                 const email = credentials.email.toLowerCase().trim();
-                const now = Date.now();
-
-                // Verificação de bloqueio por tentativas falhas
-                const record = loginAttempts.get(email);
-                if (record && record.lockUntil > now) {
-                    const remaining = Math.ceil((record.lockUntil - now) / 60000);
-                    throw new Error(`Muitas tentativas falhas. Tente novamente em ${remaining} minutos.`);
-                }
+                const now = new Date();
 
                 const user = await prisma.user.findUnique({
                     where: { email },
@@ -43,30 +33,45 @@ export const authOptions: NextAuthOptions = {
 
                 if (!user) {
                     // Proteção básica: delay artificial para dificultar brute force
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 1000));
                     return null;
+                }
+
+                if (user.lockedUntil && user.lockedUntil > now) {
+                    const remaining = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 60000);
+                    throw new Error(`Muitas tentativas falhas. Tente novamente em ${remaining} minutos.`);
                 }
 
                 const passwordMatch = await bcrypt.compare(credentials.password, user.passwordHash);
 
                 if (!passwordMatch) {
-                    // Registra tentativa falha
-                    const current = loginAttempts.get(email) || { count: 0, lockUntil: 0 };
-                    const newCount = current.count + 1;
+                    // Registra tentativa falha no banco
+                    const newCount = user.failedLoginAttempts + 1;
 
                     if (newCount >= MAX_ATTEMPTS) {
-                        loginAttempts.set(email, { count: 0, lockUntil: now + LOCK_TIME });
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { failedLoginAttempts: 0, lockedUntil: new Date(now.getTime() + LOCK_TIME) }
+                        });
                     } else {
-                        loginAttempts.set(email, { count: newCount, lockUntil: 0 });
+                        await prisma.user.update({
+                            where: { id: user.id },
+                            data: { failedLoginAttempts: newCount }
+                        });
                     }
 
                     // Delay artificial
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 1000));
                     return null;
                 }
 
-                // Login bem-sucedido: limpa historico de erros
-                loginAttempts.delete(email);
+                // Login bem-sucedido: limpa historico de erros no banco
+                if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: { failedLoginAttempts: 0, lockedUntil: null }
+                    });
+                }
 
                 return {
                     id: user.id,
@@ -82,16 +87,16 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
-                token.role = (user as any).role;
-                token.activeTrack = (user as any).activeTrack;
+                token.role = user.role;
+                token.activeTrack = user.activeTrack;
             }
             return token;
         },
         async session({ session, token }) {
             if (token && session.user) {
-                (session.user as any).id = token.id as string;
-                (session.user as any).role = token.role as Role;
-                (session.user as any).activeTrack = token.activeTrack as string;
+                session.user.id = token.id as string;
+                session.user.role = token.role as Role;
+                session.user.activeTrack = token.activeTrack as Track;
             }
             return session;
         },
@@ -111,7 +116,7 @@ export async function requireAuth() {
 
 export async function requireAdmin() {
     const session = await requireAuth();
-    if (!session.user || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'GESTOR')) {
+    if (!session.user || (session.user.role !== 'ADMIN' && session.user.role !== 'GESTOR')) {
         redirect('/user/dashboard');
     }
     return session;
