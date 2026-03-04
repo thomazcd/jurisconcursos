@@ -1,0 +1,26 @@
+# Analyzing PDF Processing Limits
+
+## Current Limits
+
+1. **Vercel Timeout:** `export const maxDuration = 60;` applies to Hobby/Pro limits. Vercel Pro has up to 300s. We can set it to 300 just in case.
+2. **Body Size Limit:** Next.js defaults to 4MB for body parser. However, since the file is uploaded as `FormData`, Vercel limits the total request body to 4.5MB for serverless functions, unless streaming or specific configuration is used. `MAX_PDF_SIZE` is currently 10MB in the code, which might fail before hitting the code if Next.js/Vercel enforces 4.5MB on `req.formData()`.
+3. **Gemini Payload Limit:** Gemini 1.5/2.5 Flash can handle huge context windows (up to 1M+ tokens), so sending a 50+ page PDF directly to Gemini via `inlineData` is perfectly fine (50 pages is tiny for it, around 20k tokens).
+4. **Base64 Overhead:** Converting to base64 adds 33% overhead. A 4MB PDF becomes ~5.3MB in memory.
+
+## The Bottleneck: Vercel Limits
+
+A standard Next.js App Router POST request handles uploads in memory. Vercel has a hard limit of **4.5 MB** on the request body payload for non-Edge serverless functions.
+If a user tries to upload a 6MB PDF (about 30-50 pages of scanned/image-heavy text, or a massive text PDF), Next.js might throw a `413 Payload Too Large` error before it even reaches our handler!
+
+Wait, `req.formData()` can handle slightly larger if not bound by Next.js body parser limits, but Vercel's standard limit for incoming requests is 4.5 MB on the Hobby/Pro tier unless we use the `edge` runtime or use a presigned URL approach (upload to S3/Supabase first, then send URL to Gemini).
+
+Currently, the limit in the handler is `10 * 1024 * 1024` (10MB). 
+If it is a text-based PDF (like STJ/STF informativos, which are pure text vector), 50 pages is usually around 500KB to 1MB! Very small.
+So size is NOT the main issue for purely text PDFs.
+
+The real issue is **Timeout** and **Gemini Output Limit**.
+- `maxDuration = 60` is set. If we ask Gemini to extract 50 pages worth of precedents (might be 30 precedents), Gemini might take 40-70 seconds to generate the large JSON output. Vercel will kill the request at 60 seconds.
+- By increasing `maxDuration` to `300` (max for Vercel Pro), we give it breathing room.
+- Also, we can tell the user: "Yes, we can process 50 pages! O limite principal será o tempo (se ultrapassar 5 minutos de processamento, a Vercel pode derrubar), mas como usamos o Gemini Flash, ele costuma ler 50 páginas em 20-30 segundos."
+
+Let's check `maxDuration` in `src/app/api/admin/gemini-pdf/route.ts` and Next.js version limits.

@@ -310,7 +310,7 @@ export default function AdminImportClient() {
 
                 <div style={{ marginTop: '1.5rem', background: 'rgba(201, 138, 0, 0.05)', border: '1px dashed #c98a00', padding: '1.5rem', borderRadius: 12 }}>
                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                        <button type="button" onClick={() => setImportMode('pdf')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c98a00', background: importMode === 'pdf' ? '#c98a00' : 'transparent', color: importMode === 'pdf' ? '#fff' : '#c98a00', fontWeight: 800, cursor: 'pointer' }}>Via Arquivo PDF (Max 20pgs)</button>
+                        <button type="button" onClick={() => setImportMode('pdf')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c98a00', background: importMode === 'pdf' ? '#c98a00' : 'transparent', color: importMode === 'pdf' ? '#fff' : '#c98a00', fontWeight: 800, cursor: 'pointer' }}>Via Arquivo PDF (Max 50pgs)</button>
                         <button type="button" onClick={() => setImportMode('text')} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #c98a00', background: importMode === 'text' ? '#c98a00' : 'transparent', color: importMode === 'text' ? '#fff' : '#c98a00', fontWeight: 800, cursor: 'pointer' }}>Via Texto Colado</button>
                     </div>
 
