@@ -34,7 +34,7 @@ export default async function HomePage() {
             <header className="hero-section">
                 <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                     <div className="badge-version">
-                        v{APP_VERSION} • Inteligência Artificial Jurídica
+                        v{APP_VERSION}
                     </div>
                     <h1 className="hero-gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.2rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1.5rem' }}>
                         Memorização Ágil <br /> <span className="hero-accent-text">para Carreiras de Elite.</span>
