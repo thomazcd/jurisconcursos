@@ -136,12 +136,14 @@ export default function AdminImportClient() {
         // Parseador Local para Textos Estruturados (NotebookLLM)
         if (rawBulkText.includes('**Órgão Julgador:**') || rawBulkText.includes('**Número do Processo:**')) {
             const drafts: any[] = [];
-            const splitRegex = /\*\s*\*\*Órgão Julgador:\*\*|\*\s*\*\*Número do Processo:\*\*/g;
-            const parts = rawBulkText.split(splitRegex).filter(t => t.trim().length > 0);
 
-            // We do a naive approach. For each part, we search for properties
-            // NotebookLLM structure usually has line by line properties.
-            const blocks = rawBulkText.split(/(?=\*\s*\*\*Órgão Julgador:\*\*|\*\s*\*\*Número do Processo:\*\*)/g).filter(x => x.trim().length > 0);
+            // Define a raiz separadora baseada na primeira marcação de cada Tese
+            let boundaryRegex = /(?=\*?\s*\*\*Órgão Julgador:\*\*)/g;
+            if (!rawBulkText.includes('**Órgão Julgador:**')) {
+                boundaryRegex = /(?=\*?\s*\*\*Número do Processo:\*\*)/g;
+            }
+
+            const blocks = rawBulkText.split(boundaryRegex).filter(x => x.trim().length > 0);
 
             for (const block of blocks) {
                 const lines = block.split('\n');
@@ -159,29 +161,29 @@ export default function AdminImportClient() {
                 let currentSection = '';
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
-                    if (line.includes('**Órgão Julgador:**')) { currentSection = 'orgao'; orgaoObj = line.replace(/\*\s*\*\*Órgão Julgador:\*\*/, '').trim(); }
+                    if (line.includes('**Órgão Julgador:**')) { currentSection = 'orgao'; orgaoObj = line.replace(/\*?\s*\*\*Órgão Julgador:\*\*/, '').trim(); }
                     else if (line.includes('**Data de Julgamento:**')) {
                         currentSection = 'julgamento';
-                        const dRaw = line.replace(/\*\s*\*\*Data de Julgamento:\*\*/, '').trim().replace(/\.$/, '');
+                        const dRaw = line.replace(/\*?\s*\*\*Data de Julgamento:\*\*/, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) julgamento = dRaw.split('/').reverse().join('-');
                     }
                     else if (line.includes('**Data de Publicação:**')) {
                         currentSection = 'publicacao';
-                        const dRaw = line.replace(/\*\s*\*\*Data de Publicação:\*\*/, '').trim().replace(/\.$/, '');
+                        const dRaw = line.replace(/\*?\s*\*\*Data de Publicação:\*\*/, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) publicacao = dRaw.split('/').reverse().join('-');
                     }
-                    else if (line.includes('**Número do Processo:**')) { currentSection = 'processo'; processClass = line.replace(/\*\s*\*\*Número do Processo:\*\*/, '').trim(); }
-                    else if (line.includes('**Relator:**')) { currentSection = 'relator'; relator = line.replace(/\*\s*\*\*Relator:\*\*/, '').trim(); }
+                    else if (line.includes('**Número do Processo:**')) { currentSection = 'processo'; processClass = line.replace(/\*?\s*\*\*Número do Processo:\*\*/, '').trim(); }
+                    else if (line.includes('**Relator:**')) { currentSection = 'relator'; relator = line.replace(/\*?\s*\*\*Relator:\*\*/, '').trim(); }
                     else if (line.includes('**Relator para o acórdão:**')) {
                         currentSection = 'relatorAcordao';
-                        const r2 = line.replace(/\*\s*\*\*Relator para o acórdão:\*\*/, '').trim();
+                        const r2 = line.replace(/\*?\s*\*\*Relator para o acórdão:\*\*/, '').trim();
                         if (r2 && r2 !== 'N/A' && r2 !== 'N/A.') relator += ` (P/ Acórdão: ${r2})`;
                     }
-                    else if (line.includes('**Número do Tema:**')) { currentSection = 'temaNum'; temaNum = line.replace(/\*\s*\*\*Número do Tema:\*\*/, '').trim(); }
-                    else if (line.includes('**Ramos do Direito:**')) { currentSection = 'tags'; tagsStr = line.replace(/\*\s*\*\*Ramos do Direito:\*\*/, '').trim(); }
-                    else if (line.includes('**Tema-Assunto:**')) { currentSection = 'temaAssunto'; temaDesc = line.replace(/\*\s*\*\*Tema-Assunto:\*\*/, '').trim(); }
-                    else if (line.includes('**Destaque:**')) { currentSection = 'destaque'; destaque = line.replace(/\*\s*\*\*Destaque:\*\*/, '').trim(); }
-                    else if (line.includes('**Inteiro Teor:**')) { currentSection = 'inteiroTeor'; inteiroTeor = line.replace(/\*\s*\*\*Inteiro Teor:\*\*/, '').trim(); }
+                    else if (line.includes('**Número do Tema:**')) { currentSection = 'temaNum'; temaNum = line.replace(/\*?\s*\*\*Número do Tema:\*\*/, '').trim(); }
+                    else if (line.includes('**Ramos do Direito:**')) { currentSection = 'tags'; tagsStr = line.replace(/\*?\s*\*\*Ramos do Direito:\*\*/, '').trim(); }
+                    else if (line.includes('**Tema-Assunto:**')) { currentSection = 'temaAssunto'; temaDesc = line.replace(/\*?\s*\*\*Tema-Assunto:\*\*/, '').trim(); }
+                    else if (line.includes('**Destaque:**')) { currentSection = 'destaque'; destaque = line.replace(/\*?\s*\*\*Destaque:\*\*/, '').trim(); }
+                    else if (line.includes('**Inteiro Teor:**')) { currentSection = 'inteiroTeor'; inteiroTeor = line.replace(/\*?\s*\*\*Inteiro Teor:\*\*/, '').trim(); }
                     else {
                         if (currentSection === 'temaAssunto') temaDesc += '\n' + line;
                         else if (currentSection === 'destaque') destaque += '\n' + line;
