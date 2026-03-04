@@ -13,7 +13,26 @@ interface PrecedentDetailsModalProps {
 export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
     selectedPrecedent, setSelectedPrecedent, setIsFocusMode, copyToClipboard, copyingId
 }) => {
+    const [fullData, setFullData] = React.useState<Precedent | null>(selectedPrecedent);
+    const [loading, setLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        setFullData(selectedPrecedent);
+
+        if (selectedPrecedent && selectedPrecedent.fullTextOrLink === undefined) {
+            setLoading(true);
+            fetch(`/api/user/precedents/${selectedPrecedent.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setFullData(prev => ({ ...prev, ...data }));
+                })
+                .catch(err => console.error('Error fetching precedent details:', err))
+                .finally(() => setLoading(false));
+        }
+    }, [selectedPrecedent]);
+
     if (!selectedPrecedent) return null;
+    const p = fullData || selectedPrecedent;
 
     return (
         <div className="modal-overlay" onClick={() => { setSelectedPrecedent(null); setIsFocusMode(false); }}>
@@ -39,7 +58,7 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                             display: 'block',
                             wordWrap: 'break-word',
                             overflowWrap: 'break-word'
-                        }}>{selectedPrecedent.theme?.includes('|') ? selectedPrecedent.theme.split('|')[1].trim() : selectedPrecedent.title}</h3>
+                        }}>{p.theme?.includes('|') ? p.theme.split('|')[1].trim() : p.title}</h3>
 
                         <div style={{
                             display: 'grid',
@@ -57,29 +76,29 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Pin size={12} /> Tema:
                                 </strong>
-                                <span>{(selectedPrecedent.theme?.includes('|') && selectedPrecedent.theme.split('|')[0].trim()) || 'Não afetado'}</span>
+                                <span>{(p.theme?.includes('|') && p.theme.split('|')[0].trim()) || 'Não afetado'}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Landmark size={12} /> Tribunal:
                                 </strong>
-                                <span>{selectedPrecedent.court}</span>
+                                <span>{p.court}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.FileText size={12} /> Informativo:
                                 </strong>
-                                <span>{selectedPrecedent.informatoryNumber}{selectedPrecedent.informatoryYear ? `/${selectedPrecedent.informatoryYear}` : ''}</span>
+                                <span>{p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Scale size={12} /> Processo:
                                 </strong>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span>{[selectedPrecedent.processClass, selectedPrecedent.processNumber].filter(Boolean).join(' ') || '---'}</span>
-                                    {selectedPrecedent.processNumber && (
+                                    <span>{[p.processClass, p.processNumber].filter(Boolean).join(' ') || '---'}</span>
+                                    {p.processNumber && (
                                         <button
-                                            onClick={(e) => copyToClipboard(selectedPrecedent.processNumber || '', 'modal-' + selectedPrecedent.id, e)}
+                                            onClick={(e) => copyToClipboard(p.processNumber || '', 'modal-' + p.id, e)}
                                             style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -88,7 +107,7 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                                                 background: 'var(--surface2)',
                                                 padding: '2px 8px',
                                                 borderRadius: '6px',
-                                                color: copyingId === 'modal-' + selectedPrecedent.id ? 'var(--accent)' : 'var(--text-3)',
+                                                color: copyingId === 'modal-' + p.id ? 'var(--accent)' : 'var(--text-3)',
                                                 fontSize: '0.65rem',
                                                 fontWeight: 900,
                                                 cursor: 'pointer',
@@ -96,7 +115,7 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                                             }}
                                             title="Copiar número do processo"
                                         >
-                                            {copyingId === 'modal-' + selectedPrecedent.id ? (
+                                            {copyingId === 'modal-' + p.id ? (
                                                 <><SvgIcons.Check size={10} /> número do processo copiado</>
                                             ) : (
                                                 <><SvgIcons.Copy size={10} /> Copiar</>
@@ -109,25 +128,25 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.User size={12} /> Relator:
                                 </strong>
-                                <span>{selectedPrecedent.rapporteur || '---'}</span>
+                                <span>{p.rapporteur || '---'}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Gavel size={12} /> Órgão:
                                 </strong>
-                                <span>{selectedPrecedent.organ || '---'}</span>
+                                <span>{p.organ || '---'}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Calendar size={12} /> Publicação:
                                 </strong>
-                                <span>{selectedPrecedent.publicationDate ? new Date(selectedPrecedent.publicationDate).toLocaleDateString('pt-BR') : '--'}</span>
+                                <span>{p.publicationDate ? new Date(p.publicationDate).toLocaleDateString('pt-BR') : '--'}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <strong style={{ color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px', minWidth: '85px' }}>
                                     <SvgIcons.Scale size={12} /> Julgamento:
                                 </strong>
-                                <span>{selectedPrecedent.judgmentDate ? new Date(selectedPrecedent.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
+                                <span>{p.judgmentDate ? new Date(p.judgmentDate).toLocaleDateString('pt-BR') : '---'}</span>
                             </div>
                         </div>
 
@@ -148,10 +167,19 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                             marginBottom: '1.5rem',
                             lineHeight: '1.5'
                         }}>
-                            {selectedPrecedent.summary}
+                            {p.summary}
                         </div>
 
-                        {selectedPrecedent.fullTextOrLink && !selectedPrecedent.fullTextOrLink.startsWith('http') && (
+                        {loading && (
+                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-3)' }}>
+                                <div className="skeleton-box" style={{ height: '20px', width: '60%', marginBottom: '1rem', borderRadius: 4 }} />
+                                <div className="skeleton-box" style={{ height: '20px', width: '80%', marginBottom: '1rem', borderRadius: 4 }} />
+                                <div className="skeleton-box" style={{ height: '20px', width: '100%', marginBottom: '1rem', borderRadius: 4 }} />
+                                <p style={{ fontSize: '0.75rem', fontWeight: 600 }}>Carregando conteúdo completo...</p>
+                            </div>
+                        )}
+
+                        {!loading && p.fullTextOrLink && !p.fullTextOrLink.startsWith('http') && (
                             <>
                                 <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <SvgIcons.FileText size={12} /> INFORMAÇÕES DO INTEIRO TEOR:
@@ -164,7 +192,7 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                                     textAlign: 'justify',
                                     hyphens: 'auto'
                                 }}>
-                                    {selectedPrecedent.fullTextOrLink.split('\n').map((line, i) => (
+                                    {p.fullTextOrLink.split('\n').map((line, i) => (
                                         <p key={i} style={{ marginBottom: line.trim() ? '1.2em' : '0' }}>{line}</p>
                                     ))}
                                 </div>
@@ -174,10 +202,10 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
                 </div>
 
                 <div className="modal-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--surface)', padding: '1rem', borderRadius: '0 0 24px 24px', justifyContent: 'center' }}>
-                    {selectedPrecedent.fullTextOrLink && selectedPrecedent.fullTextOrLink.startsWith('http') && (
-                        <a href={selectedPrecedent.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ minWidth: '150px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={16} /> Ver Inteiro Teor Online</a>
+                    {!loading && p.fullTextOrLink && p.fullTextOrLink.startsWith('http') && (
+                        <a href={p.fullTextOrLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ minWidth: '150px', display: 'flex', alignItems: 'center', gap: '8px' }}><SvgIcons.ExternalLink size={16} /> Ver Inteiro Teor Online</a>
                     )}
-                    {(!selectedPrecedent.fullTextOrLink || !selectedPrecedent.fullTextOrLink.startsWith('http')) && (
+                    {(!loading) && (
                         <button onClick={() => setSelectedPrecedent(null)} className="btn btn-ghost" style={{ fontSize: '0.8rem', fontWeight: 800 }}>Fechar Detalhes</button>
                     )}
                 </div>

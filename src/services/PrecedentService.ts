@@ -42,13 +42,33 @@ export class PrecedentService {
         const precedentsDb = await prisma.precedent.findMany({
             where,
             orderBy: [{ judgmentDate: 'desc' }, { createdAt: 'desc' }],
-            include: {
+            select: {
+                id: true,
+                title: true,
+                summary: true,
+                court: true,
+                judgmentDate: true,
+                publicationDate: true,
+                isRG: true,
+                rgTheme: true,
+                informatoryNumber: true,
+                informatoryYear: true,
+                processClass: true,
+                processNumber: true,
+                organ: true,
+                rapporteur: true,
+                theme: true,
+                tags: true,
+                status: true,
+                flashcardAnswer: true,
+                flashcardQuestion: true,
+                // fullTextOrLink is excluded for performance and fetched on demand
                 subjects: {
                     select: { id: true, name: true }
                 },
                 informatory: { select: { court: true, number: true, year: true } }
             },
-            take: limit, // removed distinct as it may force a heavy DISTINCT ON
+            take: limit,
         });
 
         console.log('[PrecedentService] Found precedents:', precedentsDb.length);
