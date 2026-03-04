@@ -80,6 +80,6 @@ Retorne ESTRITAMENTE um array JSON puro (sem markdown, sem \`\`\`json) contendo 
         return NextResponse.json({ precedents: jsonData });
     } catch (error: any) {
         console.error('Erro no processamento do PDF pelo Gemini:', error);
-        return NextResponse.json({ error: error.message || 'Erro ao processar PDF com a IA.' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao processar PDF com a IA.' }, { status: 500 });
     }
 }

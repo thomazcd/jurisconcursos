@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
     const precedents = await prisma.precedent.findMany({
         where: {
             ...appFilter,
-            subjects: { some: { trackScope: { in: scopes as any[] } } },
             reads: { none: { userId } },
         },
         include: {

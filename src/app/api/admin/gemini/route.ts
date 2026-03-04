@@ -94,6 +94,6 @@ ${text}
         return NextResponse.json({ suggestion: jsonData });
     } catch (error: any) {
         console.error('Erro no processamento do Gemini:', error);
-        return NextResponse.json({ error: error.message || 'Erro ao processar texto com a IA.' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao processar texto com a IA.' }, { status: 500 });
     }
 }

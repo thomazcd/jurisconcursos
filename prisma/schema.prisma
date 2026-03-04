@@ -144,6 +144,10 @@ model Precedent {
   @@index([court])
   @@index([judgmentDate])
   @@index([forAll])
+  @@index([forProcurador])
+  @@index([forJuizEstadual])
+  @@index([forJuizFederal])
+  @@index([status])
   @@map("precedents")
 }
 

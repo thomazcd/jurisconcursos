@@ -55,6 +55,6 @@ export async function POST(req: NextRequest) {
         });
     } catch (err: any) {
         console.error('ERROR in /api/admin/precedents/bulk-flashcards:', err);
-        return NextResponse.json({ error: 'Erro ao gerar flashcards', details: err.message }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao gerar flashcards' }, { status: 500 });
     }
 }
