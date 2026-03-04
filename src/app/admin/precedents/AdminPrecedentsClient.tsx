@@ -12,6 +12,8 @@ type Precedent = {
     processNumber?: string | null; organ?: string | null; rapporteur?: string | null;
     theme?: string | null; tags: string[];
     subjects: { id: string; name: string }[];
+    flashcardQuestion?: string | null;
+    flashcardAnswer?: boolean;
 };
 
 const COURTS = ['STF', 'STJ', 'TRF', 'TJ'] as const;
@@ -55,6 +57,7 @@ export default function AdminPrecedentsClient() {
     // Create modal
     const [showCreate, setShowCreate] = useState(false);
     const [createForm, setCreateForm] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
+    const [generatingAI, setGeneratingAI] = useState(false);
 
     async function fetchData() {
         setLoading(true);
@@ -135,6 +138,33 @@ export default function AdminPrecedentsClient() {
         await fetch(`/api/admin/precedents/${id}`, { method: 'DELETE' });
         if (panel?.id === id) setPanel(null);
         fetchData();
+    }
+
+    async function handleGenerateFlashcards() {
+        if (precedents.length === 0) return;
+        const count = Math.min(precedents.length, 20);
+        if (!confirm(`Gerar questões de IA para os primeiros ${count} julgados da lista atual?`)) return;
+
+        setGeneratingAI(true);
+        try {
+            const res = await fetch('/api/admin/precedents/bulk-flashcards', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ precedentIds: precedents.slice(0, 20).map(p => p.id) })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(`Sucesso! ${data.processed} julgados atualizados com questões de IA.`);
+                fetchData();
+            } else {
+                alert('Erro: ' + (data.error || 'Falha ao processar'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro de conexão ao gerar questões.');
+        } finally {
+            setGeneratingAI(false);
+        }
     }
 
 
@@ -285,6 +315,18 @@ export default function AdminPrecedentsClient() {
                         <option value="">Todas matérias</option>
                         {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={handleGenerateFlashcards}
+                        disabled={generatingAI || precedents.length === 0}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', fontSize: '0.8rem' }}
+                    >
+                        {generatingAI ? (
+                            <><SvgIcons.RefreshCw size={14} className="animate-spin" /> Processando...</>
+                        ) : (
+                            <><SvgIcons.Brain size={14} /> Gerar V/F (IA)</>
+                        )}
+                    </button>
                 </div>
 
                 <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -371,6 +413,8 @@ export default function AdminPrecedentsClient() {
                                         <DetailRow label="Relator" value={panel.rapporteur} />
                                         <DetailRow label="RG" value={panel.isRG ? `Sim${panel.rgTheme ? ` (Tema ${panel.rgTheme})` : ''}` : null} />
                                         <DetailRow label="Visível para" value={visibilityLabel(panel)} />
+                                        <DetailRow label="Questão V/F (IA)" value={panel.flashcardQuestion} />
+                                        <DetailRow label="Resposta V/F" value={panel.flashcardAnswer !== undefined ? (panel.flashcardAnswer ? 'Verdadeiro' : 'Falso') : null} />
                                     </div>
 
                                     {panel.fullTextOrLink && (
