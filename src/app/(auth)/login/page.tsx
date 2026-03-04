@@ -48,9 +48,9 @@ export default function LoginPage() {
                     <div className="form-group">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <label htmlFor="password">Senha</label>
-                            <a href="mailto:admin@jurisconcursos.com" style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                            <Link href="/forgot-password" style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 700 }}>
                                 Esqueceu a senha?
-                            </a>
+                            </Link>
                         </div>
                         <input
                             id="password" type="password" placeholder="••••••"
