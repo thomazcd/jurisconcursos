@@ -34,27 +34,19 @@ export default async function HomePage() {
             <header className="hero-section">
                 <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                     <div className="badge-version">
-                        Versão {APP_VERSION} • Inteligência Artificial Jurídica
+                        v{APP_VERSION} • Inteligência Artificial Jurídica
                     </div>
-                    <h1 className="hero-gradient-text" style={{ fontSize: 'clamp(2rem, 7vw, 3.8rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '1rem' }}>
-                        Memorização Ágil para <br /> <span className="hero-accent-text">Carreiras de Elite.</span>
+                    <h1 className="hero-gradient-text" style={{ fontSize: 'clamp(2.5rem, 8vw, 4.2rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1.5rem' }}>
+                        Memorização Ágil <br /> <span className="hero-accent-text">para Carreiras de Elite.</span>
                     </h1>
-                    <p style={{ fontSize: '1.1rem', color: 'var(--text-3)', maxWidth: '600px', margin: '0 auto 2rem', lineHeight: 1.5 }}>
-                        Flashcards inteligentes baseados em informativos do STF e STJ. Pare de apenas ler, comece a reter.
+                    <p style={{ fontSize: '1.2rem', color: 'var(--text-3)', maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.4, fontWeight: 500 }}>
+                        Flashcards inteligentes baseados em informativos do STF e STJ. <br />
+                        Pare de apenas ler, comece a reter o que realmente importa.
                     </p>
 
-                    {/* Live Preview / Mockup with Scanner Animation */}
-                    <div className="preview-container" style={{ marginBottom: '3rem' }}>
-                        <img
-                            src="/dashboard-preview.png"
-                            alt="Dashboard Preview"
-                            className="preview-image"
-                        />
-                    </div>
-
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Link href="/register" className="btn btn-primary" style={{ padding: '0.8rem 2rem', fontSize: '1.1rem', borderRadius: '14px', fontWeight: 800 }}>
-                            Criar Conta Grátis <SvgIcons.ArrowRight size={20} />
+                        <Link href="/register" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.15rem', borderRadius: '16px', fontWeight: 800, border: 'none' }}>
+                            Começar agora gratuitamente <SvgIcons.ArrowRight size={20} />
                         </Link>
                     </div>
                 </div>

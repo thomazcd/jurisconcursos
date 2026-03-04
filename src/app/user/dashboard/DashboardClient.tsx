@@ -15,7 +15,6 @@ import { DashboardHeader } from './components/DashboardHeader';
 import { DashboardFilters } from './components/DashboardFilters';
 import { FocusModeOverlay } from './components/FocusModeOverlay';
 import { PrecedentList } from './components/PrecedentList';
-import { DashboardOverview } from './components/DashboardOverview';
 import { HelpModal } from './components/HelpModal';
 import { Subject, Precedent } from './types';
 
@@ -91,8 +90,6 @@ export default function DashboardClient({ userName }: Props) {
     const { data: subData, mutate: mutateSubjects } = useSWR('/api/user/subjects', fetcher);
     const allSubjects: Subject[] = subData?.subjects ?? [];
 
-    const { data: statsData, mutate: mutateStats } = useSWR('/api/user/stats', fetcher);
-
     // Matérias disponíveis no seletor de baixo: Todas as "habilitadas" no topo
     const enabledSubjects = useMemo(() => {
         if (enabledSubjectIds.length === 0) return allSubjects;
@@ -114,7 +111,6 @@ export default function DashboardClient({ userName }: Props) {
         const queryString = params.toString();
         return queryString ? `${base}?${queryString}` : base;
     }, [selectedSubject, enabledSubjectIds, search]);
-
     const { data: precData, isValidating: isValidatingPrecedents, error: precError, mutate: mutatePrecedents } = useSWR(precUrl, fetcher, {
         keepPreviousData: false,
         revalidateOnFocus: true,
@@ -122,14 +118,6 @@ export default function DashboardClient({ userName }: Props) {
 
     const loading = !precData && !precError;
     const precedents: Precedent[] = precData?.precedents ?? [];
-
-    const recommendedPrecedents = useMemo(() => {
-        if (!precedents.length) return [];
-        // Seleciona 3 julgados que ainda não foram marcados como lidos (ou aleatórios se todos foram lidos)
-        const unread = precedents.filter(p => (readMap[p.id]?.count ?? 0) === 0);
-        const source = unread.length > 0 ? unread : precedents;
-        return [...source].sort(() => 0.5 - Math.random()).slice(0, 3);
-    }, [precedents, readMap]);
 
     useEffect(() => {
         if (!precData?.precedents) return;
@@ -157,7 +145,6 @@ export default function DashboardClient({ userName }: Props) {
         setReadMap(m => ({ ...m, [id]: { ...prev, count: prev.count + 1, events: [new Date().toISOString(), ...prev.events] } }));
         await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'READ' }) });
         mutateSubjects();
-        mutateStats();
     };
 
     const decrementRead = async (id: string, e: React.MouseEvent) => {
@@ -167,7 +154,6 @@ export default function DashboardClient({ userName }: Props) {
         setReadMap(m => ({ ...m, [id]: { ...prev, count: prev.count - 1, events: prev.events.slice(1) } }));
         await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'decrement' }) });
         mutateSubjects();
-        mutateStats();
     };
 
     const resetRead = async (id: string, e: React.MouseEvent) => {
@@ -177,7 +163,6 @@ export default function DashboardClient({ userName }: Props) {
         await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: id, action: 'reset' }) });
         mutateSubjects();
         mutatePrecedents();
-        mutateStats();
     };
 
     const toggleFavorite = async (id: string, e: React.MouseEvent) => {
@@ -203,7 +188,6 @@ export default function DashboardClient({ userName }: Props) {
         }));
         await fetch('/api/user/read', { method: 'POST', body: JSON.stringify({ precedentId: p.id, action: 'flashcard', isCorrect }) });
         mutateSubjects();
-        mutateStats();
     };
 
     const saveNotes = async (id: string, notes: string | null) => {
@@ -279,16 +263,7 @@ export default function DashboardClient({ userName }: Props) {
                     setEnabledSubjectIds={setEnabledSubjectIds}
                 />
 
-                {!isFocusMode && (
-                    <DashboardOverview
-                        userName={userName}
-                        stats={statsData}
-                        recommendedPrecedents={recommendedPrecedents}
-                        onFlashcard={handleFlashcard}
-                        revealed={revealed}
-                        results={flashcardResults}
-                    />
-                )}
+
 
                 <DashboardFilters
                     isFocusMode={isFocusMode}
