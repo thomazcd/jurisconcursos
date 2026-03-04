@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { requireAuth } from '@/lib/guards';
 import { InformatoryService } from '@/services/InformatoryService';
 import { Track } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
+    const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
+    if (error) return error;
 
     const activeTrack = (session.user as any).activeTrack as Track;
 
