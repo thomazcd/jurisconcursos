@@ -1,0 +1,111 @@
+/* Landing Page Specific Styles */
+
+.landing-container {
+    --landing-accent: #14b8a6;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--landing-accent) !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.hero-gradient-text {
+    background: linear-gradient(to bottom, var(--text) 50%, var(--text-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-accent-text {
+    color: var(--accent);
+    -webkit-text-fill-color: initial;
+}
+
+.nav-glass {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+}
+
+.hero-section {
+    padding: 10rem 2rem 6rem;
+    text-align: center;
+    background: radial-gradient(circle at 50% 10%, rgba(20, 184, 166, 0.08) 0%, transparent 50%);
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-version {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    padding: 6px 16px;
+    borderRadius: 30px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    border-radius: 30px;
+}
+
+.badge-dot {
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.feature-icon-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: rgba(20, 184, 166, 0.08);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.preview-container {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 1rem;
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-strong);
+    max-width: 800px;
+    margin: 0 auto;
+    aspect-ratio: 16/10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 8rem 1rem 4rem;
+    }
+    
+    .nav-glass {
+        padding: 0.75rem 1rem;
+    }
+}

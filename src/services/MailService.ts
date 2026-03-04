@@ -3,18 +3,18 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export class MailService {
-    /**
-     * Envia o link de recuperação de senha por e-mail.
-     */
-    static async sendResetPasswordEmail(email: string, token: string) {
-        const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+  /**
+   * Envia o link de recuperação de senha por e-mail.
+   */
+  static async sendResetPasswordEmail(email: string, token: string) {
+    const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
-        try {
-            const { data, error } = await resend.emails.send({
-                from: 'Juris Concursos <nao-responder@jurisconcursos.com.br>',
-                to: [email],
-                subject: 'Recuperação de Senha - Juris Concursos',
-                html: `
+    try {
+      const { data, error } = await resend.emails.send({
+        from: process.env.SMTP_FROM || 'Juris Concursos <nao-responder@jurisconcursos.com.br>',
+        to: [email],
+        subject: 'Recuperação de Senha - Juris Concursos',
+        html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
             <h1 style="color: #333; font-size: 24px; text-align: center;">Recuperação de Senha</h1>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
@@ -36,17 +36,17 @@ export class MailService {
             </p>
           </div>
         `,
-            });
+      });
 
-            if (error) {
-                console.error('Erro ao enviar e-mail via Resend:', error);
-                throw new Error('Falha no envio do e-mail');
-            }
+      if (error) {
+        console.error('Erro ao enviar e-mail via Resend:', error);
+        throw new Error('Falha no envio do e-mail');
+      }
 
-            return data;
-        } catch (err) {
-            console.error('Falha crítica no MailService:', err);
-            throw err;
-        }
+      return data;
+    } catch (err) {
+      console.error('Falha crítica no MailService:', err);
+      throw err;
     }
+  }
 }
