@@ -74,6 +74,8 @@ export default function UserSettingsPage() {
                 </div>
             </div>
 
+            <PasswordChangeSection setSaving={setSaving} setSuccess={setSuccess} saving={saving} />
+
             <div className="card" style={{ border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <SvgIcons.Fire size={20} fill="#ef4444" /> Zona de Perigo
@@ -123,6 +125,90 @@ export default function UserSettingsPage() {
                     </button>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function PasswordChangeSection({ setSaving, setSuccess, saving }: { setSaving: (v: boolean) => void, setSuccess: (v: string) => void, saving: boolean }) {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [error, setError] = useState('');
+
+    async function handlePasswordChange(e: React.FormEvent) {
+        e.preventDefault();
+        if (!currentPassword || !newPassword) {
+            setError('Todos os campos são obrigatórios');
+            return;
+        }
+        if (newPassword.length < 6) {
+            setError('A nova senha deve ter pelo menos 6 caracteres');
+            return;
+        }
+
+        setSaving(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const res = await fetch('/api/user/profile/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Erro ao alterar senha');
+
+            setSuccess('Senha alterada com sucesso!');
+            setCurrentPassword('');
+            setNewPassword('');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '0.25rem' }}>Segurança</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', marginBottom: '1.5rem' }}>
+                Altere sua senha de acesso
+            </p>
+
+            <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {error && <div className="alert alert-error" style={{ fontSize: '0.8rem', padding: '0.5rem' }}>{error}</div>}
+
+                <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)' }}>Senha Atual</label>
+                    <input
+                        type="password"
+                        value={currentPassword}
+                        onChange={e => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        style={{ height: '42px' }}
+                    />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-3)' }}>Nova Senha</label>
+                    <input
+                        type="password"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        style={{ height: '42px' }}
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="btn btn-primary"
+                    style={{ marginTop: '0.5rem', alignSelf: 'flex-start', minWidth: '150px' }}
+                >
+                    {saving ? 'Processando...' : 'Alterar Senha'}
+                </button>
+            </form>
         </div>
     );
 }
