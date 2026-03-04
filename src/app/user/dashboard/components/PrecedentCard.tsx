@@ -146,14 +146,34 @@ export const PrecedentCard: React.FC<PrecedentCardProps> = ({
                             <SvgIcons.Landmark size={11} /> {p.court} {p.informatoryNumber}{p.informatoryYear ? `/${p.informatoryYear}` : ''}
                         </span>
 
+                        <span style={{ padding: '2px 0', color: 'var(--text-3)', fontSize: '0.7rem' }}>
+                            <SvgIcons.Search size={11} /> {procList}
+                        </span>
+
                         <span
                             onClick={(e) => onSelectPrecedent(p, e)}
-                            style={{ cursor: 'pointer', padding: '2px 0', color: 'var(--text-3)', fontSize: '0.7rem' }}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '2px 8px',
+                                color: 'var(--accent)',
+                                fontSize: '0.7rem',
+                                fontWeight: 800,
+                                background: 'rgba(20, 184, 166, 0.08)',
+                                borderRadius: '4px',
+                                transition: 'all 0.2s',
+                                border: '1px solid rgba(20, 184, 166, 0.15)'
+                            }}
                             title="Clique para ver detalhes e inteiro teor"
-                            onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
-                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-3)'}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = 'rgba(20, 184, 166, 0.15)';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = 'rgba(20, 184, 166, 0.08)';
+                                e.currentTarget.style.transform = 'none';
+                            }}
                         >
-                            <SvgIcons.Search size={11} /> {procList}
+                            Inteiro teor
                         </span>
 
                         {p.organ && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-3)', padding: '2px 0', whiteSpace: 'nowrap', fontSize: '0.7rem', fontWeight: 800 }}><SvgIcons.Gavel size={11} /> {p.organ}</span>}
