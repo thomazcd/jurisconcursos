@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: NextRequest) {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
-    const userId = (session!.user as any).id;
+    const userId = session!.user.id;
 
     const { precedentId, action, isCorrect, notes } = await req.json();
     if (!precedentId) return NextResponse.json({ error: 'precedentId required' }, { status: 400 });

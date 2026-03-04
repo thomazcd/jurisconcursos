@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
         const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
         if (error) return error;
 
-        const userId = (session!.user as any).id;
+        const userId = session!.user.id;
 
         const { searchParams } = new URL(req.url);
         const subjectId = searchParams.get('subjectId');
@@ -32,8 +32,7 @@ export async function GET(req: NextRequest) {
     } catch (err: any) {
         console.error('ERROR in GET /api/user/precedents:', err);
         return NextResponse.json({
-            error: 'Erro interno ao carregar precedentes.',
-            details: err.message
+            error: 'Erro interno ao carregar precedentes.'
         }, { status: 500 });
     }
 }

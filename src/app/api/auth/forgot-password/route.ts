@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, message: 'Se o e-mail estiver cadastrado, um link de recuperação será enviado.' });
         }
 
+        // Rate-limit: se já existe um token válido criado nos últimos 5 minutos, bloqueia
+        if (user.resetToken && user.resetTokenExpires && user.resetTokenExpires > new Date()) {
+            const timeSinceCreation = user.resetTokenExpires.getTime() - 3600000; // token criado = expires - 1h
+            const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+            if (timeSinceCreation > fiveMinutesAgo) {
+                return NextResponse.json({ success: true, message: 'Se o e-mail estiver cadastrado, um link de recuperação será enviado.' });
+            }
+        }
+
         // Gerar token seguro (válido por 1 hora)
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600000); // 1 hora a partir de agora

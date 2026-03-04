@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
 
-    const userId = (session!.user as any).id as string;
+    const userId = session!.user.id;
     const profile = await prisma.userProfile.findUnique({ where: { userId } });
     const track: Track = (profile?.activeTrack ?? 'JUIZ_ESTADUAL') as Track;
     const appFilter = getApplicabilityFilter();

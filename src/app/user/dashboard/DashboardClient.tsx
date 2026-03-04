@@ -218,7 +218,7 @@ export default function DashboardClient({ userName }: Props) {
             if (infFilter !== 'ALL' && p.informatoryNumber !== infFilter) return false;
             return true;
         });
-    }, [precedents, readMap, filterHideRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter]);
+    }, [precedents, readMap, filterHideRead, filterShowRead, filterOnlyErrors, filterOnlyFavorites, courtFilter, yearFilter, infFilter]);
 
     const availableInformatories = useMemo(() => {
         const set = new Set<string>();

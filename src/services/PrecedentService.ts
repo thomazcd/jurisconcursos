@@ -37,7 +37,10 @@ export class PrecedentService {
         }
 
         // 1. Busca os dados de negócio (Julgados) com Join no Pai (Informativo)
-        console.log('[PrecedentService] Fetching precedents for user:', userId, 'where:', JSON.stringify(where));
+        // Debug logging only in development
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[PrecedentService] Fetching precedents for user:', userId, 'where:', JSON.stringify(where));
+        }
 
         const precedentsDb = await prisma.precedent.findMany({
             where,
@@ -71,7 +74,9 @@ export class PrecedentService {
             take: limit,
         });
 
-        console.log('[PrecedentService] Found precedents:', precedentsDb.length);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[PrecedentService] Found precedents:', precedentsDb.length);
+        }
 
         // Se precisarmos fazer "tree-shake" dos dados sensíveis, faríamos aqui.
         // No momento a estrutura já atende.

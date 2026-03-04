@@ -10,7 +10,7 @@ export async function GET() {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
 
-    const activeTrack = (session.user as any).activeTrack as Track;
+    const activeTrack = session!.user.activeTrack;
 
     try {
         // Usa o serviço centralizado para buscar apenas os informativos da trilha do aluno

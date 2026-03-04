@@ -12,7 +12,7 @@ export default async function HomePage() {
 
     // Redirect if already logged in
     if (session) {
-        const role = (session.user as any)?.role;
+        const role = session.user.role;
         if (role === 'ADMIN' || role === 'GESTOR') redirect('/admin');
         redirect('/user/dashboard');
     }

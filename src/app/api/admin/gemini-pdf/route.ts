@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Nenhum arquivo PDF recebido.' }, { status: 400 });
         }
 
+        const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB
+        if (file.size > MAX_PDF_SIZE) {
+            return NextResponse.json({ error: 'O PDF excede o limite de 10MB.' }, { status: 400 });
+        }
+
         // Convert the file to an ArrayBuffer, then base64 for Gemini
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);

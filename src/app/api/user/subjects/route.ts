@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
         const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
         if (error) return error;
 
-        const userId = (session!.user as any).id as string;
+        const userId = session!.user.id;
 
         // Optimized query to get counts directly from the DB
         const subjects: any[] = await prisma.$queryRaw`

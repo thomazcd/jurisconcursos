@@ -10,7 +10,7 @@ export default async function AdminChangelogPage() {
     const session = await getServerSession(authOptions);
     if (!session?.user) redirect('/login');
 
-    const role = (session.user as any).role;
+    const role = session.user.role;
     if (role === 'USER') redirect('/user/dashboard');
 
     return (

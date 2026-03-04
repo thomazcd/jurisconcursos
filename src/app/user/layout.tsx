@@ -12,8 +12,8 @@ export default async function UserLayout({
     const session = await getServerSession(authOptions);
     if (!session?.user) redirect('/login');
 
-    const userId = (session.user as any).id;
-    const role = (session.user as any).role;
+    const userId = session.user.id;
+    const role = session.user.role;
 
     // Admin/Gestor shouldn't be in the user section
     if (role === 'ADMIN' || role === 'GESTOR') redirect('/admin');

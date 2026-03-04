@@ -12,7 +12,7 @@ export async function GET(
         const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
         if (error) return error;
 
-        const userId = (session!.user as any).id;
+        const userId = session!.user.id;
         const id = params.id;
 
         const precedent = await prisma.precedent.findUnique({

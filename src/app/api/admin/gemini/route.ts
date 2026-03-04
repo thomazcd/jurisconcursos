@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Texto não fornecido.' }, { status: 400 });
         }
 
+        if (text.length > 100_000) {
+            return NextResponse.json({ error: 'Texto excede o limite de 100.000 caracteres.' }, { status: 400 });
+        }
+
         const prompt = isBulk ? `
 Vou te passar o texto bruto extraído de um arquivo PDF de Boletim ou Informativo de Jurisprudência (Informativo de Jurisprudência STF/STJ).
 Sua missão é identificar TODOS os julgados (teses) presentes neste texto.

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
 
-    const userId = (session!.user as any).id as string;
+    const userId = session!.user.id;
     const profile = await prisma.userProfile.findUnique({
         where: { userId }
     });
@@ -28,7 +28,7 @@ export async function PATCH(req: NextRequest) {
     const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
     if (error) return error;
 
-    const userId = (session!.user as any).id as string;
+    const userId = session!.user.id;
     const body = await req.json();
     const parsed = schema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
         update: updateData,
         create: {
             userId,
-            activeTrack: (parsed.data.activeTrack as any) || 'JUIZ_ESTADUAL'
+            activeTrack: parsed.data.activeTrack || 'JUIZ_ESTADUAL'
         }
     });
 

@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
     const session = await getServerSession(authOptions);
     if (!session?.user) redirect('/login');
 
-    const role = (session.user as any).role;
+    const role = session.user.role;
     if (role === 'USER') redirect('/user/dashboard');
 
     let subjectCount = 0, precedentCount = 0, userCount = 0;

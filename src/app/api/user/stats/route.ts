@@ -9,24 +9,21 @@ export async function GET(req: NextRequest) {
     try {
         const { error, session } = await requireAuth(['USER', 'ADMIN', 'GESTOR']);
         if (error) return error;
-        const userId = (session!.user as any).id;
+        const userId = session!.user.id;
 
         const eligibility = getApplicabilityFilter();
-        const subjectFilter = {};
-        const selectedIds: string[] = [];
 
-        // 1. Busca simplificada dos dados brutos
-        const allPrecedents = await prisma.precedent.findMany({
-            where: {
-                ...eligibility
-            },
-            select: { id: true, court: true, informatoryYear: true, judgmentDate: true, subjects: { select: { id: true, name: true } } }
-        });
-
-        const allUserReads = await prisma.precedentRead.findMany({
-            where: { userId, precedentId: { in: allPrecedents.map(p => p.id) } },
-            select: { precedentId: true, readCount: true, correctCount: true, wrongCount: true, readEvents: true }
-        });
+        // Run both queries in parallel for better performance
+        const [allPrecedents, allUserReads] = await Promise.all([
+            prisma.precedent.findMany({
+                where: { ...eligibility },
+                select: { id: true, court: true, informatoryYear: true, judgmentDate: true, subjects: { select: { id: true, name: true } } }
+            }),
+            prisma.precedentRead.findMany({
+                where: { userId },
+                select: { precedentId: true, readCount: true, correctCount: true, wrongCount: true, readEvents: true }
+            })
+        ]);
 
         // 2. Mapeamento de memória super rápido O(N)
         const readMap = new Map();
@@ -79,7 +76,10 @@ export async function GET(req: NextRequest) {
                 yearMap[y].hits += r.correctCount;
                 yearMap[y].misses += r.wrongCount;
 
-                events.push(...r.readEvents);
+                // Limit events to last 200 for performance
+                if (events.length < 200) {
+                    events.push(...r.readEvents.slice(-5));
+                }
             }
         }
 
@@ -109,8 +109,8 @@ export async function GET(req: NextRequest) {
                 STJ: { total: stjTotal, read: stjRead, hits: stjHits, misses: stjMisses },
             },
             bySubject,
+            events,
             byYear: Object.entries(yearMap).map(([year, stats]) => ({ year, ...stats })).sort((a, b) => b.year.localeCompare(a.year)),
-            events
         });
     } catch (err: any) {
         console.error(err);
