@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SessionProvider } from '@/components/SessionProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
     title: 'JurisConcursos.com.br',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </head>
             <body>
                 <SessionProvider>{children}</SessionProvider>
+                <Analytics />
             </body>
         </html>
     );
