@@ -66,6 +66,15 @@ export default function DashboardClient({ userName }: Props) {
         setIsDark(document.documentElement.classList.contains('dark-theme'));
     }, []);
 
+    useEffect(() => {
+        if (isFocusMode) {
+            document.body.classList.add('is-focus-mode');
+        } else {
+            document.body.classList.remove('is-focus-mode');
+        }
+        return () => document.body.classList.remove('is-focus-mode');
+    }, [isFocusMode]);
+
     const toggleTheme = () => {
         const next = !isDark;
         setIsDark(next);
