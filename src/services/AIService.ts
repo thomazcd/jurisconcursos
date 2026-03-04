@@ -51,7 +51,7 @@ export class AIService {
                 }
             });
 
-            const rawText = (response as any).text || '';
+            const rawText = response.text || '';
             const data = JSON.parse(rawText);
             return {
                 question: data.question as string,

@@ -22,11 +22,18 @@ export const PrecedentDetailsModal: React.FC<PrecedentDetailsModalProps> = ({
         if (selectedPrecedent && selectedPrecedent.fullTextOrLink === undefined) {
             setLoading(true);
             fetch(`/api/user/precedents/${selectedPrecedent.id}`)
-                .then(res => res.json())
+                .then(async (res) => {
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Erro ao carregar detalhes');
+                    return data;
+                })
                 .then(data => {
                     setFullData(prev => ({ ...prev, ...data }));
                 })
-                .catch(err => console.error('Error fetching precedent details:', err))
+                .catch(err => {
+                    console.error('Error fetching precedent details:', err);
+                    alert(err.message || 'Falha ao carregar detalhes completos do julgado.');
+                })
                 .finally(() => setLoading(false));
         }
     }, [selectedPrecedent]);

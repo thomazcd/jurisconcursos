@@ -18,22 +18,24 @@ type StatsData = {
 export default function StatsClient() {
     const [data, setData] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const loadStats = () => {
         setLoading(true);
+        setError(null);
         fetch('/api/user/stats')
-            .then(r => r.json())
+            .then(async (r) => {
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Erro ao carregar estatísticas');
+                return d;
+            })
             .then(d => {
-                if (d.error) {
-                    console.error('Stats API Error:', d.error);
-                    setLoading(false);
-                    return;
-                }
                 setData(d);
                 setLoading(false);
             })
             .catch(err => {
                 console.error('Stats Fetch Error:', err);
+                setError(err.message || 'Erro ao comunicar com o servidor.');
                 setLoading(false);
             });
     };
@@ -143,6 +145,15 @@ export default function StatsClient() {
         <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)' }}>
             <div className="skeleton-box" style={{ width: '60px', height: '60px', borderRadius: '50%', margin: '0 auto 1.5rem' }} />
             <div style={{ color: 'var(--text-3)', fontStyle: 'italic', fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>Analisando seu desempenho e gerando estatísticas avançadas... <SvgIcons.Chart size={18} /></div>
+        </div>
+    );
+
+    if (error) return (
+        <div style={{ padding: '8rem 2rem', textAlign: 'center', minHeight: '100vh', background: 'var(--background)', color: '#ef4444' }}>
+            <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 800 }}>
+                <SvgIcons.AlertCircle size={24} /> {error}
+            </p>
+            <button onClick={loadStats} className="btn btn-ghost" style={{ marginTop: '1rem' }}>Tentar Novamente</button>
         </div>
     );
 

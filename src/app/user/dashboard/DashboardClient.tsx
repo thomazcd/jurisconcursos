@@ -5,8 +5,12 @@ import useSWR from 'swr';
 import { APP_VERSION } from '@/lib/version';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
-const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(res => res.json());
-
+const fetcher = async (url: string) => {
+    const res = await fetch(url, { cache: 'no-store' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao carregar os dados.');
+    return data;
+};
 import { PrecedentCard } from './components/PrecedentCard';
 import { NotesModal } from './components/NotesModal';
 import { PrecedentDetailsModal } from './components/PrecedentDetailsModal';

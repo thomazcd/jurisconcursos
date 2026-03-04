@@ -12,16 +12,22 @@ interface Informatory {
 export default function NovidadesClient() {
     const [data, setData] = useState<{ informatories: Informatory[], lastUpdate: string } | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/api/user/informatories')
-            .then(r => r.json())
+            .then(async (r) => {
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Erro ao carregar informativos');
+                return d;
+            })
             .then(d => {
                 setData(d);
                 setLoading(false);
             })
             .catch(err => {
                 console.error(err);
+                setError(err.message || 'Erro ao comunicar com o servidor.');
                 setLoading(false);
             });
     }, []);
@@ -30,6 +36,16 @@ export default function NovidadesClient() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
                 <div className="loader">Carregando...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: '#ef4444' }}>
+                <p style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+                    <SvgIcons.AlertCircle size={24} /> {error}
+                </p>
             </div>
         );
     }
