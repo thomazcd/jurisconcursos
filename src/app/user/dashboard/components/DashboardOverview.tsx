@@ -74,7 +74,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                                 {p.subjects?.[0]?.name || 'Jurisprudência'}
                             </div>
                             <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.4, marginBottom: '1rem' }}>
-                                {p.flashcardVf || p.thesis || p.title}
+                                {p.flashcardQuestion || p.theme || p.title}
                             </div>
                         </div>
 
