@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
-const VALID_TRACKS = ['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR'] as const;
+const VALID_TRACKS = ['JUIZ_ESTADUAL', 'JUIZ_FEDERAL', 'PROCURADOR', 'TODAS'] as const;
 
 const schema = z.object({
     name: z.string().min(2).max(80),
