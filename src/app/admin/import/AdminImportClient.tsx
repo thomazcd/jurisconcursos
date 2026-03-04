@@ -78,6 +78,30 @@ export default function AdminImportClient() {
         setPrecedentsDrafts(precedentsDrafts.filter(d => d.id !== id));
     }
 
+    function handleEditDraft(id: string) {
+        const d = precedentsDrafts.find(d => d.id === id);
+        if (!d) return;
+
+        setTitle(d.title || '');
+        setSummary(d.summary || '');
+        setFullText(d.fullTextOrLink || '');
+        setProcessClass(d.processClass || '');
+        setProcessNumber(d.processNumber || '');
+        setOrgan(d.organ || '');
+        setRapporteur(d.rapporteur || '');
+        setJudgmentDate(d.judgmentDate || '');
+        setTheme(d.theme || '');
+        setFlashcardQuestion(d.flashcardQuestion || '');
+        setFlashcardAnswer(d.flashcardAnswer !== undefined ? d.flashcardAnswer : true);
+        setIsGeral(d.forAll);
+        setIsPGE(d.forProcurador);
+        setIsFed(d.forJuizFederal);
+        setIsEst(d.forJuizEstadual);
+
+        window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll to editor
+        removeDraft(id); // Remove from queue while editing
+    }
+
     async function handlePublish() {
         if (!infNumber || !infYear) return alert('Defina o número e o ano do informativo.');
         if (precedentsDrafts.length === 0) return alert('Adicione pelo menos um precedente.');
@@ -172,6 +196,80 @@ export default function AdminImportClient() {
         if (!rawBulkText.trim()) return alert("Cole o texto do informativo primeiro.");
 
         setPdfLoading(true);
+
+        // Parseador Local para Textos Estruturados (Evita o servidor Gemini pra formato perfeito do STJ/STF)
+        if (rawBulkText.includes('**Número do Processo:**')) {
+            const drafts: any[] = [];
+            let currentContent = rawBulkText;
+
+            const splitRegex = /\*\s*\*\*Número do Processo:\*\*/g;
+            const parts = currentContent.split(splitRegex).filter(t => t.trim().length > 0);
+
+            for (const part of parts) {
+                const lines = part.split('\n');
+                let processNumber = lines[0].trim();
+                let relator = '';
+                let temaDesc = '';
+                let destaque = '';
+                let inteiroTeor = '';
+                let temaNum = '';
+
+                let currentSection = '';
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.includes('**Relator:**')) { currentSection = 'relator'; relator = line.replace(/\*\s*\*\*Relator:\*\*/, '').trim(); }
+                    else if (line.includes('**Relator para o acórdão:**')) { currentSection = 'relator'; }
+                    else if (line.includes('**Número do Tema:**')) { currentSection = 'temaNum'; temaNum = line.replace(/\*\s*\*\*Número do Tema:\*\*/, '').trim(); }
+                    else if (line.includes('**Ramos do Direito:**')) { currentSection = 'ramos'; }
+                    else if (line.includes('**Tema-Assunto:**')) { currentSection = 'temaAssunto'; temaDesc = line.replace(/\*\s*\*\*Tema-Assunto:\*\*/, '').trim(); }
+                    else if (line.includes('**Destaque:**')) { currentSection = 'destaque'; destaque = line.replace(/\*\s*\*\*Destaque:\*\*/, '').trim(); }
+                    else if (line.includes('**Inteiro Teor:**')) { currentSection = 'inteiroTeor'; inteiroTeor = line.replace(/\*\s*\*\*Inteiro Teor:\*\*/, '').trim(); }
+                    else {
+                        if (currentSection === 'temaAssunto') temaDesc += '\n' + line;
+                        else if (currentSection === 'destaque') destaque += '\n' + line;
+                        else if (currentSection === 'inteiroTeor') inteiroTeor += '\n' + line;
+                    }
+                }
+
+                if (destaque.trim() || inteiroTeor.trim()) {
+                    drafts.push({
+                        title: temaDesc.trim(),
+                        summary: destaque.trim(),
+                        fullText: inteiroTeor.trim(),
+                        processClass: processNumber.replace(/\.$/, ''),
+                        rapporteur: relator.replace(/\.$/, ''),
+                        theme: temaNum.replace(/\.$/, '') || null
+                    });
+                }
+            }
+
+            if (drafts.length > 0) {
+                const mappedDrafts = drafts.map(p => ({
+                    id: Date.now().toString() + Math.random().toString(36).substring(7),
+                    title: p.title || 'Tópico Extraído Localmente',
+                    summary: p.summary || '',
+                    fullTextOrLink: p.fullText || '',
+                    processClass: p.processClass || '',
+                    processNumber: '',
+                    organ: '',
+                    rapporteur: p.rapporteur || '',
+                    judgmentDate: null,
+                    theme: p.theme || '',
+                    flashcardQuestion: '',
+                    flashcardAnswer: true,
+                    forAll: true,
+                    forProcurador: false,
+                    forJuizFederal: false,
+                    forJuizEstadual: false,
+                }));
+                setPrecedentsDrafts(prev => [...mappedDrafts, ...prev]);
+                setRawBulkText('');
+                setPdfLoading(false);
+                alert(`✨ Leitura Rápida! ${mappedDrafts.length} teses mapeadas automaticamente.`);
+                return;
+            }
+        }
+
         try {
             const res = await fetch('/api/admin/gemini', { // We can reuse the JSON logic or similar
                 method: 'POST',
@@ -439,11 +537,18 @@ export default function AdminImportClient() {
                     )}
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {precedentsDrafts.map(d => (
+                        {precedentsDrafts.map((d, idx) => (
                             <div key={d.id} className="card" style={{ padding: '1rem', position: 'relative', borderLeft: '4px solid var(--accent)' }}>
-                                <button onClick={() => removeDraft(d.id)} style={{ position: 'absolute', top: '10px', right: '10px', background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remover"><SvgIcons.X size={14} /></button>
+                                <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '8px' }}>
+                                    <button onClick={() => handleEditDraft(d.id)} style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} title="Puxar para Formulário e Editar">
+                                        <SvgIcons.FileText size={12} /> Editar
+                                    </button>
+                                    <button onClick={() => removeDraft(d.id)} style={{ background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remover">
+                                        <SvgIcons.X size={14} />
+                                    </button>
+                                </div>
 
-                                <div style={{ fontSize: '0.9rem', fontWeight: 900, marginBottom: '0.5rem', paddingRight: '2rem' }}>{d.title}</div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 900, marginBottom: '0.5rem', paddingRight: '5rem' }}>{d.title || `Tese ${idx + 1} (Sem Título)`}</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginBottom: '1rem' }}>{d.summary}</div>
 
                                 {d.fullTextOrLink && (
