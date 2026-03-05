@@ -37,24 +37,27 @@ export async function POST(req: NextRequest) {
 Vou te enviar um arquivo PDF orginal de Boletim ou Informativo de Jurisprudência inteiro do STJ/STF.
 Sua missão é atuar como um Extrator Especialista de Dados e analisá-lo com sua visão multimodal.
 Identifique e extraia TODOS os julgados (teses) presentes neste informativo.
-Para CADA julgado identificado, extraia e preencha o seguinte formato JSON:
+Extraia primeiramente o número do Informativo, e a seguir a lista de todos os precedentes encontrados, no formato JSON abaixo:
 
-[
-  {
-    "title": "Crie um título curto e chamativo para o assunto principal (Tese principal). Ex: Tráfico e Violação Domiciliar",
-    "summary": "Crie um resumo (Destaque Institucional) com no máximo 4 linhas, direto e reto que ajude um concorseiro a saber a tese do tribunal.",
-    "fullText": "Extraia o texto fiel do inteiro teor contido nas páginas do PDF que baseou esse julgado. Preserve a escrita jurídica.",
-    "flashcardQuestion": "Crie uma assertiva estilo CESPE (V ou F) com base nessa tese. Que seja um pouco pegadinha mas correta em relação ao texto (ou deliberadamente incorreta se for mais didático).",
-    "flashcardAnswer": true ou false (dependendo de como você formulou a questão),
-    "processClass": "Identifique a classe e processo. Ex: HC 123.456, AgRg no REsp 999.888",
-    "organ": "Identifique o órgão julgador (Ex: Terceira Seção, Segunda Turma, Tribunal Pleno)",
-    "rapporteur": "Identifique o relator (Ex: Min. Rogério Schietti Cruz)",
-    "judgmentDate": "Extraia a data de julgamento se houver no formato YYYY-MM-DD",
-    "theme": "Identifique se foi julgado em 'Tema X', 'Recurso Repetitivo', 'Repercussão Geral'. Se não achar, deixe null."
-  }
-]
+{
+  "informatoryNumber": "Identifique o número cardinal do informativo constante no PDF (ex: 876). Se não achar, retorne null.",
+  "precedents": [
+    {
+      "title": "Extraia o texto completo do Tema-Assunto original e oficial da tese, sem resumi-lo. Preservar o texto na sua inteireza.",
+      "summary": "Crie um resumo sintético destacando as principais palavras-chave do Destaque, focado na tese. Facilite a leitura dinâmica. Obrigatório: Não utilize dois pontos (:) neste resumo.",
+      "fullText": "Extraia o texto fiel do inteiro teor contido nas páginas do PDF que baseou esse julgado. Preserve a escrita jurídica.",
+      "flashcardQuestion": "Crie uma assertiva estilo CESPE (V ou F) com base nessa tese. Que seja um pouco pegadinha mas correta em relação ao texto (ou deliberadamente incorreta se for mais didático).",
+      "flashcardAnswer": true ou false (dependendo de como você formulou a questão),
+      "processClass": "Identifique a classe e processo. Ex: HC 123.456, AgRg no REsp 999.888",
+      "organ": "Identifique o órgão julgador (Ex: Terceira Seção, Segunda Turma, Tribunal Pleno)",
+      "rapporteur": "Identifique o relator (Ex: Min. Rogério Schietti Cruz)",
+      "judgmentDate": "Extraia a data de julgamento se houver no formato YYYY-MM-DD",
+      "theme": "Identifique se foi julgado em 'Tema X', 'Recurso Repetitivo', 'Repercussão Geral'. Se não achar, deixe null."
+    }
+  ]
+}
 
-Retorne ESTRITAMENTE um array JSON puro (sem markdown, sem \`\`\`json) contendo os objetos.
+Retorne ESTRITAMENTE um objeto JSON puro (sem markdown, sem \`\`\`json).
 `;
 
         const response = await ai.models.generateContent({
@@ -77,7 +80,7 @@ Retorne ESTRITAMENTE um array JSON puro (sem markdown, sem \`\`\`json) contendo 
         const rawText = response.text || '';
         const jsonData = JSON.parse(rawText);
 
-        return NextResponse.json({ precedents: jsonData });
+        return NextResponse.json(jsonData);
     } catch (error: any) {
         console.error('Erro no processamento do PDF pelo Gemini:', error);
         return NextResponse.json({ error: 'Erro ao processar PDF com a IA.' }, { status: 500 });

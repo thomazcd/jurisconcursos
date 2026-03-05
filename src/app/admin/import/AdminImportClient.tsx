@@ -114,6 +114,10 @@ export default function AdminImportClient() {
             try { data = JSON.parse(rawText); } catch (e) { throw new Error('Servidor demorou a responder ou timeout na Vercel.'); }
             if (!res.ok) throw new Error(data?.error || 'Erro Gemini PDF');
 
+            if (data.informatoryNumber) {
+                setInfNumber(data.informatoryNumber.toString());
+            }
+
             if (data.precedents && Array.isArray(data.precedents)) {
                 pushAiDraftsToQueue(data.precedents);
             } else {
@@ -167,9 +171,9 @@ export default function AdminImportClient() {
                         const dRaw = line.replace(/\*?\s*\*\*Data de Julgamento:\*\*/, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) julgamento = dRaw.split('/').reverse().join('-');
                     }
-                    else if (line.includes('**Data de Publicação:**')) {
+                    else if (line.match(/\*\*Data d[ea] Publica[cç][aã]o.*?\*\*/i)) {
                         currentSection = 'publicacao';
-                        const dRaw = line.replace(/\*?\s*\*\*Data de Publicação:\*\*/, '').trim().replace(/\.$/, '');
+                        const dRaw = line.replace(/\*?\s*\*\*Data d[ea] Publica[cç][aã]o.*?\*\*/i, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) publicacao = dRaw.split('/').reverse().join('-');
                     }
                     else if (line.includes('**Número do Processo:**')) { currentSection = 'processo'; processClass = line.replace(/\*?\s*\*\*Número do Processo:\*\*/, '').trim(); }
@@ -180,7 +184,10 @@ export default function AdminImportClient() {
                         if (r2 && r2 !== 'N/A' && r2 !== 'N/A.') relator += ` (P/ Acórdão: ${r2})`;
                     }
                     else if (line.includes('**Número do Tema:**')) { currentSection = 'temaNum'; temaNum = line.replace(/\*?\s*\*\*Número do Tema:\*\*/, '').trim(); }
-                    else if (line.includes('**Ramos do Direito:**')) { currentSection = 'tags'; tagsStr = line.replace(/\*?\s*\*\*Ramos do Direito:\*\*/, '').trim(); }
+                    else if (line.match(/\*\*Ramo(s)? do [Dd]ireito.*?\*\*/i)) {
+                        currentSection = 'tags';
+                        tagsStr = line.replace(/\*?\s*\*\*Ramo(s)? do [Dd]ireito.*?\*\*/i, '').trim();
+                    }
                     else if (line.includes('**Tema-Assunto:**')) { currentSection = 'temaAssunto'; temaDesc = line.replace(/\*?\s*\*\*Tema-Assunto:\*\*/, '').trim(); }
                     else if (line.includes('**Destaque:**')) { currentSection = 'destaque'; destaque = line.replace(/\*?\s*\*\*Destaque:\*\*/, '').trim(); }
                     else if (line.includes('**Inteiro Teor:**')) { currentSection = 'inteiroTeor'; inteiroTeor = line.replace(/\*?\s*\*\*Inteiro Teor:\*\*/, '').trim(); }
@@ -194,7 +201,7 @@ export default function AdminImportClient() {
                 if (destaque.trim() || inteiroTeor.trim()) {
                     const tagsArr = tagsStr.split(/,|\./).map(s => s.trim().replace(/^DIREITO /, '')).filter(s => s.length > 0);
                     drafts.push({
-                        title: temaDesc.split('.')[0].trim() || 'Sem Título',
+                        title: temaDesc.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim() || 'Sem Título',
                         summary: destaque.trim(),
                         fullText: inteiroTeor.trim(),
                         processClass: processClass.replace(/\.$/, ''),
