@@ -89,16 +89,36 @@ export const PrecedentCard: React.FC<PrecedentCardProps> = ({
             <div className="prec-title" style={{ fontSize: compactMode ? '0.9em' : '1.1em', fontWeight: 900, color: 'var(--text)', marginBottom: compactMode ? '0.25em' : '0.75em', lineHeight: '1.4', letterSpacing: '-0.01em' }}>{p.title}</div>
 
             {!isRevealed && studyMode === 'FLASHCARD' ? (
-                <div style={{ background: 'var(--surface2)', padding: '1.25rem', borderRadius: 14, border: '1px solid var(--border)', marginBottom: '0.75rem' }} onClick={e => e.stopPropagation()}>
-                    <div style={{ fontSize: '1.05em', color: 'var(--text)', fontWeight: 600, marginBottom: '1rem', lineHeight: '1.5' }}>{p.flashcardQuestion || p.summary}</div>
-                    <div style={{ display: 'flex', gap: '0.6rem' }}>
-                        <button onClick={(e) => { e.stopPropagation(); onHandleFlashcard(p, true); }} className="btn btn-sm" style={{ flex: 1, background: '#10b981', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>VERDADEIRO</button>
-                        <button onClick={(e) => { e.stopPropagation(); onHandleFlashcard(p, false); }} className="btn btn-sm" style={{ flex: 1, background: '#ef4444', color: '#fff', fontWeight: 800, height: '38px', borderRadius: 10 }}>FALSO</button>
+                <div style={{ background: 'var(--surface2)', padding: '1.5rem', borderRadius: 16, border: '2px solid rgba(139, 92, 246, 0.3)', marginBottom: '1rem', boxShadow: '0 8px 24px rgba(139, 92, 246, 0.05)', position: 'relative', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '4px', background: 'linear-gradient(90deg, #8b5cf6, #ec4899)' }}></div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#8b5cf6', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}><SvgIcons.Brain size={14} /> Julgue o Item</div>
+                    <div style={{ fontSize: '1.1em', color: 'var(--text)', fontWeight: 700, marginBottom: '1.5rem', lineHeight: '1.6' }}>{p.flashcardQuestion || p.summary}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <button onClick={(e) => { e.stopPropagation(); onHandleFlashcard(p, true); }} className="btn" style={{ background: '#10b981', color: '#fff', fontWeight: 900, fontSize: '0.95rem', height: '44px', borderRadius: 12, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}><SvgIcons.Check size={18} /> CERTO</button>
+                        <button onClick={(e) => { e.stopPropagation(); onHandleFlashcard(p, false); }} className="btn" style={{ background: '#ef4444', color: '#fff', fontWeight: 900, fontSize: '0.95rem', height: '44px', borderRadius: 12, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)' }}><SvgIcons.X size={18} /> ERRADO</button>
                     </div>
                 </div>
             ) : (
                 <div style={{ marginBottom: compactMode ? '0.5rem' : '1rem' }}>
-                    {flashResult && <div style={{ padding: '0.5em 0.75em', marginBottom: '0.5em', borderRadius: 8, background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2', color: flashResult === 'CORRECT' ? '#166534' : '#991b1b', fontWeight: 900, fontSize: '0.8em', border: `1px solid ${flashResult === 'CORRECT' ? '#bcf0da' : '#fecaca'}` }}>{flashResult === 'CORRECT' ? '🎯 ACERTOU!' : '❌ ERROU!'}</div>}
+                    {flashResult && (
+                        <div style={{
+                            padding: '0.75rem 1rem',
+                            marginBottom: '1rem',
+                            borderRadius: 12,
+                            background: flashResult === 'CORRECT' ? '#dcfce7' : '#fee2e2',
+                            color: flashResult === 'CORRECT' ? '#166534' : '#991b1b',
+                            fontWeight: 900,
+                            fontSize: '0.9rem',
+                            border: `2px solid ${flashResult === 'CORRECT' ? '#86efac' : '#fca5a5'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: `0 4px 12px ${flashResult === 'CORRECT' ? 'rgba(22, 101, 52, 0.1)' : 'rgba(153, 27, 27, 0.1)'}`,
+                            animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}>
+                            {flashResult === 'CORRECT' ? <><SvgIcons.CheckCircle size={20} /> VOCÊ ACERTOU! MANDOU BEM!</> : <><SvgIcons.AlertCircle size={20} /> VOCÊ ERROU! ATENÇÃO NA REVISÃO.</>}
+                        </div>
+                    )}
 
                     <div className="tese-text" style={{
                         fontSize: compactMode ? '0.85em' : '0.98em',

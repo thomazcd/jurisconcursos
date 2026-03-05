@@ -8,6 +8,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '2.1.051',
+        date: '2026-03-04',
+        description: 'Imersão em Revisão Ativa (Flashcards)',
+        changes: ['O Switch de Modo de Estudo no topo do Painel do Aluno foi redesenhado para destacar a "Revisão (V/F)".', 'Bateria de questões (CERTO ou ERRADO) remodelada com interface premium usando gradientes e sombras dinâmicas, e exibição de alerta de ACERTO/ERRO de alto impacto.']
+    },
+    {
         version: '2.1.049',
         date: '2026-03-04',
         description: 'Integração de Metadados via IA',

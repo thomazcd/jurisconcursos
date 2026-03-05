@@ -189,16 +189,44 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = (props) => {
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
 
-                {/* Modo de Estudo */}
-                <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '3px', gap: '2px' }}>
+                {/* Modo de Estudo (Switch Imersivo) */}
+                <div style={{ display: 'flex', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: '16px', padding: '4px', gap: '4px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
                     <button
                         onClick={() => setStudyMode('READ')}
-                        style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'READ' ? 'var(--accent)' : 'transparent', color: studyMode === 'READ' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    ><SvgIcons.Book size={14} /> Leitura</button>
+                        style={{
+                            padding: '8px 24px',
+                            borderRadius: '12px',
+                            fontSize: '0.85rem',
+                            fontWeight: 900,
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            background: studyMode === 'READ' ? 'var(--accent)' : 'transparent',
+                            color: studyMode === 'READ' ? '#fff' : 'var(--text-3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: studyMode === 'READ' ? '0 4px 12px rgba(20, 184, 166, 0.3)' : 'none'
+                        }}
+                    ><SvgIcons.Book size={16} /> LEITURA LIVRE</button>
                     <button
                         onClick={() => setStudyMode('FLASHCARD')}
-                        style={{ padding: '6px 16px', borderRadius: 9, fontSize: '0.78rem', fontWeight: 800, border: 'none', cursor: 'pointer', transition: 'all 0.15s', background: studyMode === 'FLASHCARD' ? 'var(--accent)' : 'transparent', color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    ><SvgIcons.Brain size={14} /> V/F</button>
+                        style={{
+                            padding: '8px 24px',
+                            borderRadius: '12px',
+                            fontSize: '0.85rem',
+                            fontWeight: 900,
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            background: studyMode === 'FLASHCARD' ? 'linear-gradient(135deg, #8b5cf6, #ec4899)' : 'transparent',
+                            color: studyMode === 'FLASHCARD' ? '#fff' : 'var(--text-3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: studyMode === 'FLASHCARD' ? '0 4px 12px rgba(236, 72, 153, 0.3)' : 'none'
+                        }}
+                    ><SvgIcons.Brain size={16} /> REVISÃO (V/F)</button>
                 </div>
 
                 <div style={{ width: 1, height: 24, background: 'var(--border)' }} />

@@ -1,6 +1,6 @@
 {
     "name": "juris-concursos",
-    "version": "2.1.50",
+    "version": "2.1.51",
     "private": true,
     "engines": {
         "node": ">=20.0.0"
