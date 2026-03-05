@@ -40,7 +40,9 @@ export default function AdminImportClient() {
         "Nesse sentido,", "Portanto,", "Desse modo,", "Com efeito,",
         "Nesse raciocínio,", "Ademais,", "Outrossim,", "Saliente-se que,",
         "Destaca-se que,", "Na hipótese,", "Nessa linha de intelecção,",
-        "Todavia,", "Entretanto,", "Contudo,", "Inicialmente,"
+        "Todavia,", "Entretanto,", "Contudo,", "Inicialmente,",
+        "De acordo,", "De fato,", "Dito isto,", "No acordo,",
+        "Quanto,", "No presente caso,", "As instâncias", "Em contraste,"
     ];
 
     function formatLegalText(text: string) {
@@ -277,7 +279,7 @@ export default function AdminImportClient() {
             id: Date.now().toString() + Math.random().toString(36).substring(7),
             title: p.title || '',
             summary: p.summary || '',
-            fullTextOrLink: p.fullText || p.fullTextOrLink || '',
+            fullTextOrLink: formatLegalText(p.fullText || p.fullTextOrLink || ''),
             processClass: p.processClass || '',
             processNumber: '',
             organ: p.organ || '',
