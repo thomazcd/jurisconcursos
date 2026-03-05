@@ -178,6 +178,7 @@ export function Sidebar({ role, name, email }: SidebarProps) {
                                 }
                             />
                             <NavLink href="/user/stats" icon={<SvgIcons.Chart size={18} />} label="Desempenho" />
+                            <NavLink href="/user/radar" icon={<SvgIcons.Target size={18} />} label="Meu Radar" />
 
                             <div style={{ height: '1px', background: 'var(--border)', margin: '0.75rem 0.5rem' }} />
 

@@ -8,6 +8,54 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '2.1.049',
+        date: '2026-03-04',
+        description: 'Integração de Metadados via IA',
+        changes: ['Mapeamento automatizado de Data de Publicação Oficial e extração contextual das Tags (Ramos do Direito) direto dos PDEs de Jurisprudência para o Banco de Dados durante a revisão.']
+    },
+    {
+        version: '2.1.048',
+        date: '2026-03-04',
+        description: 'Painel Aprimorado de Inteiro Teor',
+        changes: ['Aplicação de formatação de justificação automática e sincronização da fonte de leitura no editor invisível de importação massiva, para pré-visualização fidedigna.']
+    },
+    {
+        version: '2.1.047',
+        date: '2026-03-04',
+        description: 'Tracking Temporal & Date Fetcher',
+        changes: ['Introdução do cronômetro reactivo de extração de PDFs pesados (Lendo... Xs) e injeção do extrator visual inteligente que capta a data de publicação original do fascículo no cabeçalho dos Boletins.']
+    },
+    {
+        version: '2.1.046',
+        date: '2026-03-04',
+        description: 'Filtro Anti-Rodapé',
+        changes: ['Novo filtro heurístico programado para rejeitar lixo textual no fim de informativos gerados via NotebookLLM (ignora automaticamente blocos iniciados apenas por LEGISLAÇÃO isolada).']
+    },
+    {
+        version: '2.1.045',
+        date: '2026-03-04',
+        description: 'Extração Robusta DJe/DJEN',
+        changes: ['Proteção contra variações sintáticas para não perder datas de publicação de acórdão, aceitando "Data de Publicação", "Data Publicação (DJe)", etc.']
+    },
+    {
+        version: '2.1.041 - 2.1.043',
+        date: '2026-03-04',
+        description: 'Proteção Temática e Quebra de Parágrafos',
+        changes: ['Correção de segurança no Parser interno para evitar mutilação de Títulos longos.', 'Flexibilização na leitura das Tags se estivessem no plural ou singular.', 'Lógica refinada para o separador de conectivos (Todavia, Com efeito), exigindo pausa real de pontuação prévia.']
+    },
+    {
+        version: '2.1.040',
+        date: '2026-03-04',
+        description: 'Importador Mágico Inline UI',
+        changes: ['Revolução Visual: Sai de cena a página sequencial e entra uma esteira inline de revisão onde o coordenador consegue revisar lado a lado todas as teses sem carregar abas novas, agrupadas em lote.']
+    },
+    {
+        version: '2.1.039',
+        date: '2026-03-04',
+        description: 'Bypass para Estruturas NotebookLLM',
+        changes: ['A funcionalidade mágica nativa foi adicionada para interpretar caixas de texto com Markdown gerado pela IA da Google de forma instantânea sem precisar subir PDF.']
+    },
+    {
         version: '2.0.8',
         date: '2026-03-02',
         description: 'V2.0: Performance, Segurança e Auditoria Criptográfica',
