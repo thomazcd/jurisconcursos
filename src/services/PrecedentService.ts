@@ -23,17 +23,32 @@ export class PrecedentService {
         if (subjectId && subjectId !== 'ALL') {
             where.subjects = { some: { id: subjectId } };
         } else if (subjectIds && subjectIds.length > 0) {
-            where.subjects = { some: { id: { in: subjectIds } } };
+            where.AND = [
+                {
+                    OR: [
+                        { subjects: { some: { id: { in: subjectIds } } } },
+                        { subjects: { none: {} } }
+                    ]
+                }
+            ];
         }
 
         if (q) {
-            where.OR = [
-                { title: { contains: q, mode: 'insensitive' } },
-                { summary: { contains: q, mode: 'insensitive' } },
-                { theme: { contains: q, mode: 'insensitive' } },
-                { processNumber: { contains: q, mode: 'insensitive' } },
-                { informatory: { number: { contains: q, mode: 'insensitive' } } }
-            ];
+            const qFilter = {
+                OR: [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { summary: { contains: q, mode: 'insensitive' } },
+                    { theme: { contains: q, mode: 'insensitive' } },
+                    { processNumber: { contains: q, mode: 'insensitive' } },
+                    { informatory: { number: { contains: q, mode: 'insensitive' } } }
+                ]
+            };
+
+            if (where.AND) {
+                where.AND.push(qFilter);
+            } else {
+                where.AND = [qFilter];
+            }
         }
 
         // 1. Busca os dados de negócio (Julgados) com Join no Pai (Informativo)

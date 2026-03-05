@@ -1,5 +1,4 @@
-'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 
 type Subject = { id: string; name: string };
@@ -58,6 +57,9 @@ export default function AdminPrecedentsClient() {
     const [showCreate, setShowCreate] = useState(false);
     const [createForm, setCreateForm] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
     const [generatingAI, setGeneratingAI] = useState(false);
+
+    // Grouping
+    const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
     async function fetchData() {
         setLoading(true);
@@ -138,6 +140,21 @@ export default function AdminPrecedentsClient() {
         await fetch(`/api/admin/precedents/${id}`, { method: 'DELETE' });
         if (panel?.id === id) setPanel(null);
         fetchData();
+    }
+
+    async function handleDeleteInformatory(groupName: string, items: Precedent[]) {
+        if (!confirm(`Excluir TODOS os ${items.length} precedentes do ${groupName}? Esta ação é irreversível.`)) return;
+        let successCount = 0;
+        setLoading(true);
+        for (const p of items) {
+            const res = await fetch(`/api/admin/precedents/${p.id}`, { method: 'DELETE' });
+            if (res.ok) successCount++;
+            if (panel?.id === p.id) setPanel(null);
+        }
+        alert(`${successCount} teses removidas.`);
+        fetchData();
+        setExpandedGroup(null);
+        setLoading(false);
     }
 
     async function handleGenerateFlashcards() {
@@ -285,6 +302,21 @@ export default function AdminPrecedentsClient() {
         );
     }
 
+    const groupedInfo = precedents.reduce((acc, p) => {
+        const key = p.informatoryNumber ? `Informativo ${p.informatoryNumber} (${p.court})` : 'Julgados Avulsos';
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(p);
+        return acc;
+    }, {} as Record<string, Precedent[]>);
+
+    const groupKeys = Object.keys(groupedInfo).sort((a, b) => {
+        if (a === 'Julgados Avulsos') return 1;
+        if (b === 'Julgados Avulsos') return -1;
+        const numA = parseInt(a.replace(/\D/g, '')) || 0;
+        const numB = parseInt(b.replace(/\D/g, '')) || 0;
+        return numB - numA;
+    });
+
     return (
         <div style={{ height: '100%', minHeight: 0 }}>
             {/* List Container */}
@@ -340,27 +372,47 @@ export default function AdminPrecedentsClient() {
                             <tbody>
                                 {loading && <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Carregando…</td></tr>}
                                 {!loading && precedents.length === 0 && <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum precedente.</td></tr>}
-                                {!loading && precedents.map(p => (
-                                    <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => openPanel(p)}>
-                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', fontWeight: 600 }}>
-                                            {p.informatoryNumber ? `STJ ${p.informatoryNumber}` : '—'}
-                                        </td>
-                                        <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', color: 'var(--text-2)' }}>
-                                            {p.processNumber || '—'}
-                                        </td>
-                                        <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
-                                        <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={12} /> {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
-                                        <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
-                                        <td style={{ fontSize: '0.78rem' }}>
-                                            {p.subjects?.map(s => s.name).join(', ') || '—'}
-                                        </td>
-                                        <td style={{ fontSize: '0.78rem' }}>{visibilityLabel(p)}</td>
-                                        <td onClick={e => e.stopPropagation()}>
-                                            <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id, p.title)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <SvgIcons.X size={14} />
-                                            </button>
-                                        </td>
-                                    </tr>
+                                {!loading && groupKeys.map(k => (
+                                    <React.Fragment key={k}>
+                                        <tr style={{ background: 'var(--surface2)' }}>
+                                            <td colSpan={8} style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div
+                                                        onClick={() => setExpandedGroup(expandedGroup === k ? null : k)}
+                                                        style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 800, color: 'var(--text)', flex: 1 }}
+                                                    >
+                                                        {expandedGroup === k ? <SvgIcons.ChevronUp size={16} /> : <SvgIcons.ChevronDown size={16} />}
+                                                        {k} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-3)' }}>({groupedInfo[k].length} teses)</span>
+                                                    </div>
+                                                    <button onClick={() => handleDeleteInformatory(k, groupedInfo[k])} className="btn btn-sm btn-danger" style={{ fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        <SvgIcons.Trash size={12} /> Apagar Lote
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {expandedGroup === k && groupedInfo[k].map(p => (
+                                            <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => openPanel(p)}>
+                                                <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', fontWeight: 600 }}>
+                                                    {p.informatoryNumber ? `STJ ${p.informatoryNumber}` : '—'}
+                                                </td>
+                                                <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem', color: 'var(--text-2)' }}>
+                                                    {p.processNumber || '—'}
+                                                </td>
+                                                <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{p.title}</td>
+                                                <td>{p.theme ? <span style={{ fontSize: '0.72rem', background: 'rgba(201,138,0,0.12)', color: '#a06e00', padding: '1px 8px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><SvgIcons.Pin size={12} /> {p.theme}</span> : <span style={{ color: 'var(--text-3)', fontSize: '0.75rem' }}>—</span>}</td>
+                                                <td><span className={`badge badge-${p.court.toLowerCase()}`}>{p.court}</span></td>
+                                                <td style={{ fontSize: '0.78rem' }}>
+                                                    {p.subjects?.map(s => s.name).join(', ') || '—'}
+                                                </td>
+                                                <td style={{ fontSize: '0.78rem' }}>{visibilityLabel(p)}</td>
+                                                <td onClick={e => e.stopPropagation()}>
+                                                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id, p.title)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <SvgIcons.X size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
                                 ))}
                             </tbody>
                         </table>
