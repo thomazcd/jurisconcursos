@@ -116,7 +116,7 @@ export default function RadarClient() {
 
                     <div className="card">
                         <h3 style={{ fontSize: '1rem', fontWeight: 800, borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <SvgIcons.Chart size={18} /> Top Disciplicas Consumidas
+                            <SvgIcons.Chart size={18} /> Top Disciplinas Consumidas
                         </h3>
                         {data.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
