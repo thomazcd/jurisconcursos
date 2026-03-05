@@ -15,6 +15,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
         }
 
+        if (userToDelete.email === 'tt@tt.com' || userToDelete.email === 'thomazcd@gmail.com') {
+            return NextResponse.json({ error: 'Este usuário é protegido e não pode ser excluído.' }, { status: 403 });
+        }
+
         // Actually delete the user - cascade will remove UserProfile, PrecedentReads, etc
         await prisma.user.delete({
             where: { id }

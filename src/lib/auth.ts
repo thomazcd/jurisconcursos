@@ -66,12 +66,10 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 // Login bem-sucedido: limpa historico de erros no banco
-                if (user.failedLoginAttempts > 0 || user.lockedUntil) {
-                    await prisma.user.update({
-                        where: { id: user.id },
-                        data: { failedLoginAttempts: 0, lockedUntil: null }
-                    });
-                }
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: now }
+                });
 
                 return {
                     id: user.id,
