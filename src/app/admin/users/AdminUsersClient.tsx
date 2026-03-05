@@ -10,6 +10,7 @@ type UserData = {
     email: string;
     role: string;
     createdAt: Date;
+    lastLoginAt?: Date | null;
 };
 
 export default function AdminUsersClient({ initialUsers, initialRegistrationOpen }: { initialUsers: UserData[], initialRegistrationOpen: boolean }) {
@@ -103,13 +104,14 @@ export default function AdminUsersClient({ initialUsers, initialRegistrationOpen
                                     <th>Email</th>
                                     <th>Perfil</th>
                                     <th>Data Cadastro</th>
+                                    <th>Último Login</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum usuário.</td>
+                                        <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum usuário.</td>
                                     </tr>
                                 )}
                                 {users.map(u => (
@@ -125,16 +127,23 @@ export default function AdminUsersClient({ initialUsers, initialRegistrationOpen
                                             </span>
                                         </td>
                                         <td style={{ fontSize: '0.8rem' }}>{new Date(u.createdAt).toLocaleString('pt-BR')}</td>
+                                        <td style={{ fontSize: '0.8rem', color: u.lastLoginAt ? 'var(--text)' : 'var(--text-3)' }}>
+                                            {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('pt-BR') : 'Nunca acessou'}
+                                        </td>
                                         <td>
-                                            <button
-                                                onClick={() => handleDelete(u.id, u.name)}
-                                                disabled={deletingId === u.id}
-                                                className="btn btn-danger btn-sm"
-                                                style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: '6px' }}
-                                                title="Excluir Usuário"
-                                            >
-                                                {deletingId === u.id ? 'Excluindo...' : 'Excluir'}
-                                            </button>
+                                            {u.email === 'tt@tt.com' || u.email === 'thomazcd@gmail.com' ? (
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>Protegido</span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleDelete(u.id, u.name)}
+                                                    disabled={deletingId === u.id}
+                                                    className="btn btn-danger btn-sm"
+                                                    style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: '6px' }}
+                                                    title="Excluir Usuário"
+                                                >
+                                                    {deletingId === u.id ? 'Excluindo...' : 'Excluir'}
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
