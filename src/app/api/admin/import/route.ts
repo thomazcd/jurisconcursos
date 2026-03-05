@@ -70,26 +70,6 @@ export async function POST(req: NextRequest) {
 
         // Prepare subject auto-mapping rules
         const subjects = await prisma.subject.findMany();
-        const rules = [
-            { id: 's-ptrib', keywords: ['processo tributário'] },
-            { id: 's-trib', keywords: ['tributário', 'imposto', 'refis', 'fiscal', 'contribuinte', 'icms', 'iss', 'irpf', 'irpj', 'iptu', 'itcmd'] },
-            { id: 's-cproc', keywords: ['processo civil', 'processual civil', 'cpc', 'honorários', 'recurso', 'agravo', 'apelação', 'competência', 'legitimidade', 'embargos'] },
-            { id: 's-admin', keywords: ['administrativo', 'servidor', 'concurso', 'improbidade', 'licitação', 'poder público', 'estado', 'município'] },
-            { id: 's-civil', keywords: ['civil', 'contrato', 'família', 'sucessões', 'danos morais', 'responsabilidade civil', 'propriedade'] },
-            { id: 's-pproc', keywords: ['processo penal', 'processual penal', 'cpp'] },
-            { id: 's-pen', keywords: ['penal', 'crime', 'delito', 'prisão', 'condenação', 'pena', 'tráfico', 'roubo', 'furto'] },
-            { id: 's-cons', keywords: ['consumidor', 'código de defesa', 'cdc', 'vício', 'produto', 'serviço', 'propaganda'] },
-            { id: 's-const', keywords: ['constitucional', 'constituição', 'inconstitucional'] },
-            { id: 's-empr', keywords: ['empresarial', 'societário', 'falência', 'recuperação judicial', 'sociedade', 'empresa'] },
-            { id: 's-ambi', keywords: ['ambiental', 'meio ambiente', 'ibama', 'desmatamento'] },
-            { id: 's-prev', keywords: ['previdenciário', 'inss', 'aposentadoria', 'pensão'] },
-            { id: 's-intl', keywords: ['internacional', 'tratado', 'extradição'] },
-            { id: 's-econ', keywords: ['econômico', 'cade'] },
-            { id: 's-elei', keywords: ['eleitoral', 'tse', 'eleição', 'partido'] },
-            { id: 's-eca', keywords: ['criança', 'adolescente', 'eca', 'menor'] },
-            { id: 's-trab', keywords: ['trabalho', 'clt', 'empregador', 'empregado'] },
-            { id: 's-ptrab', keywords: ['processo do trabalho'] },
-        ];
 
         // Criar os Precedentes vinculados e mapear os subjects
         let insertedCount = 0;
@@ -104,14 +84,6 @@ export async function POST(req: NextRequest) {
                     if (tNorm.includes(s.name.toLowerCase()) || s.name.toLowerCase().includes(tNorm.replace(/^direito /, ''))) {
                         matchedSubjectIds.add(s.id);
                     }
-                }
-            }
-
-            // 2. Keyword based match
-            const textToSearch = `${tags.join(' ')} ${p.title} ${p.summary}`.toLowerCase();
-            for (const rule of rules) {
-                if (rule.keywords.some(k => textToSearch.includes(k))) {
-                    matchedSubjectIds.add(rule.id);
                 }
             }
 
