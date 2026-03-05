@@ -41,6 +41,7 @@ Extraia primeiramente o número do Informativo, e a seguir a lista de todos os p
 
 {
   "informatoryNumber": "Identifique o número cardinal do informativo constante no PDF (ex: 876). Se não achar, retorne null.",
+  "informatoryDate": "Identifique a data do informativo (ex: data de publicação geral), geralmente está no topo ao lado ou abaixo do número. Forneça no formato bancário YYYY-MM-DD. Se não achar, retorne null.",
   "precedents": [
     {
       "title": "Extraia o texto completo do Tema-Assunto original e oficial da tese, sem resumi-lo. Preservar o texto na sua inteireza.",

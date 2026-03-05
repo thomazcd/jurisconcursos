@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons as SvgIcons } from '@/components/ui/Icons';
 import { useRouter } from 'next/navigation';
 
@@ -15,12 +15,24 @@ export default function AdminImportClient() {
     const [pubDateInfo, setPubDateInfo] = useState('');
 
     const [pdfLoading, setPdfLoading] = useState(false);
+    const [pdfElapsedSeconds, setPdfElapsedSeconds] = useState(0);
     const [importMode, setImportMode] = useState<'pdf' | 'text'>('pdf');
     const [rawBulkText, setRawBulkText] = useState('');
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const [precedentsDrafts, setPrecedentsDrafts] = useState<any[]>([]);
     const [expandedDraftId, setExpandedDraftId] = useState<string | null>(null);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (pdfLoading) {
+            setPdfElapsedSeconds(0);
+            interval = setInterval(() => {
+                setPdfElapsedSeconds(prev => prev + 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [pdfLoading]);
 
     // List of judicial connectors to automatically insert \n\n
     const legalConnectors = [
@@ -119,6 +131,9 @@ export default function AdminImportClient() {
 
             if (data.informatoryNumber) {
                 setInfNumber(data.informatoryNumber.toString());
+            }
+            if (data.informatoryDate) {
+                setPubDateInfo(data.informatoryDate.toString());
             }
 
             if (data.precedents && Array.isArray(data.precedents)) {
@@ -338,7 +353,7 @@ export default function AdminImportClient() {
                             <div>
                                 <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pdfLoading} className="btn" style={{ background: '#a06e00', color: '#fff', fontSize: '0.8rem', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.FileText size={14} />}
-                                    {pdfLoading ? 'Lendo...' : 'Selecionar Informativo PDF'}
+                                    {pdfLoading ? `Lendo... (${pdfElapsedSeconds}s)` : 'Selecionar Informativo PDF'}
                                 </button>
                                 <input type="file" accept="application/pdf" ref={fileInputRef} onChange={handlePDFUpload} style={{ display: 'none' }} />
                             </div>
@@ -349,7 +364,7 @@ export default function AdminImportClient() {
                             <textarea className="form-input" rows={6} value={rawBulkText} onChange={e => setRawBulkText(e.target.value)} placeholder="Cole aqui o texto inteiro... (Reconhecimento instantâneo para padrão NotebookLLM ativo)" style={{ background: '#fff', border: '1px solid #e2e8f0', marginBottom: '1rem' }} />
                             <button type="button" onClick={handleBulkTextUpload} disabled={pdfLoading || !rawBulkText} className="btn" style={{ width: '100%', background: '#a06e00', color: '#fff', fontWeight: 800, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 {pdfLoading ? <span className="spinner" style={{ width: 14, height: 14, borderColor: '#fff', borderTopColor: 'transparent' }} /> : <SvgIcons.Plus size={14} />}
-                                {pdfLoading ? 'Extraindo teses...' : 'Mapear e Extrair Teses Desse Texto'}
+                                {pdfLoading ? `Extraindo teses... (${pdfElapsedSeconds}s)` : 'Mapear e Extrair Teses Desse Texto'}
                             </button>
                         </div>
                     )}
