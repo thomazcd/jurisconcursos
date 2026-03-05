@@ -14,11 +14,29 @@ type UserData = {
 
 export default function AdminUsersClient({ initialUsers, initialRegistrationOpen }: { initialUsers: UserData[], initialRegistrationOpen: boolean }) {
     const { data: session } = useSession();
-    const [users] = useState<UserData[]>(initialUsers);
+    const [users, setUsers] = useState<UserData[]>(initialUsers);
     const [registrationOpen, setRegistrationOpen] = useState(initialRegistrationOpen);
     const [savingSetting, setSavingSetting] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     if (!session?.user) return null;
+
+    async function handleDelete(id: string, name: string) {
+        if (!confirm(`Deseja realmente EXCLUIR o usuário ${name} e todo o seu histórico? Esta ação é irreversível.`)) return;
+
+        setDeletingId(id);
+        try {
+            const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Erro ao excluir usuário');
+
+            setUsers(prev => prev.filter(u => u.id !== id));
+            alert('Usuário excluído com sucesso.');
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setDeletingId(null);
+        }
+    }
 
     async function toggleRegistration() {
         if (!confirm(`Deseja ${registrationOpen ? 'FECHAR' : 'ABRIR'} novos cadastros na plataforma?`)) return;
@@ -85,12 +103,13 @@ export default function AdminUsersClient({ initialUsers, initialRegistrationOpen
                                     <th>Email</th>
                                     <th>Perfil</th>
                                     <th>Data Cadastro</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum usuário.</td>
+                                        <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-3)' }}>Nenhum usuário.</td>
                                     </tr>
                                 )}
                                 {users.map(u => (
@@ -106,6 +125,17 @@ export default function AdminUsersClient({ initialUsers, initialRegistrationOpen
                                             </span>
                                         </td>
                                         <td style={{ fontSize: '0.8rem' }}>{new Date(u.createdAt).toLocaleString('pt-BR')}</td>
+                                        <td>
+                                            <button
+                                                onClick={() => handleDelete(u.id, u.name)}
+                                                disabled={deletingId === u.id}
+                                                className="btn btn-danger btn-sm"
+                                                style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: '6px' }}
+                                                title="Excluir Usuário"
+                                            >
+                                                {deletingId === u.id ? 'Excluindo...' : 'Excluir'}
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
