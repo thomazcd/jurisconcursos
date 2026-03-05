@@ -151,6 +151,7 @@ export function Sidebar({ role, name, email }: SidebarProps) {
                             <NavLink href="/admin/precedents" icon={<SvgIcons.Gavel size={18} />} label="Edição de Precedentes" />
                             <NavLink href="/admin/import" icon={<SvgIcons.Sparkles size={18} />} label="Importador Mágico" />
                             <NavLink href="/admin/changelog" icon={<SvgIcons.History size={18} />} label="Log de Versões" />
+                            <NavLink href="/admin/users" icon={<SvgIcons.User size={18} />} label="Usuários Cadastrados" />
                         </>
                     ) : (
                         <>

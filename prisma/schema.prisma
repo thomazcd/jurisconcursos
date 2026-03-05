@@ -190,3 +190,12 @@ model PrecedentRead {
   @@index([userId, precedentId])
   @@map("precedent_reads")
 }
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_settings")
+}
