@@ -434,7 +434,7 @@ export default function AdminImportClient() {
                                                 <SvgIcons.Sparkles size={12} /> Separar Parágrafos Automaticamente
                                             </button>
                                         </div>
-                                        <textarea className="form-input" rows={7} style={{ fontFamily: 'var(--font-mono), monospace', fontSize: '0.8rem' }} value={d.fullTextOrLink} onChange={e => updateDraft(d.id, { fullTextOrLink: e.target.value })} />
+                                        <textarea className="form-input" rows={8} style={{ fontFamily: 'var(--font), sans-serif', fontSize: '0.85em', textAlign: 'justify', lineHeight: '1.6' }} value={d.fullTextOrLink} onChange={e => updateDraft(d.id, { fullTextOrLink: e.target.value })} />
                                     </div>
 
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
