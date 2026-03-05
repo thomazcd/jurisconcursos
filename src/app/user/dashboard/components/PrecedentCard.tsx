@@ -100,7 +100,7 @@ export const PrecedentCard: React.FC<PrecedentCardProps> = ({
                 </div>
             ) : (
                 <div style={{ marginBottom: compactMode ? '0.5rem' : '1rem' }}>
-                    {flashResult && (
+                    {studyMode === 'FLASHCARD' && flashResult && (
                         <div style={{
                             padding: '0.75rem 1rem',
                             marginBottom: '1rem',
