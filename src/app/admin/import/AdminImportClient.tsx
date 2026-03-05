@@ -35,11 +35,14 @@ export default function AdminImportClient() {
         if (!text) return '';
         let result = text;
         legalConnectors.forEach(conn => {
-            // Regex to find connector that is not at the start of a new line
-            // adding two newlines before it
-            const regex = new RegExp(`([^\\n])(\\s+)(${conn})`, 'gi');
+            // Regex to find connector preceded by end-of-sentence punctuation (. ! ? ;) and at least one space
+            // This prevents splitting in the middle of a sentence (i.e. 'Na hipótese, todavia,...')
+            const regex = new RegExp(`([.!?;]["']?)(\\s+)(${conn})`, 'gi');
             result = result.replace(regex, `$1\n\n$3`);
         });
+
+        // Clean up excessive newlines if text already had breaks
+        result = result.replace(/\n{3,}/g, '\n\n');
         return result;
     }
 
@@ -165,6 +168,12 @@ export default function AdminImportClient() {
                 let currentSection = '';
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
+
+                    // Ignora qualquer sessão final de legislação
+                    if (line.match(/^\*?\s*\*?LEGISLA[ÇC][ÃA]O/i)) {
+                        break;
+                    }
+
                     if (line.includes('**Órgão Julgador:**')) { currentSection = 'orgao'; orgaoObj = line.replace(/\*?\s*\*\*Órgão Julgador:\*\*/, '').trim(); }
                     else if (line.includes('**Data de Julgamento:**')) {
                         currentSection = 'julgamento';
