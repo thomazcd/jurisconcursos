@@ -8,6 +8,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        version: '2.1.058',
+        date: '2026-03-04',
+        description: 'Painel de Usuários e Segurança no Cadastro',
+        changes: ['Criação do Painel de Gestão de Usuários com listagem completa e exclusão segura.', 'Adição de Chave-Mestra que bloqueia integralmente novas inscrições, trancando a página visual (/register) e selando as rotas da API contra requisições via scripts externos (retornando erro 403).', 'Registro da "Data de Último Login" de cada aluno para mapeamento de engajamento.', 'A logomarca em todas as telas agora funciona como link de retorno para a Home page.']
+    },
+    {
         version: '2.1.051',
         date: '2026-03-04',
         description: 'Imersão em Revisão Ativa (Flashcards)',
