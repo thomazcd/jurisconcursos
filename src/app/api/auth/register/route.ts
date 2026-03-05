@@ -16,6 +16,14 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
     try {
+        const setting = await prisma.systemSetting.findUnique({
+            where: { key: 'registration_open' }
+        });
+        const isRegistrationOpen = setting ? setting.value === 'true' : true;
+        if (!isRegistrationOpen) {
+            return NextResponse.json({ error: 'Cadastro de novos alunos temporariamente desabilitado.' }, { status: 403 });
+        }
+
         const body = await req.json();
         const parsed = schema.safeParse(body);
 
