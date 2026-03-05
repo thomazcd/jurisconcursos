@@ -169,8 +169,8 @@ export default function AdminImportClient() {
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
 
-                    // Ignora qualquer sessão final de legislação
-                    if (line.match(/^\*?\s*\*?LEGISLA[ÇC][ÃA]O/i)) {
+                    // Ignora sessão final se a palavra LEGISLAÇÃO aparecer isolada como Título (evita falsos-positivos no meio do texto)
+                    if (line.match(/^(?:\*\s*)?\**LEGISLA[ÇC][ÃA]O:?\**\s*$/i)) {
                         break;
                     }
 
