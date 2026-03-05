@@ -180,9 +180,9 @@ export default function AdminImportClient() {
                         const dRaw = line.replace(/\*?\s*\*\*Data de Julgamento:\*\*/, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) julgamento = dRaw.split('/').reverse().join('-');
                     }
-                    else if (line.match(/\*\*Data d[ea] Publica[cç][aã]o.*?\*\*/i)) {
+                    else if (line.match(/\*\*Data (?:d[ea] )?Publica[cç][aã]o.*?\*\*/i)) {
                         currentSection = 'publicacao';
-                        const dRaw = line.replace(/\*?\s*\*\*Data d[ea] Publica[cç][aã]o.*?\*\*/i, '').trim().replace(/\.$/, '');
+                        const dRaw = line.replace(/\*?\s*\*\*Data (?:d[ea] )?Publica[cç][aã]o.*?\*\*/i, '').trim().replace(/\.$/, '');
                         if (dRaw.includes('/')) publicacao = dRaw.split('/').reverse().join('-');
                     }
                     else if (line.includes('**Número do Processo:**')) { currentSection = 'processo'; processClass = line.replace(/\*?\s*\*\*Número do Processo:\*\*/, '').trim(); }
