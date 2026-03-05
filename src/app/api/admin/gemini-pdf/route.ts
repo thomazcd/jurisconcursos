@@ -53,6 +53,8 @@ Extraia primeiramente o número do Informativo, e a seguir a lista de todos os p
       "organ": "Identifique o órgão julgador (Ex: Terceira Seção, Segunda Turma, Tribunal Pleno)",
       "rapporteur": "Identifique o relator (Ex: Min. Rogério Schietti Cruz)",
       "judgmentDate": "Extraia a data de julgamento se houver no formato YYYY-MM-DD",
+      "publicationDate": "Extraia a data de publicação (DJe ou DJEN) do acórdão se houver, no formato YYYY-MM-DD",
+      "tags": ["Identifique 1 a 3 áreas principais referentes ao ramo do Direito deste julgado. Ex: 'Direito Penal', 'Direito Tributário', etc."],
       "theme": "Identifique se foi julgado em 'Tema X', 'Recurso Repetitivo', 'Repercussão Geral'. Se não achar, deixe null."
     }
   ]
