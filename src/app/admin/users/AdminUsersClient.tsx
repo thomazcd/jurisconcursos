@@ -126,9 +126,9 @@ export default function AdminUsersClient({ initialUsers, initialRegistrationOpen
                                                 {u.role === 'USER' ? 'ALUNO' : 'ADMINISTRADOR'}
                                             </span>
                                         </td>
-                                        <td style={{ fontSize: '0.8rem' }}>{new Date(u.createdAt).toLocaleString('pt-BR')}</td>
+                                        <td style={{ fontSize: '0.8rem' }}>{new Date(u.createdAt).toLocaleString('pt-BR', { timeZone: 'America/Rio_Branco' })}</td>
                                         <td style={{ fontSize: '0.8rem', color: u.lastLoginAt ? 'var(--text)' : 'var(--text-3)' }}>
-                                            {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('pt-BR') : 'Nunca acessou'}
+                                            {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('pt-BR', { timeZone: 'America/Rio_Branco' }) : 'Nunca acessou'}
                                         </td>
                                         <td>
                                             {u.email === 'tt@tt.com' || u.email === 'thomazcd@gmail.com' ? (
